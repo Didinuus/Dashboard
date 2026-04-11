@@ -6,233 +6,20 @@
     <title>FX Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-        body { font-family:Arial,sans-serif; background:#111111; color:#fff; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:Arial,sans-serif; background:#111111; padding:30px; color:#fff; }
+        .container { max-width:1600px; margin:0 auto; }
 
-        /* ========= DESKTOP (default) ========= */
-        .desktop-only { display:block; }
-        .mobile-only { display:none; }
-
-        body.desktop { padding:30px; }
-        body.desktop .container { max-width:1600px; margin:0 auto; }
-
-        /* ========= MOBILE OVERRIDES ========= */
-        body.mobile { padding:0; overflow-x:hidden; }
-        body.mobile .container { max-width:100vw; padding:0; }
-        body.mobile .desktop-only { display:none !important; }
-        body.mobile .mobile-only { display:block; }
-
-        /* --- MOBILE NAV BAR --- */
-        .mobile-nav {
-            display:none;
-            position:fixed; bottom:0; left:0; right:0; z-index:100;
-            background:#161616; border-top:1px solid #1e2230;
-            padding:0 0 env(safe-area-inset-bottom) 0;
-        }
-        body.mobile .mobile-nav { display:flex; }
-        .mobile-nav-inner { display:flex; width:100%; }
-        .mob-nav-btn {
-            flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-            padding:8px 4px; gap:3px; background:transparent; border:none; color:#666;
-            font-size:9px; font-weight:bold; cursor:pointer; letter-spacing:0.3px;
-            transition:color .15s;
-        }
-        .mob-nav-btn.active { color:#4a8fff; }
-        .mob-nav-btn svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; }
-
-        /* --- MOBILE HEADER --- */
-        .mobile-header {
-            display:none; position:sticky; top:0; z-index:90;
-            background:#161616; border-bottom:1px solid #1e2230;
-            padding:10px 14px; align-items:center; justify-content:space-between;
-            height:48px;
-        }
-        body.mobile .mobile-header { display:flex; }
-        .mob-header-title { font-size:14px; font-weight:bold; color:#fff; }
-        .mob-header-right { display:flex; align-items:center; gap:8px; }
-        .mob-status { font-size:10px; color:#666; }
-        .mob-refresh-btn { background:transparent; border:none; color:#aaa; font-size:18px; cursor:pointer; padding:4px; }
-
-        /* --- MOBILE SCROLL PAGES --- */
-        body.mobile .tab-page { display:none !important; }
-        body.mobile .tab-page.active { display:block !important; }
-        body.mobile .tab-page { padding:0 0 70px 0; overflow-x:hidden; }
-
-        /* --- MOBILE TICKER --- */
-        body.mobile .ticker-section { margin:0; border-radius:0; border-left:none; border-right:none; border-top:none; }
-
-        /* --- MOBILE CARDS --- */
-        .mob-card {
-            background:#161616; border:1px solid #1e2230; border-radius:10px;
-            margin:10px 10px 0; overflow:hidden;
-        }
-        .mob-card-header {
-            background:#161616; padding:10px 12px; font-size:12px; font-weight:bold;
-            border-bottom:1px solid #1e2230; display:flex; align-items:center; justify-content:space-between;
-        }
-        .mob-card-body { padding:0; }
-
-        /* --- MOBILE SENTIMENT TABLE --- */
-        body.mobile .main-section {
-            display:block !important; height:auto !important; margin:0 !important;
-        }
-        body.mobile .table-container {
-            height:auto !important; margin:10px 10px 0; border-radius:10px; overflow:visible !important;
-        }
-        body.mobile .table-scroll {
-            max-height:42vh; overflow-y:scroll; overflow-x:auto;
-            -webkit-overflow-scrolling:touch; border-radius:10px;
-        }
-        body.mobile #sentimentScroll table {
-            font-size:10px; table-layout:auto; width:auto; min-width:100%;
-            border-collapse:collapse;
-        }
-        body.mobile #sentimentScroll th,
-        body.mobile #sentimentScroll td { padding:5px 7px; white-space:nowrap; font-size:10px; }
-        body.mobile #sentimentScroll th:first-child,
-        body.mobile #sentimentScroll td:first-child {
-            position:sticky; left:0; z-index:2;
-            background:#161616 !important;
-            min-width:58px; font-weight:bold;
-            box-shadow:2px 0 6px rgba(0,0,0,0.6);
-        }
-        body.mobile #sentimentScroll th:nth-child(2),
-        body.mobile #sentimentScroll td:nth-child(2),
-        body.mobile #sentimentScroll th:nth-child(3),
-        body.mobile #sentimentScroll td:nth-child(3) { min-width:44px; }
-        body.mobile #sentimentScroll th:nth-child(n+4),
-        body.mobile #sentimentScroll td:nth-child(n+4) { min-width:58px; }
-
-        /* --- MOBILE CHART (sentiment) --- */
-        body.mobile .chart-sentiment {
-            margin:10px 10px 0; border-radius:10px;
-            height:auto !important; min-height:0 !important; padding:10px;
-        }
-        body.mobile .chart-sentiment-wrapper {
-            position:relative; width:100%; height:600px;
-        }
-        body.mobile #sentimentChart { position:absolute; top:0; left:0; width:100% !important; height:100% !important; }
-
-        /* --- MOBILE COT --- */
-        body.mobile .cot-section {
-            display:block !important; margin-bottom:10px !important;
-        }
-        body.mobile .cot-container { margin:10px 10px 0; border-radius:10px; }
-        body.mobile .cot-chart-wrap { margin:8px 10px 0; border-radius:10px; }
-        body.mobile .cot-pies {
-            grid-template-columns:repeat(4,1fr) !important; gap:4px !important; padding:8px !important;
-        }
-        body.mobile .cot-pie-item canvas { width:60px !important; height:60px !important; }
-        body.mobile .cot-pie-label { font-size:9px !important; }
-
-        /* --- MOBILE HIST GRID --- */
-        body.mobile #histGrid { grid-template-columns:1fr !important; gap:8px !important; margin:0 10px; }
-        body.mobile .page-header.mob-ph { margin:10px 10px 0; border-radius:10px; }
-
-        /* Fix COT Report header — single line on mobile */
-        body.mobile #page-sentiment .page-header.mob-ph .ph-center {
-            font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-        }
-        body.mobile #page-sentiment .page-header.mob-ph .ph-right {
-            width:auto; flex-shrink:0;
-        }
-        body.mobile #page-sentiment .page-header.mob-ph .ph-right .ph-status {
-            font-size:10px; white-space:nowrap; max-width:80px; overflow:hidden; text-overflow:ellipsis;
-        }
-
-        /* Fix Central Bank Interest Rates header — single line on mobile */
-        body.mobile .macro-page-section-title {
-            margin:10px 10px 0 !important; border-radius:10px !important;
-            flex-wrap:nowrap !important; overflow:hidden;
-        }
-        body.mobile .macro-page-section-title .section-title-text {
-            font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-        }
-        body.mobile .macro-page-section-title .section-right {
-            width:auto !important; flex-shrink:0; gap:4px !important;
-        }
-        body.mobile .macro-page-section-title .source-badge { display:none; }
-        body.mobile .macro-page-section-title #irStatus { display:none; }
-
-        /* --- MOBILE STRENGTH --- */
-        body.mobile .cs-layout {
-            display:block !important; height:auto !important;
-        }
-        body.mobile .cs-chart-wrap {
-            margin:10px 10px 0; border-radius:10px; height:auto !important;
-        }
-        body.mobile .cs-chart-inner {
-            position:relative !important; min-height:55vw; height:55vw !important;
-        }
-        body.mobile .cs-header-row { gap:6px; }
-        body.mobile .cs-tf-btns { gap:4px; flex-wrap:wrap; }
-        body.mobile .cs-tf-btn { padding:5px 8px; font-size:11px; }
-        body.mobile .cs-legend { display:flex; flex-wrap:wrap; gap:5px; padding:6px 0; }
-        body.mobile .cs-legend-item { font-size:10px; padding:2px 5px; }
-        body.mobile .cs-sidebar {
-            margin:8px 10px 0;
-        }
-        body.mobile .cs-rank-card { flex:none !important; max-height:none !important; }
-        body.mobile .cs-rank-body { max-height:none; overflow:visible; }
-
-        /* --- MOBILE FX PERFORMANCE --- */
-        body.mobile #sub-rsi .page-header {
-            margin:10px 10px 0 !important; border-radius:10px !important;
-            height:auto !important; min-height:46px !important; flex-wrap:wrap; gap:6px; padding:8px 12px;
-        }
-        body.mobile .ph-left .fxp-tfs { display:flex; gap:4px; flex-wrap:wrap; }
-        body.mobile .fxp-tf-btn { padding:5px 8px; font-size:11px; }
-        body.mobile #fxpBarsContainer, body.mobile #fxpHeatmapContainer {
-            width:100%;
-        }
-        body.mobile #fxpHeatmapContainer { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-        body.mobile .fxp-heatmap-table { font-size:10px; }
-        body.mobile .fxp-heatmap-table th, body.mobile .fxp-heatmap-table td { padding:5px 4px; }
-        /* wrap the two perf sections into single col */
-        body.mobile #fxpGridWrap { 
-            display:block !important; 
-        }
-        body.mobile .fxp-bars-card, body.mobile .fxp-heatmap-card { 
-            margin:8px 10px 0; border-radius:10px;
-        }
-
-        /* --- MOBILE IR CARDS --- */
-        body.mobile .ir-cards-grid {
-            grid-template-columns:repeat(2,1fr) !important; gap:8px !important;
-            margin:0 10px;
-        }
-        body.mobile .ir-card { padding:12px !important; }
-        body.mobile .ir-rate { font-size:22px !important; }
-        body.mobile .ir-rate-pct { font-size:13px !important; }
-        body.mobile .ir-comparison-card { margin:8px 10px 0; border-radius:10px; }
-        body.mobile .ir-hist-grid {
-            grid-template-columns:1fr !important; gap:8px !important;
-            margin:0 10px;
-        }
-        body.mobile .ir-layout { gap:8px; }
-
-        /* --- MOBILE CALENDAR --- */
-        body.mobile .calendar-section {
-            margin:10px 10px 0; border-radius:10px; height:75vh !important;
-        }
-        body.mobile .page-header { margin:10px 10px 0; border-radius:10px; }
-
-        /* --- PAIRS MODAL MOBILE --- */
-        body.mobile .pairs-modal { width:95vw !important; max-height:80vh !important; }
-        body.mobile .pairs-grid { grid-template-columns:repeat(3,1fr) !important; }
-
-        /* ========================
-           EXISTING DESKTOP STYLES
-           ======================== */
         .ticker-section { margin-bottom:20px; overflow:hidden; border-radius:8px; border:1px solid #1e2230; background:#161616; padding:4px 8px; }
 
         .refresh-icon-btn {
-            background:transparent; border:none; color:#aaa; cursor:pointer;
-            font-size:16px; padding:0 5px; transition:color .2s; display:flex; align-items:center;
+            background: transparent; border: none; color: #aaa; cursor: pointer;
+            font-size: 16px; padding: 0 5px; transition: color 0.2s;
+            display: flex; align-items: center;
         }
-        .refresh-icon-btn:hover { color:#fff; }
-        .refresh-icon-btn.spinning { animation:spin 1s linear infinite; }
-        @keyframes spin { from{transform:rotate(0deg);}to{transform:rotate(360deg);} }
+        .refresh-icon-btn:hover { color: #fff; }
+        .refresh-icon-btn.spinning { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .sentiment-headers { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:12px; }
         .sentiment-headers .page-header { margin-bottom:0; }
@@ -260,6 +47,9 @@
         .cot-chart-wrap h3 { text-align:center; margin-bottom:10px; font-size:14px; color:#fff; font-weight:bold; }
 
         .calendar-section { background:#161616; padding:15px 15px 6px 15px; border:1px solid #1e2230; border-radius:8px; height:95vh; display:flex; flex-direction:column; }
+        .ecw-copyright { text-align:center; font-size:10px; color:#555; margin-top:4px; }
+        .ecw-copyright a { color:#555; text-decoration:none; }
+        .ecw-copyright a:hover { color:#888; }
 
         .cot-pies { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px; }
         .cot-pie-item { display:flex; flex-direction:column; align-items:center; gap:4px; }
@@ -304,6 +94,7 @@
         .cs-tf-btn { padding:5px 12px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; }
         .cs-tf-btn:hover { background:#1e2230; color:#fff; }
         .cs-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
+        .cs-header-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
         .cs-legend { display:flex; flex-wrap:wrap; gap:8px; }
         .cs-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; cursor:pointer; padding:3px 7px; border-radius:4px; border:1px solid transparent; transition:border-color .15s; }
         .cs-legend-item:hover { border-color:#1e2230; }
@@ -311,6 +102,7 @@
         .cs-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
         .cs-layout { display:grid; grid-template-columns:1fr 340px; gap:15px; height:60vh; }
 
+        /* INTEREST RATES */
         .ir-layout { display:flex; flex-direction:column; gap:15px; }
         .ir-cards-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:6px; }
         .ir-card { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:6px; position:relative; overflow:hidden; transition:border-color .2s; }
@@ -340,13 +132,16 @@
         .ir-hist-title { font-size:12px; font-weight:bold; color:#ccc; margin-bottom:10px; text-align:center; }
         .ir-hist-wrap { position:relative; height:120px; }
 
+        /* MACRO PAGE */
         .macro-page-section { margin-bottom:30px; }
         .macro-page-section-title { background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:14px; color:#fff; border:1px solid #1e2230; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0; }
         .macro-page-section-title .section-title-text { flex:1; text-align:center; }
         .macro-page-section-title .section-right { display:flex; align-items:center; gap:8px; width:160px; justify-content:flex-end; }
         .macro-page-section-title .section-left { width:160px; }
+
         .source-badge { font-size:9px; color:#555; padding:2px 6px; border:1px solid #222; border-radius:4px; }
 
+        /* PAIRS SELECTOR */
         .pairs-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
         .pairs-modal-overlay.open { display:flex; }
         .pairs-modal { background:#161616; border:1px solid #1e2230; border-radius:12px; padding:24px; width:600px; max-width:95vw; max-height:85vh; display:flex; flex-direction:column; gap:14px; }
@@ -369,10 +164,12 @@
         .pairs-edit-btn { padding:5px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px; color:#aaa; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; }
         .pairs-edit-btn:hover { background:#1e2230; color:#fff; }
 
+        /* FX PERFORMANCE */
         .fxp-tf-btn { padding:6px 16px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; transition:all .15s; }
         .fxp-tf-btn:hover { background:#1e2230; color:#fff; }
         .fxp-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
 
+        /* Performance bars */
         .fxp-bars-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
         .fxp-bars-title { font-size:12px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
         .fxp-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
@@ -384,6 +181,7 @@
         .fxp-bar-val { font-size:11px; font-weight:bold; width:54px; text-align:right; flex-shrink:0; }
         .fxp-bar-flag { font-size:14px; width:20px; flex-shrink:0; }
 
+        /* Heatmap */
         .fxp-heatmap-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
         .fxp-heatmap-title { font-size:12px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
         .fxp-heatmap-table { border-collapse:collapse; width:100%; min-width:560px; }
@@ -394,37 +192,222 @@
         .fxp-heatmap-table .fxp-diag { background:#111; color:#555; }
         .fxp-loading { text-align:center; padding:40px; color:#555; font-size:13px; }
 
-        .table-head-fixed .scrollbar-spacer { display:inline-block; width:10px; flex-shrink:0; }
-        .table-head-fixed-inner { display:flex; align-items:stretch; }
-        .table-head-fixed-inner table { flex:1; min-width:0; }
-        .scrollbar-placeholder { width:10px; flex-shrink:0; background:#161616; border-bottom:1px solid #1e2230; }
+        /* ---- SCROLLBAR WIDTH COMPENSATION ---- */
+        .table-head-fixed .scrollbar-spacer {
+            display: inline-block;
+            width: 10px;
+            flex-shrink: 0;
+        }
+        .table-head-fixed-inner {
+            display: flex;
+            align-items: stretch;
+        }
+        .table-head-fixed-inner table {
+            flex: 1;
+            min-width: 0;
+        }
+        .scrollbar-placeholder {
+            width: 10px;
+            flex-shrink: 0;
+            background: #161616;
+            border-bottom: 1px solid #1e2230;
+        }
 
-        /* mobile sentiment table scroll */
-        body.mobile .table-scroll-x { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-        body.mobile .table-scroll-x table { table-layout:auto; min-width:600px; }
+        /* ============================================================
+           MOBILE STYLES — iPhone / small screens (max-width: 768px)
+           ============================================================ */
+        @media (max-width: 768px) {
+            body { padding: 10px 8px; -webkit-tap-highlight-color: transparent; }
 
-        /* mobile macro section spacing */
-        body.mobile .macro-page-section { margin-bottom:0; padding-bottom:8px; }
+            /* ---- TICKER ---- */
+            .ticker-section { margin-bottom: 10px; padding: 2px 4px; }
+
+            /* ---- TABS ---- */
+            .tabs {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                margin-bottom: 12px;
+            }
+            .tab-btn {
+                padding: 10px 6px;
+                font-size: 11px;
+                text-align: center;
+                border-radius: 8px;
+            }
+
+            /* ---- PAGE HEADER ---- */
+            .page-header {
+                height: auto;
+                min-height: 44px;
+                padding: 8px 10px;
+                flex-wrap: wrap;
+                gap: 6px;
+                font-size: 12px;
+            }
+            .page-header .ph-left { width: auto; }
+            .page-header .ph-right { width: auto; }
+            .page-header .ph-center { flex: none; width: 100%; text-align: center; order: -1; }
+
+            /* ---- SENTIMENT PAGE ---- */
+            .sentiment-headers {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+            .main-section {
+                grid-template-columns: 1fr;
+                height: auto;
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+            .table-container {
+                height: 55vw;
+                min-height: 260px;
+                max-height: 340px;
+            }
+            /* Mobile table: show only essential columns, hide volume & positions */
+            .table-container th:nth-child(4),
+            .table-container th:nth-child(5),
+            .table-container th:nth-child(6),
+            .table-container th:nth-child(7),
+            .table-container td:nth-child(4),
+            .table-container td:nth-child(5),
+            .table-container td:nth-child(6),
+            .table-container td:nth-child(7) { display: none; }
+            .table-container th, .table-container td { font-size: 11px; padding: 5px 4px; }
+
+            .chart-sentiment {
+                height: 280px;
+                padding: 10px;
+            }
+
+            /* ---- COT SECTION ---- */
+            .cot-section {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+            .cot-pies {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 4px;
+                padding: 8px;
+            }
+            .cot-pie-item canvas { width: 60px!important; height: 60px!important; }
+            .cot-pie-label { font-size: 9px; }
+            .cot-scroll table th, .cot-scroll table td { font-size: 10px; padding: 4px 3px; }
+            /* Hide delta column on mobile COT */
+            .cot-scroll table th:nth-child(5),
+            .cot-scroll table td:nth-child(5) { display: none; }
+
+            /* ---- HIST GRID ---- */
+            #histGrid { grid-template-columns: 1fr!important; gap: 10px!important; }
+
+            /* ---- CURRENCY STRENGTH ---- */
+            .cs-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+                gap: 12px;
+            }
+            .cs-chart-wrap { padding: 10px; }
+            .cs-chart-inner { height: 260px; position: relative; }
+            #csChart { position: absolute; top:0; left:0; width:100%!important; height:100%!important; }
+            .cs-sidebar { flex-direction: column; }
+            .cs-rank-card { max-height: 320px; }
+            .cs-rank-body { max-height: 250px; overflow-y: auto; }
+            .cs-tf-btns { gap: 4px; flex-wrap: wrap; }
+            .cs-tf-btn { padding: 6px 8px; font-size: 11px; }
+            .cs-header-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .cs-legend { gap: 5px; }
+            .cs-legend-item { font-size: 10px; padding: 2px 5px; }
+
+            /* ---- FX PERFORMANCE ---- */
+            .fxp-tf-btn { padding: 6px 8px; font-size: 11px; }
+            /* Stack bars + heatmap vertically */
+            #strength-perf-grid { grid-template-columns: 1fr!important; }
+            .fxp-bars-card { padding: 12px; }
+            .fxp-heatmap-card { padding: 12px; overflow-x: auto; }
+            .fxp-heatmap-table { min-width: 420px; font-size: 10px; }
+            .fxp-heatmap-table th { font-size: 9px; padding: 5px 3px; }
+            .fxp-heatmap-table td { font-size: 9px; padding: 5px 3px; }
+            .fxp-bar-row { gap: 6px; margin-bottom: 8px; }
+            .fxp-bar-cur { font-size: 11px; width: 30px; }
+            .fxp-bar-val { font-size: 10px; width: 46px; }
+            .fxp-bar-flag { font-size: 12px; }
+
+            /* ---- INTEREST RATES ---- */
+            .ir-cards-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .ir-card { padding: 12px; gap: 4px; }
+            .ir-bank-name { font-size: 10px; }
+            .ir-rate-pct { font-size: 14px; }
+            .ir-currency { font-size: 11px; }
+            .ir-change-badge { font-size: 10px; padding: 2px 6px; }
+            .ir-next-date { font-size: 11px; }
+            .ir-expectation { font-size: 10px; }
+            .ir-hist-grid { grid-template-columns: 1fr; gap: 10px; }
+            .ir-hist-wrap { height: 100px; }
+            .ir-bar-row { gap: 6px; }
+            .ir-bar-label { width: 36px; font-size: 11px; }
+
+            /* ---- MACRO PAGE SECTION TITLE ---- */
+            .macro-page-section-title {
+                height: auto;
+                min-height: 44px;
+                padding: 8px 10px;
+                flex-wrap: wrap;
+                font-size: 12px;
+            }
+            .macro-page-section-title .section-left { width: auto; }
+            .macro-page-section-title .section-right { width: auto; }
+            .macro-page-section-title .section-title-text { width: 100%; text-align: center; order: -1; }
+
+            /* ---- CALENDAR ---- */
+            .calendar-section { height: 85vh; padding: 8px; }
+
+            /* ---- PAIRS MODAL ---- */
+            .pairs-modal { padding: 16px; gap: 10px; width: 95vw; max-height: 90vh; }
+            .pairs-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+            .pair-chip { padding: 5px 6px; font-size: 11px; }
+
+            /* ---- COT DATE / HEADER ---- */
+            .cot-header { font-size: 12px; padding: 8px; }
+
+            /* ---- MOBILE: Remove inner scrollbar in table container on mobile ---- */
+            .table-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+            /* ---- MOBILE bottom safe area for iPhone ---- */
+            .container { padding-bottom: env(safe-area-inset-bottom, 20px); }
+
+            /* History chart wrappers */
+            #histGrid > div { padding: 8px!important; }
+            #histGrid canvas { height: 110px!important; }
+        }
+
+        /* Extra small phones */
+        @media (max-width: 375px) {
+            .ir-cards-grid { grid-template-columns: 1fr; }
+            .cot-pies { grid-template-columns: repeat(4, 1fr); }
+            .tabs { grid-template-columns: 1fr 1fr; }
+            .tab-btn { font-size: 10px; padding: 9px 4px; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
 
-    <!-- TICKER (shared) -->
     <div class="ticker-section">
         <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js"></script>
         <tv-ticker-tape symbols="FX:AUDUSD,FX:EURUSD,OANDA:GBPUSD,FX:NZDUSD,FX:USDCAD,FX:USDCHF,FX:USDJPY,FX:AUDCAD,FX:AUDCHF,FX:AUDJPY,FX:AUDNZD,FX:CADCHF,FX:CADJPY,FX:CHFJPY,FX:EURAUD,FX:EURCAD,FX:EURCHF,FX:EURGBP,FX:EURJPY,FX:EURNZD,FX:GBPAUD,FX:GBPCAD,FX:GBPCHF,FX:GBPJPY,FX:GBPNZD,FX:NZDCAD,FX:NZDCHF,FX:NZDJPY" theme="dark" transparent></tv-ticker-tape>
     </div>
 
-    <!-- DESKTOP TABS -->
-    <div class="tabs desktop-only">
+    <div class="tabs">
         <button class="tab-btn active"  onclick="showTab('sentiment')">Traders Sentiment</button>
         <button class="tab-btn"         onclick="showTab('strength')">Currency Strength</button>
         <button class="tab-btn"         onclick="showTab('macropage')">Macro</button>
         <button class="tab-btn"         onclick="showTab('calendar')">Economic Calendar</button>
     </div>
 
-    <!-- PAIRS MODAL -->
+    <!-- PAIRS SELECTOR MODAL -->
     <div class="pairs-modal-overlay" id="pairsModalOverlay" onclick="if(event.target===this)closePairsModal()">
         <div class="pairs-modal">
             <div class="pairs-modal-header">
@@ -444,19 +427,9 @@
         </div>
     </div>
 
-    <!-- MOBILE HEADER -->
-    <div class="mobile-header" id="mobileHeader">
-        <div class="mob-header-title" id="mobHeaderTitle">Traders Sentiment</div>
-        <div class="mob-header-right">
-            <span class="mob-status" id="mobStatus">Loading...</span>
-            <button class="mob-refresh-btn" id="mobRefreshBtn" onclick="mobRefresh()">&#8634;</button>
-        </div>
-    </div>
-
-    <!-- ===== SENTIMENT ===== -->
+    <!-- SENTIMENT -->
     <div class="tab-page active" id="page-sentiment">
-        <!-- Desktop headers -->
-        <div class="sentiment-headers desktop-only">
+        <div class="sentiment-headers">
             <div class="page-header">
                 <div class="ph-left">
                     <button class="pairs-edit-btn" onclick="openPairsModal()">&#9881; Edit Pairs</button>
@@ -469,40 +442,29 @@
             </div>
             <div class="page-header" style="justify-content:center;"><span>Long vs Short &mdash; Traders Sentiment</span></div>
         </div>
-
-        <!-- Mobile top controls -->
-        <div class="mobile-only" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px 0;">
-            <button class="pairs-edit-btn" onclick="openPairsModal()" style="font-size:12px;">&#9881; Edit Pairs</button>
-            <span style="font-size:10px;color:#666;" id="lastUpdateMob">Loading...</span>
-        </div>
-
         <div class="main-section">
             <div class="table-container">
-                <!-- Desktop fixed header -->
-                <div class="table-head-fixed desktop-only">
+                <div class="table-head-fixed">
                     <div class="table-head-fixed-inner">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Pair</th><th>% Short</th><th>% Long</th>
-                                    <th>Short Vol</th><th>Long Vol</th>
-                                    <th>Short Pos</th><th>Long Pos</th><th>Total Pos</th>
+                                    <th>Pair</th>
+                                    <th>% Short</th>
+                                    <th>% Long</th>
+                                    <th>Short Vol</th>
+                                    <th>Long Vol</th>
+                                    <th>Short Pos</th>
+                                    <th>Long Pos</th>
+                                    <th>Total</th>
                                 </tr>
                             </thead>
                         </table>
                         <div class="scrollbar-placeholder" id="scrollbarPlaceholder"></div>
                     </div>
                 </div>
-                <!-- Mobile: scrollable x+y table -->
-                <div class="table-scroll table-scroll-x" id="sentimentScroll">
+                <div class="table-scroll" id="sentimentScroll">
                     <table>
-                        <thead class="mobile-only">
-                            <tr>
-                                <th>Pair</th><th>% Short</th><th>% Long</th>
-                                <th>Short Vol</th><th>Long Vol</th>
-                                <th>Short Pos</th><th>Long Pos</th><th>Total Pos</th>
-                            </tr>
-                        </thead>
                         <tbody id="sentimentBody"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody>
                     </table>
                 </div>
@@ -513,9 +475,9 @@
         </div>
 
         <div style="margin-top:20px;">
-            <div class="page-header mob-ph">
+            <div class="page-header">
                 <div class="ph-left"></div>
-                <div class="ph-center">COT Report &mdash; CFTC</div>
+                <div class="ph-center">COT Report &mdash; CFTC Commitments of Traders</div>
                 <div class="ph-right"><span class="ph-status" id="cotDate">Loading...</span></div>
             </div>
             <div class="cot-section" style="margin-bottom:15px">
@@ -540,16 +502,16 @@
                 <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Large Speculators</h3><div class="cot-pies" id="cotPiesLS"></div></div>
             </div>
             <div style="margin-top:15px">
-                <div class="page-header mob-ph" style="justify-content:center;">Net Positions</div>
+                <div class="page-header" style="justify-content:center;">Net Positions</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="histGrid"></div>
             </div>
         </div>
     </div>
 
-    <!-- ===== STRENGTH ===== -->
+    <!-- STRENGTH -->
     <div class="tab-page" id="page-strength">
         <div id="sub-rsi">
-            <div class="page-header mob-ph">
+            <div class="page-header">
                 <div class="ph-left"></div>
                 <div class="ph-center">Currency Strength Index</div>
                 <div class="ph-right"><span class="ph-status" id="csStatus">Loading...</span></div>
@@ -567,7 +529,7 @@
                         </div>
                         <div class="cs-legend" id="csLegend"></div>
                     </div>
-                    <div class="cs-chart-inner"><canvas id="csChart" style="touch-action:none;"></canvas></div>
+                    <div class="cs-chart-inner"><canvas id="csChart"></canvas></div>
                 </div>
                 <div class="cs-sidebar">
                     <div class="cs-rank-card">
@@ -576,9 +538,8 @@
                     </div>
                 </div>
             </div>
-            <!-- FX Performance -->
             <div style="margin-top:15px;">
-                <div class="page-header mob-ph">
+                <div class="page-header">
                     <div class="ph-left">
                         <div style="display:flex;gap:6px;flex-wrap:wrap;">
                             <button class="fxp-tf-btn active" onclick="fxpSetTF('D',this)">Today</button>
@@ -594,7 +555,7 @@
                         <button class="refresh-icon-btn" onclick="fxpLoad()">&#8634;</button>
                     </div>
                 </div>
-                <div id="fxpGridWrap" style="display:grid;grid-template-columns:420px 1fr;gap:15px;align-items:stretch;">
+                <div id="strength-perf-grid" style="display:grid;grid-template-columns:420px 1fr;gap:15px;align-items:stretch;">
                     <div class="fxp-bars-card" style="display:flex;flex-direction:column;">
                         <div class="fxp-bars-title">Currency Performance</div>
                         <div id="fxpBarsContainer" style="flex:1;"><div class="fxp-loading">Loading...</div></div>
@@ -608,7 +569,7 @@
         </div>
     </div>
 
-    <!-- ===== MACRO ===== -->
+    <!-- MACRO PAGE -->
     <div class="tab-page" id="page-macropage">
         <div class="macro-page-section">
             <div class="macro-page-section-title">
@@ -627,16 +588,16 @@
                     <div id="irBarsContainer"></div>
                 </div>
                 <div>
-                    <div class="page-header mob-ph" style="justify-content:center;">Interest Rate History</div>
+                    <div class="page-header" style="justify-content:center;">Interest Rate History</div>
                     <div class="ir-hist-grid" id="irHistGrid"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ===== CALENDAR ===== -->
+    <!-- CALENDAR -->
     <div class="tab-page" id="page-calendar">
-        <div class="page-header mob-ph" style="justify-content:center;">Economic Calendar</div>
+        <div class="page-header" style="justify-content:center;">Economic Calendar</div>
         <div class="calendar-section">
             <div class="tradingview-widget-container" style="flex:1;min-height:0;">
                 <div class="tradingview-widget-container__widget" style="height:100%;"></div>
@@ -647,92 +608,51 @@
         </div>
     </div>
 
-    <!-- MOBILE BOTTOM NAV -->
-    <nav class="mobile-nav">
-        <div class="mobile-nav-inner">
-            <button class="mob-nav-btn active" id="mobnav-sentiment" onclick="mobShowTab('sentiment',this)">
-                <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
-                Sentiment
-            </button>
-            <button class="mob-nav-btn" id="mobnav-strength" onclick="mobShowTab('strength',this)">
-                <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                Strength
-            </button>
-            <button class="mob-nav-btn" id="mobnav-macropage" onclick="mobShowTab('macropage',this)">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                Macro
-            </button>
-            <button class="mob-nav-btn" id="mobnav-calendar" onclick="mobShowTab('calendar',this)">
-                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                Calendar
-            </button>
-        </div>
-    </nav>
-
 </div>
 
 <script>
-/* ========= DEVICE DETECTION ========= */
-function isMobile() {
-    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
-}
-(function() {
-    if (isMobile()) {
-        document.body.classList.add('mobile');
-        // mobile: inject desktop-only display fix
-        document.querySelectorAll('.desktop-only').forEach(function(el){ el.style.display='none'; });
-    } else {
-        document.body.classList.add('desktop');
+/* ========= MOBILE DETECTION & RESPONSIVE LAYOUT ========= */
+var IS_MOBILE = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
+function applyMobileLayout() {
+    if (!IS_MOBILE) return;
+
+    // Stack the FX performance grid vertically on mobile
+    var perfGrid = document.getElementById('strength-perf-grid');
+    if (perfGrid) {
+        perfGrid.style.gridTemplateColumns = '1fr';
     }
-    // also re-check on resize for responsive testing
-    window.addEventListener('resize', function() {
-        if (isMobile() && !document.body.classList.contains('mobile')) {
-            document.body.classList.add('mobile');
-            document.body.classList.remove('desktop');
-        } else if (!isMobile() && !document.body.classList.contains('desktop')) {
-            document.body.classList.add('desktop');
-            document.body.classList.remove('mobile');
-        }
+
+    // Stack histGrid to 1 column
+    var histGrid = document.getElementById('histGrid');
+    if (histGrid) {
+        histGrid.style.gridTemplateColumns = '1fr';
+    }
+
+    // Touch-friendly: increase tap targets on buttons
+    document.querySelectorAll('.tab-btn, .cs-tf-btn, .fxp-tf-btn, .pairs-edit-btn').forEach(function(btn) {
+        btn.style.minHeight = '40px';
     });
-})();
+}
 
 /* ========= HELPERS ========= */
 function fmtTime(){ return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
 
+/* ========= SCROLLBAR WIDTH SYNC ========= */
 function syncScrollbarPlaceholder() {
+    if (IS_MOBILE) return; // Not needed on mobile (no scrollbar gutter)
     var scroll = document.getElementById('sentimentScroll');
     var placeholder = document.getElementById('scrollbarPlaceholder');
     if (!scroll || !placeholder) return;
     var sbWidth = scroll.offsetWidth - scroll.clientWidth;
     placeholder.style.width = Math.max(sbWidth, 10) + 'px';
 }
-window.addEventListener('resize', syncScrollbarPlaceholder);
-
-/* ========= MOBILE NAV & STATUS ========= */
-var MOB_TITLES = {sentiment:'Traders Sentiment', strength:'Currency Strength', macropage:'Macro', calendar:'Economic Calendar'};
-
-function mobShowTab(name, btn) {
-    showTab(name);
-    document.querySelectorAll('.mob-nav-btn').forEach(function(b){ b.classList.remove('active'); });
-    if (btn) btn.classList.add('active');
-    document.getElementById('mobHeaderTitle').textContent = MOB_TITLES[name] || name;
-    // update refresh button behavior
-    document.getElementById('mobStatus').textContent = '—';
-}
-
-function mobRefresh() {
-    var active = document.querySelector('.tab-page.active');
-    if (!active) return;
-    var id = active.id.replace('page-','');
-    if (id==='sentiment') actualiserDonnees();
-    else if (id==='strength') { csLoad(); setTimeout(fxpLoad,1000); }
-    else if (id==='macropage') renderRates();
-}
-
-function updateMobStatus(txt) {
-    var el = document.getElementById('mobStatus');
-    if (el) el.textContent = txt;
-}
+window.addEventListener('resize', function() {
+    syncScrollbarPlaceholder();
+    // Re-check mobile on resize (e.g. rotation)
+    IS_MOBILE = window.innerWidth <= 768;
+    applyMobileLayout();
+});
 
 /* ========= TAB NAV ========= */
 function showTab(name) {
@@ -745,6 +665,8 @@ function showTab(name) {
     if (name === 'strength') { csLoad(); setTimeout(fxpLoad, 1000); }
     if (name === 'macropage') renderRates();
     if (name === 'sentiment') actualiserDonnees();
+    // Scroll to top on mobile tab switch
+    if (IS_MOBILE) window.scrollTo({top:0, behavior:'smooth'});
 }
 
 /* ========= SENTIMENT ========= */
@@ -770,7 +692,8 @@ function getActivePairs() {
             if (Array.isArray(parsed) && parsed.length > 0) return parsed;
         }
     } catch(e) {}
-    return ALL_PAIRS.slice();
+    // On mobile default to majors only for better readability
+    return IS_MOBILE ? MAJOR_PAIRS.slice() : ALL_PAIRS.slice();
 }
 
 function saveActivePairs(pairs) {
@@ -786,9 +709,11 @@ function openPairsModal() {
     buildPairsGrid();
     document.getElementById('pairsModalOverlay').classList.add('open');
 }
+
 function closePairsModal() {
     document.getElementById('pairsModalOverlay').classList.remove('open');
 }
+
 function buildPairsGrid() {
     var grid = document.getElementById('pairsGrid');
     grid.innerHTML = '';
@@ -803,9 +728,11 @@ function buildPairsGrid() {
         grid.appendChild(chip);
     });
 }
+
 function pairsSelectAll() { _modalTempSelected = new Set(ALL_PAIRS); buildPairsGrid(); }
 function pairsSelectNone() { _modalTempSelected = new Set(); buildPairsGrid(); }
 function pairsSelectMajors() { _modalTempSelected = new Set(MAJOR_PAIRS); buildPairsGrid(); }
+
 function savePairsSelection() {
     var ordered = ALL_PAIRS.filter(function(p) { return _modalTempSelected.has(p); });
     if (!ordered.length) { alert('Select at least one pair.'); return; }
@@ -821,8 +748,6 @@ function savePairsSelection() {
 
 async function actualiserDonnees() {
     document.getElementById('lastUpdate').textContent = 'Chargement...';
-    document.getElementById('lastUpdateMob').textContent = 'Loading...';
-    updateMobStatus('Loading...');
     try {
         var lr = await fetch(CONFIG.apiUrl+'login.json?email='+CONFIG.email+'&password='+CONFIG.password);
         var ld = await lr.json();
@@ -834,15 +759,9 @@ async function actualiserDonnees() {
         sd.symbols.forEach(function(s){ _sentimentMap[s.name] = s; });
         afficherTableau(_sentimentMap);
         afficherGraphique(_sentimentMap);
-        var t = fmtTime();
-        document.getElementById('lastUpdate').textContent = t;
-        document.getElementById('lastUpdateMob').textContent = t;
-        updateMobStatus(t);
+        document.getElementById('lastUpdate').textContent = fmtTime();
         setTimeout(syncScrollbarPlaceholder, 50);
-    } catch(e) {
-        document.getElementById('lastUpdate').textContent='Erreur MyFxBook';
-        updateMobStatus('Error');
-    }
+    } catch(e) { document.getElementById('lastUpdate').textContent='Erreur MyFxBook'; }
 }
 
 function afficherTableau(map) {
@@ -866,11 +785,18 @@ function afficherTableau(map) {
 }
 
 function gc(p, s) {
-    var i = p / 100, bg = 24;
+    var i = p / 100;
+    var bg = 24;
     if (s) {
-        return 'rgb('+~~(bg+(192-bg)*i)+','+~~(bg+(57-bg)*i)+','+~~(bg+(57-bg)*i)+')';
+        var r = ~~(bg + (192 - bg) * i);
+        var g = ~~(bg + (57  - bg) * i);
+        var b = ~~(bg + (57  - bg) * i);
+        return 'rgb(' + r + ',' + g + ',' + b + ')';
     } else {
-        return 'rgb('+~~(bg+(47-bg)*i)+','+~~(bg+(153-bg)*i)+','+~~(bg+(95-bg)*i)+')';
+        var r2 = ~~(bg + (47  - bg) * i);
+        var g2 = ~~(bg + (153 - bg) * i);
+        var b2 = ~~(bg + (95  - bg) * i);
+        return 'rgb(' + r2 + ',' + g2 + ',' + b2 + ')';
     }
 }
 
@@ -880,13 +806,10 @@ function afficherGraphique(map) {
     if(sentimentChart) sentimentChart.destroy();
     var lb=[],sD=[],lD=[];
     PAIRS.forEach(function(p){var d=map[p];if(d){lb.push(p);sD.push(d.shortPercentage);lD.push(d.longPercentage);}});
-    if(document.body.classList.contains('mobile')) {
-        var wrapper = document.querySelector('.chart-sentiment-wrapper');
-        if(wrapper) { wrapper.style.height = Math.max(300, lb.length * 24) + 'px'; }
-    }
+    var tickFontSize = IS_MOBILE ? 8 : 10;
     sentimentChart=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{label:'Short',data:sD,backgroundColor:'#C03939',borderWidth:0},{label:'Long',data:lD,backgroundColor:'#2F995F',borderWidth:0}]},
         options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.x+'%';}}}},
-        scales:{x:{stacked:true,max:100,display:false},y:{stacked:true,ticks:{font:{size:10},color:'#fff'},grid:{color:'#1e2230'}}}}});
+        scales:{x:{stacked:true,max:100,display:false},y:{stacked:true,ticks:{font:{size:tickFontSize},color:'#fff'},grid:{color:'#1e2230'}}}}});
 }
 
 /* ========= COT ========= */
@@ -924,58 +847,15 @@ async function chargerCOT() {
     afficherCOT(cotData);
     setTimeout(function(){buildHistGrid();updateHistCharts();},100);
 }
-
-function renderCOTTable(tbodyId,data,key){
-    var tbody=document.getElementById(tbodyId);tbody.innerHTML='';
-    data.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(d){
-        var cat=d[key];var nc=cat.net>=0?'#2F995F':'#C03939';var dc=cat.dlt>=0?'#2F995F':'#C03939';
-        var row=document.createElement('tr');
-        row.innerHTML='<td style="font-weight:bold">'+d.name+'</td><td style="color:#2F995F">'+cat.lng.toLocaleString()+'</td><td style="color:#C03939">'+cat.sht.toLocaleString()+'</td><td style="color:'+nc+';font-weight:bold">'+(cat.net>=0?'+':'')+cat.net.toLocaleString()+'</td><td style="color:'+dc+'">'+(cat.dlt>=0?'+':'')+cat.dlt.toLocaleString()+'</td><td>'+(cat.net>=0?'&#128994; Bullish':'&#128308; Bearish')+'</td>';
-        tbody.appendChild(row);
-    });
-}
-
+function renderCOTTable(tbodyId,data,key){var tbody=document.getElementById(tbodyId);tbody.innerHTML='';data.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(d){var cat=d[key];var nc=cat.net>=0?'#2F995F':'#C03939';var dc=cat.dlt>=0?'#2F995F':'#C03939';var row=document.createElement('tr');row.innerHTML='<td style="font-weight:bold">'+d.name+'</td><td style="color:#2F995F">'+cat.lng.toLocaleString()+'</td><td style="color:#C03939">'+cat.sht.toLocaleString()+'</td><td style="color:'+nc+';font-weight:bold">'+(cat.net>=0?'+':'')+cat.net.toLocaleString()+'</td><td style="color:'+dc+'">'+(cat.dlt>=0?'+':'')+cat.dlt.toLocaleString()+'</td><td>'+(cat.net>=0?'&#128994; Bullish':'&#128308; Bearish')+'</td>';tbody.appendChild(row);});}
 var cotPieCharts={};
-function renderCOTPies(containerId,data,key){
-    var container=document.getElementById(containerId);container.innerHTML='';
-    Object.keys(cotPieCharts).filter(function(k){return k.startsWith(containerId);}).forEach(function(k){cotPieCharts[k].destroy();delete cotPieCharts[k];});
-    data.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(d){
-        var cat=d[key],total=cat.lng+cat.sht;if(!total)return;
-        var pctL=Math.round(cat.lng/total*100),pctS=100-pctL;
-        var item=document.createElement('div');item.className='cot-pie-item';
-        var cid=containerId+'_'+d.name;
-        item.innerHTML='<canvas id="'+cid+'" width="80" height="80"></canvas><div class="cot-pie-label">'+d.name+'</div>';
-        container.appendChild(item);
-        cotPieCharts[cid]=new Chart(document.getElementById(cid),{type:'doughnut',data:{labels:['Long','Short'],datasets:[{data:[cat.lng,cat.sht],backgroundColor:['rgb(47,153,95)','rgb(192,57,57)'],borderColor:['#161616','#161616'],borderWidth:2}]},options:{responsive:false,cutout:'45%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+(c.label==='Long'?pctL:pctS)+'%';}}}}}}); 
-    });
-}
+function renderCOTPies(containerId,data,key){var container=document.getElementById(containerId);container.innerHTML='';Object.keys(cotPieCharts).filter(function(k){return k.startsWith(containerId);}).forEach(function(k){cotPieCharts[k].destroy();delete cotPieCharts[k];});data.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(d){var cat=d[key],total=cat.lng+cat.sht;if(!total)return;var pctL=Math.round(cat.lng/total*100),pctS=100-pctL;var item=document.createElement('div');item.className='cot-pie-item';var cid=containerId+'_'+d.name;var canvasSize = IS_MOBILE ? 60 : 80;item.innerHTML='<canvas id="'+cid+'" width="'+canvasSize+'" height="'+canvasSize+'"></canvas><div class="cot-pie-label">'+d.name+'</div>';container.appendChild(item);cotPieCharts[cid]=new Chart(document.getElementById(cid),{type:'doughnut',data:{labels:['Long','Short'],datasets:[{data:[cat.lng,cat.sht],backgroundColor:['rgb(47,153,95)','rgb(192,57,57)'],borderColor:['#161616','#161616'],borderWidth:2}]},options:{responsive:false,cutout:'45%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+(c.label==='Long'?pctL:pctS)+'%';}}}}}}); });}
 function afficherCOT(cotData){renderCOTTable('cotBodyLev',cotData,'lev');renderCOTPies('cotPiesLev',cotData,'lev');renderCOTTable('cotBodyCom',cotData,'com');renderCOTPies('cotPiesCom',cotData,'com');renderCOTTable('cotBodyLS',cotData,'ls');renderCOTPies('cotPiesLS',cotData,'ls');}
-
 var CURRENCIES_ORDER=['AUD','CAD','CHF','EUR','GBP','JPY','NZD','USD'];
 var HIST_FIELDS={lev:{color:'#1e90ff',label:'Leveraged Funds',fieldL:'lev_money_positions_long',fieldS:'lev_money_positions_short'},com:{color:'#ff8c00',label:'Commercials',fieldL:'dealer_positions_long_all',fieldS:'dealer_positions_short_all'},ls:{color:'#ffd700',label:'Large Spec.',fieldL:'asset_mgr_positions_long',fieldS:'asset_mgr_positions_short'}};
 var histCharts={};
-function buildHistGrid(){
-    var grid=document.getElementById('histGrid');if(!grid)return;grid.innerHTML='';
-    CURRENCIES_ORDER.forEach(function(cur){
-        var wrap=document.createElement('div');
-        wrap.style.cssText='background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px';
-        wrap.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:11px;font-weight:bold;color:#fff">'+cur+'</span><span style="display:flex;gap:8px;font-size:9px;color:#aaa"><span><span style="display:inline-block;width:12px;height:2px;background:#1e90ff;vertical-align:middle;margin-right:3px"></span>Leveraged</span><span><span style="display:inline-block;width:12px;height:2px;background:#ff8c00;vertical-align:middle;margin-right:3px"></span>Commercials</span><span><span style="display:inline-block;width:12px;height:2px;background:#ffd700;vertical-align:middle;margin-right:3px"></span>Large Spec.</span></span></div><div style="position:relative;height:140px"><canvas id="histChart_'+cur+'"></canvas></div>';
-        grid.appendChild(wrap);
-    });
-}
-function updateHistCharts(){
-    var byCode=window._cotByCode,markets=window._cotMarkets;if(!byCode||!markets)return;
-    CURRENCIES_ORDER.forEach(function(cur){
-        var market=markets.find(function(m){return m.name===cur;});if(!market)return;
-        var rows=byCode[market.code];if(!rows||!rows.length)return;
-        var sorted=rows.slice().reverse();
-        var labels=sorted.map(function(r){return(r.report_date_as_yyyy_mm_dd||'').split('T')[0];});
-        var datasets=Object.entries(HIST_FIELDS).map(function(e){return{label:e[1].label,data:sorted.map(function(r){return(parseInt(r[e[1].fieldL]||0)||0)-(parseInt(r[e[1].fieldS]||0)||0);}),borderColor:e[1].color,backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,tension:0.2};});
-        var ctx=document.getElementById('histChart_'+cur);if(!ctx)return;
-        if(histCharts[cur])histCharts[cur].destroy();
-        histCharts[cur]=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d0d0d',borderColor:'#1e2230',borderWidth:1,titleColor:'#888',bodyColor:'#fff'}},scales:{x:{grid:{color:'#1a1a2a'},ticks:{color:'#444',font:{size:8},maxTicksLimit:8,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#444',font:{size:8},callback:function(v){return v>=0?'+'+v.toLocaleString():v.toLocaleString();}}}}}});
-    });
-}
+function buildHistGrid(){var grid=document.getElementById('histGrid');if(!grid)return;grid.innerHTML='';if(IS_MOBILE){grid.style.gridTemplateColumns='1fr';}CURRENCIES_ORDER.forEach(function(cur){var wrap=document.createElement('div');wrap.style.cssText='background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px';wrap.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:4px"><span style="font-size:11px;font-weight:bold;color:#fff">'+cur+'</span><span style="display:flex;gap:8px;font-size:9px;color:#aaa;flex-wrap:wrap"><span><span style="display:inline-block;width:12px;height:2px;background:#1e90ff;vertical-align:middle;margin-right:3px"></span>Lev Funds</span><span><span style="display:inline-block;width:12px;height:2px;background:#ff8c00;vertical-align:middle;margin-right:3px"></span>Commercials</span><span><span style="display:inline-block;width:12px;height:2px;background:#ffd700;vertical-align:middle;margin-right:3px"></span>Large Spec</span></span></div><div style="position:relative;height:'+(IS_MOBILE?'110':'140')+'px"><canvas id="histChart_'+cur+'"></canvas></div>';grid.appendChild(wrap);});}
+function updateHistCharts(){var byCode=window._cotByCode,markets=window._cotMarkets;if(!byCode||!markets)return;CURRENCIES_ORDER.forEach(function(cur){var market=markets.find(function(m){return m.name===cur;});if(!market)return;var rows=byCode[market.code];if(!rows||!rows.length)return;var sorted=rows.slice().reverse();var labels=sorted.map(function(r){return(r.report_date_as_yyyy_mm_dd||'').split('T')[0];});var datasets=Object.entries(HIST_FIELDS).map(function(e){return{label:e[1].label,data:sorted.map(function(r){return(parseInt(r[e[1].fieldL]||0)||0)-(parseInt(r[e[1].fieldS]||0)||0);}),borderColor:e[1].color,backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,tension:0.2};});var ctx=document.getElementById('histChart_'+cur);if(!ctx)return;if(histCharts[cur])histCharts[cur].destroy();histCharts[cur]=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d0d0d',borderColor:'#1e2230',borderWidth:1,titleColor:'#888',bodyColor:'#fff',callbacks:{label:function(c){return ' '+c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y.toLocaleString();}}}},scales:{x:{grid:{color:'#1a1a2a'},ticks:{color:'#444',font:{size:IS_MOBILE?7:8},maxTicksLimit:IS_MOBILE?5:8,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#444',font:{size:IS_MOBILE?7:8},callback:function(v){return v>=0?'+'+v.toLocaleString():v.toLocaleString();}}}}}}); });}
 
 /* ========= CURRENCY STRENGTH ========= */
 var OANDA_KEY='a6109748dde9f520b7491de5f93c4fde-50b266ca427e911f6bec97df47f92a4b';
@@ -987,152 +867,56 @@ var CS_TF={M5:'M5',M15:'M15',H1:'H1',H4:'H4',D:'D'};
 var CS_COUNT={M5:1000,M15:800,H1:500,H4:300,D:200};
 var CS_VIEW={M5:100,M15:100,H1:100,H4:80,D:60};
 var csTF='H1',csChart=null,csHidden=new Set(),_csRawTimes=[];
-
 function csAllPairs(){var set=new Set();Object.values(CS_PAIRS).forEach(function(v){v.base.forEach(function(p){set.add(p);});v.quote.forEach(function(p){set.add(p);});});return Array.from(set);}
 function calcRSI(closes){var period=14,rsi=new Array(closes.length).fill(null);if(closes.length<period+1)return rsi;var ag=0,al=0;for(var i=1;i<=period;i++){var d=closes[i]-closes[i-1];if(d>0)ag+=d;else al-=d;}ag/=period;al/=period;rsi[period]=al===0?100:100-100/(1+ag/al);for(var j=period+1;j<closes.length;j++){var dd=closes[j]-closes[j-1],g=dd>0?dd:0,l=dd<0?-dd:0;ag=(ag*(period-1)+g)/period;al=(al*(period-1)+l)/period;rsi[j]=al===0?100:100-100/(1+ag/al);}return rsi;}
 async function fetchCandles(instrument,count,tf){var tfStr=tf||CS_TF[csTF];var url=OANDA_URL+'/instruments/'+instrument+'/candles?granularity='+tfStr+'&count='+count+'&price=M';try{var r=await fetch(url,{headers:{'Authorization':'Bearer '+OANDA_KEY}});if(!r.ok)return null;var d=await r.json();if(!d.candles||!d.candles.length)return null;return{closes:d.candles.map(function(c){return parseFloat(c.mid.c);}),times:d.candles.map(function(c){return c.time;})};}catch(e){return null;}}
 function buildLabels(times,tf){var labels=[],useTF=tf||csTF;times.forEach(function(t){if(!t){labels.push('');return;}var dt=new Date(t);if(useTF==='D'){labels.push(dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}));}else{labels.push(dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));}});return labels;}
-
-async function csLoad(){
-    document.getElementById('csStatus').textContent='Loading...';
-    updateMobStatus('Loading...');
-    var pairs=csAllPairs(),results={};
-    await Promise.all(pairs.map(async function(p){results[p]=await fetchCandles(p,CS_COUNT[csTF]+20);}));
-    var ok=pairs.filter(function(p){return results[p]&&results[p].closes.length>14;});
-    if(!ok.length){document.getElementById('csStatus').textContent='Oanda error';return;}
-    var rsiMap={};
-    ok.forEach(function(p){rsiMap[p]=calcRSI(results[p].closes);});
-    var lens=ok.map(function(p){return rsiMap[p].length;}),minLen=Math.min.apply(null,lens),chartLen=Math.min(minLen,CS_COUNT[csTF]),startIdx=minLen-chartLen,rawTimes=results[ok[0]].times;
-    _csRawTimes=rawTimes.slice(rawTimes.length-chartLen);
-    var labels=buildLabels(_csRawTimes);
-    var strengthSeries={};
-    CS_CURRENCIES.forEach(function(cur){
-        var base=CS_PAIRS[cur].base,quote=CS_PAIRS[cur].quote,series=[];
-        for(var i=0;i<chartLen;i++){var idx=startIdx+i,sum=0,cnt=0;base.forEach(function(p){if(rsiMap[p]&&rsiMap[p][idx]!=null){sum+=rsiMap[p][idx];cnt++;}});quote.forEach(function(p){if(rsiMap[p]&&rsiMap[p][idx]!=null){sum+=(100-rsiMap[p][idx]);cnt++;}});series.push(cnt>0?parseFloat((sum/cnt).toFixed(2)):null);}
-        strengthSeries[cur]=series;
-    });
-    var viewLen=CS_VIEW[csTF]||100,EMPTY_RIGHT=Math.round(viewLen*0.10);
-    for(var e=0;e<EMPTY_RIGHT;e++){labels.push('');CS_CURRENCIES.forEach(function(cur){strengthSeries[cur].push(null);});_csRawTimes.push(null);}
-    renderCSChart(labels,strengthSeries);
-    renderCSRank(strengthSeries,'csRankBody');
-    var t=fmtTime();
-    document.getElementById('csStatus').textContent=t;
-    updateMobStatus(t);
-}
-
+async function csLoad(){document.getElementById('csStatus').textContent='Loading...';var pairs=csAllPairs(),results={};await Promise.all(pairs.map(async function(p){results[p]=await fetchCandles(p,CS_COUNT[csTF]+20);}));var ok=pairs.filter(function(p){return results[p]&&results[p].closes.length>14;});if(!ok.length){document.getElementById('csStatus').textContent='&#10060; Oanda error';return;}var rsiMap={};ok.forEach(function(p){rsiMap[p]=calcRSI(results[p].closes);});var lens=ok.map(function(p){return rsiMap[p].length;}),minLen=Math.min.apply(null,lens),chartLen=Math.min(minLen,CS_COUNT[csTF]),startIdx=minLen-chartLen,rawTimes=results[ok[0]].times;_csRawTimes=rawTimes.slice(rawTimes.length-chartLen);var labels=buildLabels(_csRawTimes);var strengthSeries={};CS_CURRENCIES.forEach(function(cur){var base=CS_PAIRS[cur].base,quote=CS_PAIRS[cur].quote,series=[];for(var i=0;i<chartLen;i++){var idx=startIdx+i,sum=0,cnt=0;base.forEach(function(p){if(rsiMap[p]&&rsiMap[p][idx]!=null){sum+=rsiMap[p][idx];cnt++;}});quote.forEach(function(p){if(rsiMap[p]&&rsiMap[p][idx]!=null){sum+=(100-rsiMap[p][idx]);cnt++;}});series.push(cnt>0?parseFloat((sum/cnt).toFixed(2)):null);}strengthSeries[cur]=series;});var viewLen=CS_VIEW[csTF]||100,EMPTY_RIGHT=Math.round(viewLen*0.10);for(var e=0;e<EMPTY_RIGHT;e++){labels.push('');CS_CURRENCIES.forEach(function(cur){strengthSeries[cur].push(null);});_csRawTimes.push(null);}renderCSChart(labels,strengthSeries);renderCSRank(strengthSeries,'csRankBody');document.getElementById('csStatus').textContent=fmtTime();}
 var _csHoverIdx=-1;
-function renderCSChart(labels,series){
-    var ctx=document.getElementById('csChart');
-    if(csChart)csChart.destroy();
-    var datasets=CS_CURRENCIES.map(function(cur){return{label:cur,data:series[cur]||[],borderColor:CS_COLORS[cur],backgroundColor:'transparent',borderWidth:1.8,pointRadius:0,pointHoverRadius:0,tension:0.3,hidden:csHidden.has(cur)};});
-    csChart=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{grid:{color:'#161616'},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12,color:'#444',font:{size:9}}},y:{position:'right',min:15,max:85,grid:{color:'#161616'},ticks:{color:'#555',font:{size:9},stepSize:10}}}},plugins:[{id:'refLines',afterDraw:function(chart){if(chart.canvas.id!=='csChart')return;var c2=chart.ctx,ca=chart.chartArea,y=chart.scales.y;[50].forEach(function(v){var yp=y.getPixelForValue(v);if(yp<ca.top||yp>ca.bottom)return;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([]);c2.stroke();c2.restore();});}},{id:'floatingLabels',afterDraw:function(chart){if(chart.canvas.id!=='csChart')return;if(_csHoverIdx<0)return;var c2=chart.ctx,ca=chart.chartArea,xScale=chart.scales.x,yScale=chart.scales.y,idx=_csHoverIdx,xp=xScale.getPixelForValue(idx);if(xp<ca.left||xp>ca.right)return;c2.save();c2.beginPath();c2.moveTo(xp,ca.top);c2.lineTo(xp,ca.bottom);c2.strokeStyle='rgba(200,200,200,0.25)';c2.lineWidth=1;c2.setLineDash([3,3]);c2.stroke();c2.restore();var items=[];chart.data.datasets.forEach(function(ds){if(ds.hidden)return;var val=ds.data[idx];if(val===null||val===undefined)return;var yp2=yScale.getPixelForValue(val);if(yp2<ca.top||yp2>ca.bottom)return;var prev=idx>0?ds.data[idx-1]:null,delta=(prev!==null&&prev!==undefined)?(val-prev):0;items.push({label:ds.label,color:ds.borderColor,val:val,delta:delta,yp:yp2});});items.sort(function(a,b){return a.yp-b.yp;});var LH=17;for(var pass=0;pass<5;pass++){for(var ii=1;ii<items.length;ii++){if(items[ii].yp-items[ii-1].yp<LH){var mid=(items[ii].yp+items[ii-1].yp)/2;items[ii-1].yp=mid-LH/2;items[ii].yp=mid+LH/2;}}}items.forEach(function(item){var text=item.label+' '+item.val.toFixed(1),isRight=(xp>ca.left+(ca.right-ca.left)*0.75),boxW=72,boxH=15,pad=5,bx=isRight?xp-boxW-6:xp+6,by=item.yp-boxH/2;by=Math.max(ca.top,Math.min(ca.bottom-boxH,by));c2.save();c2.fillStyle=item.color;c2.globalAlpha=0.92;var r2=4;c2.beginPath();c2.moveTo(bx+r2,by);c2.lineTo(bx+boxW-r2,by);c2.arcTo(bx+boxW,by,bx+boxW,by+boxH,r2);c2.lineTo(bx+boxW,by+boxH-r2);c2.arcTo(bx+boxW,by+boxH,bx+boxW-r2,by+boxH,r2);c2.lineTo(bx+r2,by+boxH);c2.arcTo(bx,by+boxH,bx,by+boxH-r2,r2);c2.lineTo(bx,by+r2);c2.arcTo(bx,by,bx+r2,by,r2);c2.closePath();c2.fill();c2.globalAlpha=1;c2.fillStyle='#fff';c2.font='bold 10px Arial';c2.textAlign='left';c2.textBaseline='middle';c2.fillText(text,bx+pad,by+boxH/2);c2.restore();c2.save();c2.beginPath();c2.arc(xp,item.yp,3.5,0,Math.PI*2);c2.fillStyle=item.color;c2.fill();c2.strokeStyle='#fff';c2.lineWidth=1.2;c2.stroke();c2.restore();});if(_csRawTimes[idx]){var dt=new Date(_csRawTimes[idx]),dateStr;if(csTF==='D'){dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}else{dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+'  '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}var dtBoxW=c2.measureText(dateStr).width+20,dtBoxH=18,dtX=xp-dtBoxW/2,dtY=ca.bottom+4;dtX=Math.max(ca.left,Math.min(ca.right-dtBoxW,dtX));c2.save();c2.fillStyle='rgba(30,34,48,0.95)';c2.strokeStyle='rgba(140,160,220,0.5)';c2.lineWidth=1;var br=4;c2.beginPath();c2.moveTo(dtX+br,dtY);c2.lineTo(dtX+dtBoxW-br,dtY);c2.arcTo(dtX+dtBoxW,dtY,dtX+dtBoxW,dtY+dtBoxH,br);c2.lineTo(dtX+dtBoxW,dtY+dtBoxH-br);c2.arcTo(dtX+dtBoxW,dtY+dtBoxH,dtX+dtBoxW-br,dtY+dtBoxH,br);c2.lineTo(dtX+br,dtY+dtBoxH);c2.arcTo(dtX,dtY+dtBoxH,dtX,dtY+dtBoxH-br,br);c2.lineTo(dtX,dtY+br);c2.arcTo(dtX,dtY,dtX+br,dtY,br);c2.closePath();c2.fill();c2.stroke();c2.fillStyle='#c8d4f0';c2.font='bold 10px Arial';c2.textAlign='center';c2.textBaseline='middle';c2.fillText(dateStr,dtX+dtBoxW/2,dtY+dtBoxH/2);c2.restore();}}}]});
+function renderCSChart(labels,series){var ctx=document.getElementById('csChart');if(csChart)csChart.destroy();var datasets=CS_CURRENCIES.map(function(cur){return{label:cur,data:series[cur]||[],borderColor:CS_COLORS[cur],backgroundColor:'transparent',borderWidth:1.8,pointRadius:0,pointHoverRadius:0,tension:0.3,hidden:csHidden.has(cur)};});csChart=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{enabled:IS_MOBILE}},scales:{x:{grid:{color:'#161616'},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:IS_MOBILE?6:12,color:'#444',font:{size:IS_MOBILE?8:9}}},y:{position:'right',min:15,max:85,grid:{color:'#161616'},ticks:{color:'#555',font:{size:IS_MOBILE?8:9},stepSize:10}}}},plugins:[{id:'refLines',afterDraw:function(chart){if(chart.canvas.id!=='csChart')return;var c2=chart.ctx,ca=chart.chartArea,y=chart.scales.y;[50].forEach(function(v){var yp=y.getPixelForValue(v);if(yp<ca.top||yp>ca.bottom)return;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([]);c2.stroke();c2.restore();});}},{id:'floatingLabels',afterDraw:function(chart){if(chart.canvas.id!=='csChart')return;if(IS_MOBILE||_csHoverIdx<0)return;var c2=chart.ctx,ca=chart.chartArea,xScale=chart.scales.x,yScale=chart.scales.y,idx=_csHoverIdx,xp=xScale.getPixelForValue(idx);if(xp<ca.left||xp>ca.right)return;c2.save();c2.beginPath();c2.moveTo(xp,ca.top);c2.lineTo(xp,ca.bottom);c2.strokeStyle='rgba(200,200,200,0.25)';c2.lineWidth=1;c2.setLineDash([3,3]);c2.stroke();c2.restore();var items=[];chart.data.datasets.forEach(function(ds){if(ds.hidden)return;var val=ds.data[idx];if(val===null||val===undefined)return;var yp2=yScale.getPixelForValue(val);if(yp2<ca.top||yp2>ca.bottom)return;var prev=idx>0?ds.data[idx-1]:null,delta=(prev!==null&&prev!==undefined)?(val-prev):0;items.push({label:ds.label,color:ds.borderColor,val:val,delta:delta,yp:yp2});});items.sort(function(a,b){return a.yp-b.yp;});var LH=17;for(var pass=0;pass<5;pass++){for(var ii=1;ii<items.length;ii++){if(items[ii].yp-items[ii-1].yp<LH){var mid=(items[ii].yp+items[ii-1].yp)/2;items[ii-1].yp=mid-LH/2;items[ii].yp=mid+LH/2;}}}items.forEach(function(item){var text=item.label+' '+item.val.toFixed(1),isRight=(xp>ca.left+(ca.right-ca.left)*0.75),boxW=72,boxH=15,pad=5,bx=isRight?xp-boxW-6:xp+6,by=item.yp-boxH/2;by=Math.max(ca.top,Math.min(ca.bottom-boxH,by));c2.save();c2.fillStyle=item.color;c2.globalAlpha=0.92;var r2=4;c2.beginPath();c2.moveTo(bx+r2,by);c2.lineTo(bx+boxW-r2,by);c2.arcTo(bx+boxW,by,bx+boxW,by+boxH,r2);c2.lineTo(bx+boxW,by+boxH-r2);c2.arcTo(bx+boxW,by+boxH,bx+boxW-r2,by+boxH,r2);c2.lineTo(bx+r2,by+boxH);c2.arcTo(bx,by+boxH,bx,by+boxH-r2,r2);c2.lineTo(bx,by+r2);c2.arcTo(bx,by,bx+r2,by,r2);c2.closePath();c2.fill();c2.globalAlpha=1;c2.fillStyle='#fff';c2.font='bold 10px Arial';c2.textAlign='left';c2.textBaseline='middle';c2.fillText(text,bx+pad,by+boxH/2);c2.restore();c2.save();c2.beginPath();c2.arc(xp,item.yp,3.5,0,Math.PI*2);c2.fillStyle=item.color;c2.fill();c2.strokeStyle='#fff';c2.lineWidth=1.2;c2.stroke();c2.restore();});if(_csRawTimes[idx]){var dt=new Date(_csRawTimes[idx]),dateStr;if(csTF==='D'){dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}else{dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+'  '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}var dtBoxW=c2.measureText(dateStr).width+20,dtBoxH=18,dtX=xp-dtBoxW/2,dtY=ca.bottom+4;dtX=Math.max(ca.left,Math.min(ca.right-dtBoxW,dtX));c2.save();c2.fillStyle='rgba(30,34,48,0.95)';c2.strokeStyle='rgba(140,160,220,0.5)';c2.lineWidth=1;var br=4;c2.beginPath();c2.moveTo(dtX+br,dtY);c2.lineTo(dtX+dtBoxW-br,dtY);c2.arcTo(dtX+dtBoxW,dtY,dtX+dtBoxW,dtY+dtBoxH,br);c2.lineTo(dtX+dtBoxW,dtY+dtBoxH-br);c2.arcTo(dtX+dtBoxW,dtY+dtBoxH,dtX+dtBoxW-br,dtY+dtBoxH,br);c2.lineTo(dtX+br,dtY+dtBoxH);c2.arcTo(dtX,dtY+dtBoxH,dtX,dtY+dtBoxH-br,br);c2.lineTo(dtX,dtY+br);c2.arcTo(dtX,dtY,dtX+br,dtY,br);c2.closePath();c2.fill();c2.stroke();c2.fillStyle='#c8d4f0';c2.font='bold 10px Arial';c2.textAlign='center';c2.textBaseline='middle';c2.fillText(dateStr,dtX+dtBoxW/2,dtY+dtBoxH/2);c2.restore();}}}]});
 
-    /* ---- INTERACTION: mouse (desktop) + touch (mobile) ---- */
-    var _csDrag=null;
-    var _csTouch={active:false,startX:0,startDist:0,startMin:0,startMax:0,lastTap:0};
-
-    function csSetView(newMin,newMax){
-        var totalLen=csChart.data.labels.length;
-        newMin=Math.max(0,newMin);newMax=Math.min(totalLen-1,newMax);
-        if(newMax-newMin<20)return;
-        csChart.options.scales.x.min=newMin;csChart.options.scales.x.max=newMax;csChart.update('none');
-    }
-
-    /* MOUSE */
-    ctx.onmousedown=function(e){if(e.button!==0)return;_csDrag={startX:e.clientX,startMin:csChart.options.scales.x.min,startMax:csChart.options.scales.x.max};ctx.style.cursor='grabbing';e.preventDefault();};
-    window.addEventListener('mouseup',function(){_csDrag=null;ctx.style.cursor='crosshair';});
-    ctx.onmousemove=function(e){
-        if(!csChart)return;
-        var rect=ctx.getBoundingClientRect(),mx=e.clientX-rect.left,xScale=csChart.scales.x,ca=csChart.chartArea;
-        if(_csDrag){var dx=e.clientX-_csDrag.startX,range=_csDrag.startMax-_csDrag.startMin,chartWidth=ca?(ca.right-ca.left):1,shift=-(dx/chartWidth)*range;csSetView(_csDrag.startMin+shift,_csDrag.startMax+shift);return;}
-        if(!ca||mx<ca.left||mx>ca.right){_csHoverIdx=-1;csChart.draw();return;}
-        var minIdx=Math.round(xScale.min),maxIdx=Math.round(xScale.max),best=minIdx,bestDist=Infinity;
-        for(var i=minIdx;i<=maxIdx;i++){var xp2=xScale.getPixelForValue(i),d=Math.abs(xp2-mx);if(d<bestDist){bestDist=d;best=i;}}
-        _csHoverIdx=best;csChart.draw();
-    };
-    ctx.onmouseleave=function(){_csDrag=null;ctx.style.cursor='crosshair';_csHoverIdx=-1;if(csChart)csChart.draw();};
-    ctx.onwheel=function(e){
-        if(!csChart)return;e.preventDefault();
-        var rect=ctx.getBoundingClientRect(),mx=e.clientX-rect.left,ca=csChart.chartArea,curMin=csChart.options.scales.x.min,curMax=csChart.options.scales.x.max,range=curMax-curMin,factor=e.deltaY>0?1.12:0.88,newRange=Math.max(20,Math.min(csChart.data.labels.length,range*factor)),ratio=ca&&ca.width>0?(mx-ca.left)/ca.width:0.5;
-        ratio=Math.max(0,Math.min(1,ratio));var anchor=curMin+ratio*range;csSetView(anchor-ratio*newRange,anchor+(1-ratio)*newRange);
-    };
-
-    /* TOUCH */
-    ctx.addEventListener('touchstart',function(e){
-        if(!csChart)return;
-        var now=Date.now();
-        // double-tap to reset
-        if(now-_csTouch.lastTap<300){csResetZoom();_csTouch.lastTap=0;return;}
-        _csTouch.lastTap=now;
-        var t=e.touches;
-        if(t.length===1){
-            _csTouch.active=true;_csTouch.startX=t[0].clientX;
-            _csTouch.startMin=csChart.options.scales.x.min;_csTouch.startMax=csChart.options.scales.x.max;
-            // show crosshair
-            var rect=ctx.getBoundingClientRect(),mx=t[0].clientX-rect.left,ca=csChart.chartArea,xScale=csChart.scales.x;
-            if(ca&&mx>=ca.left&&mx<=ca.right){
-                var minIdx=Math.round(xScale.min),maxIdx=Math.round(xScale.max),best=minIdx,bestDist=Infinity;
-                for(var i=minIdx;i<=maxIdx;i++){var xp=xScale.getPixelForValue(i),d=Math.abs(xp-mx);if(d<bestDist){bestDist=d;best=i;}}
-                _csHoverIdx=best;csChart.draw();
+    // Mobile: touch-based chart panning via touch events
+    if (IS_MOBILE) {
+        var touchStartX = null, touchStartMin = null, touchStartMax = null;
+        ctx.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartMin = csChart.options.scales.x.min;
+                touchStartMax = csChart.options.scales.x.max;
             }
-        } else if(t.length===2){
-            _csTouch.active=false;
-            var dx=t[0].clientX-t[1].clientX,dy=t[0].clientY-t[1].clientY;
-            _csTouch.startDist=Math.sqrt(dx*dx+dy*dy);
-            _csTouch.startMin=csChart.options.scales.x.min;_csTouch.startMax=csChart.options.scales.x.max;
-        }
-        e.preventDefault();
-    },{passive:false});
-
-    ctx.addEventListener('touchmove',function(e){
-        if(!csChart)return;
-        var t=e.touches;
-        if(t.length===1&&_csTouch.active){
-            var dx=t[0].clientX-_csTouch.startX,range=_csTouch.startMax-_csTouch.startMin;
-            var rect=ctx.getBoundingClientRect(),ca=csChart.chartArea,chartWidth=ca?(ca.right-ca.left):1;
-            var shift=-(dx/chartWidth)*range;
-            csSetView(_csTouch.startMin+shift,_csTouch.startMax+shift);
-            // update crosshair
-            var mx=t[0].clientX-rect.left,xScale=csChart.scales.x;
-            if(ca&&mx>=ca.left&&mx<=ca.right){
-                var minIdx=Math.round(xScale.min),maxIdx=Math.round(xScale.max),best=minIdx,bestDist=Infinity;
-                for(var i=minIdx;i<=maxIdx;i++){var xp=xScale.getPixelForValue(i),d=Math.abs(xp-mx);if(d<bestDist){bestDist=d;best=i;}}
-                _csHoverIdx=best;csChart.draw();
+        }, {passive: true});
+        ctx.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 1 && touchStartX !== null && csChart) {
+                var dx = e.touches[0].clientX - touchStartX;
+                var rect = ctx.getBoundingClientRect();
+                var chartWidth = rect.width;
+                var range = touchStartMax - touchStartMin;
+                var shift = -(dx / chartWidth) * range;
+                var totalLen = csChart.data.labels.length;
+                var newMin = Math.max(0, touchStartMin + shift);
+                var newMax = Math.min(totalLen - 1, touchStartMax + shift);
+                if (newMax - newMin >= 20) {
+                    csChart.options.scales.x.min = newMin;
+                    csChart.options.scales.x.max = newMax;
+                    csChart.update('none');
+                }
             }
-        } else if(t.length===2){
-            var dx2=t[0].clientX-t[1].clientX,dy2=t[0].clientY-t[1].clientY;
-            var newDist=Math.sqrt(dx2*dx2+dy2*dy2);
-            var scale=_csTouch.startDist/newDist;
-            var range=(_csTouch.startMax-_csTouch.startMin)*scale;
-            var mid=(_csTouch.startMax+_csTouch.startMin)/2;
-            csSetView(mid-range/2,mid+range/2);
-        }
-        e.preventDefault();
-    },{passive:false});
+        }, {passive: true});
+        ctx.addEventListener('touchend', function() { touchStartX = null; }, {passive: true});
+    } else {
+        // Desktop mouse interactions (unchanged)
+        var _csDrag=null;function csSetView(newMin,newMax){var totalLen=csChart.data.labels.length;newMin=Math.max(0,newMin);newMax=Math.min(totalLen-1,newMax);if(newMax-newMin<20)return;csChart.options.scales.x.min=newMin;csChart.options.scales.x.max=newMax;csChart.update('none');}ctx.onmousedown=function(e){if(e.button!==0)return;_csDrag={startX:e.clientX,startMin:csChart.options.scales.x.min,startMax:csChart.options.scales.x.max};ctx.style.cursor='grabbing';e.preventDefault();};window.addEventListener('mouseup',function(){_csDrag=null;ctx.style.cursor='crosshair';});ctx.onmousemove=function(e){if(!csChart)return;var rect=ctx.getBoundingClientRect(),mx=e.clientX-rect.left,xScale=csChart.scales.x,ca=csChart.chartArea;if(_csDrag){var dx=e.clientX-_csDrag.startX,range=_csDrag.startMax-_csDrag.startMin,chartWidth=ca?(ca.right-ca.left):1,shift=-(dx/chartWidth)*range;csSetView(_csDrag.startMin+shift,_csDrag.startMax+shift);return;}if(!ca||mx<ca.left||mx>ca.right){_csHoverIdx=-1;csChart.draw();return;}var minIdx=Math.round(xScale.min),maxIdx=Math.round(xScale.max),best=minIdx,bestDist=Infinity;for(var i=minIdx;i<=maxIdx;i++){var xp2=xScale.getPixelForValue(i),d=Math.abs(xp2-mx);if(d<bestDist){bestDist=d;best=i;}}_csHoverIdx=best;csChart.draw();};ctx.onmouseleave=function(){_csDrag=null;ctx.style.cursor='crosshair';_csHoverIdx=-1;if(csChart)csChart.draw();};ctx.onwheel=function(e){if(!csChart)return;e.preventDefault();var rect=ctx.getBoundingClientRect(),mx=e.clientX-rect.left,ca=csChart.chartArea,curMin=csChart.options.scales.x.min,curMax=csChart.options.scales.x.max,range=curMax-curMin,factor=e.deltaY>0?1.12:0.88,newRange=Math.max(20,Math.min(csChart.data.labels.length,range*factor)),ratio=ca&&ca.width>0?(mx-ca.left)/ca.width:0.5;ratio=Math.max(0,Math.min(1,ratio));var anchor=curMin+ratio*range;csSetView(anchor-ratio*newRange,anchor+(1-ratio)*newRange);};ctx.style.cursor='crosshair';ctx.ondblclick=function(){csResetZoom();};}
 
-    ctx.addEventListener('touchend',function(e){
-        if(e.touches.length===0){
-            _csTouch.active=false;
-            setTimeout(function(){_csHoverIdx=-1;if(csChart)csChart.draw();},1500);
-        }
-    });
-
-    ctx.ondblclick=function(){csResetZoom();};
-    ctx.style.cursor='crosshair';
-    var totalLen=labels.length,viewLen=CS_VIEW[csTF]||100;
-    csChart.options.scales.x.min=Math.max(0,totalLen-viewLen);
-    csChart.options.scales.x.max=totalLen-1;
-    csChart.update('none');
-    buildCSLegend();
-}
-
-function csResetZoom(){if(!csChart)return;var totalLen=csChart.data.labels.length,viewLen=CS_VIEW[csTF]||100;var newMin=Math.max(0,totalLen-viewLen);csChart.options.scales.x.min=newMin;csChart.options.scales.x.max=totalLen-1;csChart.update('none');}
+    var totalLen=labels.length,viewLen=CS_VIEW[csTF]||100;csChart.options.scales.x.min=Math.max(0,totalLen-viewLen);csChart.options.scales.x.max=totalLen-1;csChart.update('none');buildCSLegend();}
+function csResetZoom(){if(!csChart)return;var totalLen=csChart.data.labels.length,viewLen=CS_VIEW[csTF]||100;csChart.options.scales.x.min=Math.max(0,totalLen-viewLen);csChart.options.scales.x.max=totalLen-1;csChart.update('none');}
 function buildCSLegend(){var legend=document.getElementById('csLegend');legend.innerHTML='';CS_CURRENCIES.forEach(function(cur){var item=document.createElement('div');item.className='cs-legend-item'+(csHidden.has(cur)?' hidden':'');item.innerHTML='<div class="cs-legend-dot" style="background:'+CS_COLORS[cur]+'"></div><span>'+cur+'</span>';item.onclick=function(){if(csHidden.has(cur)){csHidden.delete(cur);item.classList.remove('hidden');}else{csHidden.add(cur);item.classList.add('hidden');}if(!csChart)return;var ds=csChart.data.datasets.find(function(d){return d.label===cur;});if(ds){ds.hidden=csHidden.has(cur);csChart.update();}};legend.appendChild(item);});}
 function renderCSRank(series,bodyId){var vals=CS_CURRENCIES.map(function(cur){var s=series[cur],f=s?s.filter(function(v){return v!==null;}):[];return{cur:cur,val:f.length?f[f.length-1]:null};}).filter(function(x){return x.val!==null;});vals.sort(function(a,b){return b.val-a.val;});var body=document.getElementById(bodyId);body.innerHTML='';var max=vals.length?vals[0].val:100,min=vals.length?vals[vals.length-1].val:0;vals.forEach(function(item,i){var pct=max===min?50:Math.round((item.val-min)/(max-min)*100),color=CS_COLORS[item.cur],row=document.createElement('div');row.className='cs-rank-row';row.innerHTML='<div class="cs-rank-pos">'+(i+1)+'</div><div class="cs-rank-dot" style="background:'+color+'"></div><div class="cs-rank-name">'+item.cur+'</div><div class="cs-rank-bar-wrap"><div class="cs-rank-bar" style="width:'+pct+'%;background:'+color+'"></div></div><div class="cs-rank-val" style="color:'+color+'">'+item.val.toFixed(1)+'</div>';body.appendChild(row);});var strong=vals.filter(function(x){return x.val>=55;}).map(function(x){return x.cur;}),weak=vals.filter(function(x){return x.val<=45;}).map(function(x){return x.cur;});if(strong.length||weak.length){var s=document.createElement('div');s.style.cssText='margin-top:10px;padding:10px;border-top:1px solid #1e2230;font-size:11px;color:#aaa;line-height:1.7';s.innerHTML=(strong.length?'<div><b style="color:#2E832B">Bullish</b>: '+strong.join(', ')+'</div>':'')+(weak.length?'<div><b style="color:#AD3644">Bearish</b>: '+weak.join(', ')+'</div>':'');body.appendChild(s);}}
 function csSetTF(tf,btn){csTF=tf;document.querySelectorAll('#sub-rsi .cs-tf-btn').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');csLoad();}
 function csRefresh(){csLoad();}
 
-/* ========= INTEREST RATES ========= */
+/* =============================================
+   INTEREST RATES
+   ============================================= */
 var IR_BANKS=[
     {name:'Federal Reserve',short:'Fed',flag:'&#127482;&#127480;',currency:'USD',rate:3.625,prev:4.375,color:'#1C79B3',nextMeeting:'Apr 28, 2026',expectation:'Hold (3.5–3.75)',expectationDir:0,cpi:2.4,history:[5.50,5.25,5.00,4.75,4.50,4.25,4.00,3.75,3.50,3.25,3.00,2.75,3.625,3.625],lastChange:'Dec 10, 2025',lastChangeBps:-25},
     {name:'European Central Bank',short:'ECB',flag:'&#127466;&#127482;',currency:'EUR',rate:2.15,prev:2.40,color:'#2E832B',nextMeeting:'Apr 29, 2026',expectation:'Hold — Iran war risk',expectationDir:0,cpi:2.6,history:[4.50,4.00,3.75,3.50,3.25,3.00,2.75,2.50,2.40,2.25,2.15,2.15,2.15,2.15],lastChange:'Jun 5, 2025',lastChangeBps:0},
@@ -1147,29 +931,30 @@ var irHistCharts={};
 function renderRates(){
     var grid=document.getElementById('irCardsGrid');grid.innerHTML='';
     IR_BANKS.forEach(function(b){
-        var bpsChg=b.lastChangeBps||0;
-        var changeStr=bpsChg===0?'Unchanged':(bpsChg>0?'▲ +':'▼ ')+Math.abs(bpsChg)+'bps';
+        var bpsChg = b.lastChangeBps || 0;
+        var changeStr = bpsChg===0 ? 'Unchanged' : (bpsChg>0?'&#9650; +':'&#9660; ')+Math.abs(bpsChg)+'bps';
         var changeBg=bpsChg>0?'rgba(20,188,96,0.15)':bpsChg<0?'rgba(242,102,102,0.15)':'rgba(100,100,100,0.15)';
         var changeCol=bpsChg>0?'#14BC60':bpsChg<0?'#F26666':'#888';
         var expColor=b.expectationDir>0?'#14BC60':b.expectationDir<0?'#F26666':'#888';
-        var rateDisplay=b.short==='Fed'?'3.50–3.75':b.rate.toFixed(2)+'%';
+        var rateDisplay = b.short==='Fed' ? '3.50–3.75' : b.rate.toFixed(2)+'%';
         var card=document.createElement('div');card.className='ir-card';
         card.innerHTML=
             '<div class="ir-accent-bar" style="background:'+b.color+'"></div>'+
             '<div class="ir-card-top"><span class="ir-bank-name">'+b.short+'</span><span class="ir-flag">'+b.flag+'</span></div>'+
-            '<div class="ir-currency" style="font-size:11px">'+b.name+'</div>'+
-            '<div class="ir-rate"><span class="ir-rate-pct">'+rateDisplay+'</span></div>'+
+            '<div class="ir-currency">'+b.name+'</div>'+
+            '<div class="ir-rate" style="font-size:28px"><span class="ir-rate-pct">'+rateDisplay+'</span></div>'+
             '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px">'+
             '<div class="ir-change-badge" style="background:'+changeBg+';color:'+changeCol+'">'+changeStr+'</div>'+
+            '<div style="font-size:10px;color:#666">Last: '+(b.lastChange||'—')+'</div>'+
             '</div>'+
-            '<div style="margin-top:4px;display:flex;align-items:center;gap:6px">'+
+            '<div style="margin-top:6px;display:flex;align-items:center;gap:6px">'+
             '<span style="font-size:10px;color:#888">CPI:</span>'+
             '<span style="font-size:12px;font-weight:bold;color:#f0c040">'+b.cpi+'%</span>'+
             '</div>'+
             '<div class="ir-next-meeting">'+
             '<div class="ir-next-label">Next meeting</div>'+
             '<div class="ir-next-date">'+b.nextMeeting+'</div>'+
-            '<div class="ir-expectation" style="color:'+expColor+'">'+b.expectation+'</div>'+
+            '<div class="ir-expectation" style="color:'+expColor+'">Fcst: '+b.expectation+'</div>'+
             '</div>';
         grid.appendChild(card);
     });
@@ -1191,45 +976,137 @@ function renderRates(){
             var ctx3=document.getElementById('irHist_'+b.short);if(!ctx3)return;
             if(irHistCharts[b.short])irHistCharts[b.short].destroy();
             var labels=['2017','2018','2019','2020','2021','2022 Q1','2022 Q3','2023 Q1','2023 Q3','2024 Q1','2024 Q2','2024 Q3','2024 Q4','2025'];
-            irHistCharts[b.short]=new Chart(ctx3,{type:'line',data:{labels:labels.slice(0,b.history.length),datasets:[{label:'Rate',data:b.history,borderColor:b.color,backgroundColor:b.color+'22',borderWidth:2,pointRadius:3,pointBackgroundColor:b.color,fill:true,tension:0.2,stepped:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d0d0d',borderColor:'#1e2230',borderWidth:1,callbacks:{label:function(c){return ' '+c.parsed.y.toFixed(2)+'%';}}}},scales:{x:{grid:{color:'#111'},ticks:{color:'#555',font:{size:8},maxTicksLimit:7,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:8},callback:function(v){return v.toFixed(1)+'%';}}}}}});
+            irHistCharts[b.short]=new Chart(ctx3,{type:'line',data:{labels:labels.slice(0,b.history.length),datasets:[{label:'Rate',data:b.history,borderColor:b.color,backgroundColor:b.color+'22',borderWidth:2,pointRadius:IS_MOBILE?2:3,pointBackgroundColor:b.color,fill:true,tension:0.2,stepped:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d0d0d',borderColor:'#1e2230',borderWidth:1,callbacks:{label:function(c){return ' '+c.parsed.y.toFixed(2)+'%';}}}},scales:{x:{grid:{color:'#111'},ticks:{color:'#555',font:{size:IS_MOBILE?7:8},maxTicksLimit:IS_MOBILE?5:7,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:IS_MOBILE?7:8},callback:function(v){return v.toFixed(1)+'%';}}}}}});
         });
     },100);
     document.getElementById('irStatus').textContent='Updated Apr 6, 2026';
-    updateMobStatus('Apr 6, 2026');
 }
 
 /* ========= FX PERFORMANCE ========= */
-var FXP_CURRENCIES=['EUR','USD','GBP','AUD','CHF','JPY','CAD','NZD'];
-var FXP_FLAGS={EUR:'&#127466;&#127482;',USD:'&#127482;&#127480;',GBP:'&#127468;&#127463;',AUD:'&#127462;&#127482;',CHF:'&#127464;&#127469;',JPY:'&#127471;&#127477;',CAD:'&#127464;&#127462;',NZD:'&#127475;&#127487;'};
-var FXP_COLORS={EUR:'#1C79B3',USD:'#AD4055',GBP:'#2E832B',AUD:'#6C2835',CHF:'#885713',JPY:'#999999',CAD:'#13527B',NZD:'#1A4817'};
-var FXP_PAIRS=['EUR_USD','GBP_USD','AUD_USD','NZD_USD','USD_JPY','USD_CAD','USD_CHF','EUR_GBP','EUR_JPY','EUR_CAD','EUR_CHF','EUR_AUD','GBP_JPY','GBP_CAD','GBP_CHF','GBP_AUD','AUD_JPY','AUD_CAD','AUD_CHF','AUD_NZD','CAD_JPY','CAD_CHF','CHF_JPY','NZD_JPY','NZD_CAD','NZD_CHF'];
-var FXP_TF_CONFIG={D:{granularity:'H1',count:25,label:'Today'},W:{granularity:'H4',count:42,label:'1 Week'},M:{granularity:'D',count:22,label:'1 Month'},M3:{granularity:'D',count:65,label:'3 Months'},Y:{granularity:'W',count:52,label:'1 Year'}};
-var fxpTF='D';
+var FXP_CURRENCIES = ['EUR','USD','GBP','AUD','CHF','JPY','CAD','NZD'];
+var FXP_FLAGS = {EUR:'&#127466;&#127482;',USD:'&#127482;&#127480;',GBP:'&#127468;&#127463;',AUD:'&#127462;&#127482;',CHF:'&#127464;&#127469;',JPY:'&#127471;&#127477;',CAD:'&#127464;&#127462;',NZD:'&#127475;&#127487;'};
+var FXP_COLORS = {EUR:'#1C79B3',USD:'#AD4055',GBP:'#2E832B',AUD:'#6C2835',CHF:'#885713',JPY:'#999999',CAD:'#13527B',NZD:'#1A4817'};
+var FXP_PAIRS = [
+    'EUR_USD','GBP_USD','AUD_USD','NZD_USD',
+    'USD_JPY','USD_CAD','USD_CHF',
+    'EUR_GBP','EUR_JPY','EUR_CAD','EUR_CHF','EUR_AUD',
+    'GBP_JPY','GBP_CAD','GBP_CHF','GBP_AUD',
+    'AUD_JPY','AUD_CAD','AUD_CHF','AUD_NZD',
+    'CAD_JPY','CAD_CHF','CHF_JPY','NZD_JPY','NZD_CAD','NZD_CHF'
+];
+var FXP_TF_CONFIG = {
+    D:  {granularity:'H1',  count:25,  label:'Today'},
+    W:  {granularity:'H4',  count:42,  label:'1 Week'},
+    M:  {granularity:'D',   count:22,  label:'1 Month'},
+    M3: {granularity:'D',   count:65,  label:'3 Months'},
+    Y:  {granularity:'W',   count:52,  label:'1 Year'}
+};
+var fxpTF = 'D';
 
-function fxpSetTF(tf,btn){fxpTF=tf;document.querySelectorAll('.fxp-tf-btn').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');fxpLoad();}
-async function fxpFetchPair(pair){var cfg=FXP_TF_CONFIG[fxpTF];var url=OANDA_URL+'/instruments/'+pair+'/candles?granularity='+cfg.granularity+'&count='+cfg.count+'&price=M';try{var r=await fetch(url,{headers:{'Authorization':'Bearer '+OANDA_KEY}});if(!r.ok)return null;var d=await r.json();if(!d.candles||d.candles.length<2)return null;var first=parseFloat(d.candles[0].mid.o),last=parseFloat(d.candles[d.candles.length-1].mid.c);if(!first)return null;return((last-first)/first)*100;}catch(e){return null;}}
-async function fxpLoad(){
-    var elStatus=document.getElementById('fxpStatus'),elBars=document.getElementById('fxpBarsContainer'),elHeat=document.getElementById('fxpHeatmapContainer');
-    if(!elBars||!elHeat)return;
-    if(elStatus)elStatus.textContent='Loading...';
-    elBars.innerHTML='<div class="fxp-loading">Loading...</div>';elHeat.innerHTML='<div class="fxp-loading">Loading...</div>';
-    var results={};
-    await Promise.all(FXP_PAIRS.map(async function(pair){results[pair]=await fxpFetchPair(pair);}));
-    var gotData=FXP_PAIRS.some(function(p){return results[p]!==null&&results[p]!==undefined;});
-    if(!gotData){elBars.innerHTML='<div class="fxp-loading" style="color:#F26666">No data</div>';elHeat.innerHTML='';if(elStatus)elStatus.textContent='Error';return;}
-    var curPerf={};
-    FXP_CURRENCIES.forEach(function(cur){var sum=0,cnt=0;FXP_PAIRS.forEach(function(pair){var parts=pair.split('_'),pct=results[pair];if(pct===null||pct===undefined)return;if(parts[0]===cur){sum+=pct;cnt++;}else if(parts[1]===cur){sum-=pct;cnt++;}});curPerf[cur]=cnt>0?sum/cnt:null;});
-    fxpRenderBars(curPerf);fxpRenderHeatmap(results);
-    var t=fmtTime();if(elStatus)elStatus.textContent=t;updateMobStatus(t);
+function fxpSetTF(tf, btn) {
+    fxpTF = tf;
+    document.querySelectorAll('.fxp-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    fxpLoad();
 }
-function fxpRenderBars(curPerf){var entries=FXP_CURRENCIES.map(function(c){return{cur:c,val:curPerf[c]};}).filter(function(x){return x.val!==null;}).sort(function(a,b){return b.val-a.val;});var maxAbs=Math.max.apply(null,entries.map(function(e){return Math.abs(e.val);}));if(!maxAbs)maxAbs=1;var html='';entries.forEach(function(e){var isPos=e.val>=0,color=isPos?'#C03939':'#2F995F',barWidth=(Math.abs(e.val)/maxAbs*50).toFixed(1),fillClass=isPos?'fxp-bar-fill-pos':'fxp-bar-fill-neg';html+='<div class="fxp-bar-row"><div class="fxp-bar-flag">'+FXP_FLAGS[e.cur]+'</div><div class="fxp-bar-cur" style="color:'+FXP_COLORS[e.cur]+'">'+e.cur+'</div><div class="fxp-bar-track"><div class="fxp-bar-zero"></div><div class="'+fillClass+'" style="width:'+barWidth+'%;background:'+color+'33;border:1px solid '+color+'"></div></div><div class="fxp-bar-val" style="color:'+color+'">'+(isPos?'+':'')+e.val.toFixed(3)+'%</div></div>';});document.getElementById('fxpBarsContainer').innerHTML=html;}
-function fxpRenderHeatmap(results){var lookup={};FXP_PAIRS.forEach(function(pair){var p=pair.split('_'),b=p[0],q=p[1];if(!lookup[b])lookup[b]={};if(!lookup[q])lookup[q]={};var pct=results[pair];lookup[b][q]=pct;lookup[q][b]=pct!==null?-pct:null;});function heatColor(val){if(val===null)return{bg:'#111',fg:'#444'};var intensity=Math.min(Math.abs(val)/1.5,1);if(val>0){var g=Math.round(80+intensity*120);return{bg:'rgba(0,'+g+',60,0.35)',fg:'#'+(val>0.5?'14BC60':'4ddb8a')};}else{var r=Math.round(140+intensity*100);return{bg:'rgba('+r+',30,30,0.35)',fg:'#'+(val<-0.5?'F26666':'ff9090')};}}var curs=FXP_CURRENCIES,html='<table class="fxp-heatmap-table"><thead><tr><th></th>';curs.forEach(function(c){html+='<th>'+FXP_FLAGS[c]+' '+c+'</th>';});html+='</tr></thead><tbody>';curs.forEach(function(base){html+='<tr><td class="fxp-row-label">'+FXP_FLAGS[base]+' '+base+'</td>';curs.forEach(function(quote){if(base===quote){html+='<td class="fxp-diag">—</td>';}else{var val=(lookup[base]&&lookup[base][quote]!==undefined)?lookup[base][quote]:null,col=heatColor(val),display=val!==null?(val>=0?'+':'')+val.toFixed(2)+'%':'—';html+='<td style="background:'+col.bg+';color:'+col.fg+'" title="'+base+'/'+quote+'">'+display+'</td>';}});html+='</tr>';});html+='</tbody></table>';document.getElementById('fxpHeatmapContainer').innerHTML=html;}
 
-/* ========= MOBILE: FX PERF LAYOUT FIX ========= */
-function applyMobileLayout(){
-    if(!isMobile())return;
-    var wrap=document.getElementById('fxpGridWrap');
-    if(wrap){ wrap.style.display='block'; wrap.style.gridTemplateColumns=''; }
+async function fxpFetchPair(pair) {
+    var cfg = FXP_TF_CONFIG[fxpTF];
+    var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.granularity + '&count=' + cfg.count + '&price=M';
+    try {
+        var r = await fetch(url, {headers:{'Authorization':'Bearer ' + OANDA_KEY}});
+        if (!r.ok) return null;
+        var d = await r.json();
+        if (!d.candles || d.candles.length < 2) return null;
+        var first = parseFloat(d.candles[0].mid.o);
+        var last  = parseFloat(d.candles[d.candles.length-1].mid.c);
+        if (!first) return null;
+        return ((last - first) / first) * 100;
+    } catch(e) { return null; }
+}
+
+async function fxpLoad() {
+    var elStatus = document.getElementById('fxpStatus');
+    var elBars   = document.getElementById('fxpBarsContainer');
+    var elHeat   = document.getElementById('fxpHeatmapContainer');
+    if (!elBars || !elHeat) return;
+    if (elStatus) elStatus.textContent = 'Loading...';
+    elBars.innerHTML = '<div class="fxp-loading">Loading...</div>';
+    elHeat.innerHTML = '<div class="fxp-loading">Loading...</div>';
+    var results = {};
+    var fetches = FXP_PAIRS.map(async function(pair) { results[pair] = await fxpFetchPair(pair); });
+    await Promise.all(fetches);
+    var gotData = FXP_PAIRS.some(function(p){ return results[p] !== null && results[p] !== undefined; });
+    if (!gotData) {
+        elBars.innerHTML = '<div class="fxp-loading" style="color:#F26666">&#10060; No data — check OANDA key</div>';
+        elHeat.innerHTML = '';
+        if (elStatus) elStatus.textContent = 'Error';
+        return;
+    }
+    var curPerf = {};
+    FXP_CURRENCIES.forEach(function(cur) {
+        var sum = 0, cnt = 0;
+        FXP_PAIRS.forEach(function(pair) {
+            var parts = pair.split('_');
+            var pct = results[pair];
+            if (pct === null || pct === undefined) return;
+            if (parts[0] === cur) { sum += pct; cnt++; }
+            else if (parts[1] === cur) { sum -= pct; cnt++; }
+        });
+        curPerf[cur] = cnt > 0 ? sum / cnt : null;
+    });
+    fxpRenderBars(curPerf);
+    fxpRenderHeatmap(results);
+    if (elStatus) elStatus.textContent = fmtTime();
+}
+
+function fxpRenderBars(curPerf) {
+    var entries = FXP_CURRENCIES.map(function(c){ return {cur:c, val:curPerf[c]}; }).filter(function(x){ return x.val !== null; }).sort(function(a,b){ return b.val - a.val; });
+    var maxAbs = Math.max.apply(null, entries.map(function(e){ return Math.abs(e.val); }));
+    if (!maxAbs) maxAbs = 1;
+    var html = '';
+    entries.forEach(function(e) {
+        var isPos = e.val >= 0;
+        var color = isPos ? '#C03939' : '#2F995F';
+        var barWidth = (Math.abs(e.val) / maxAbs * 50).toFixed(1);
+        var fillClass = isPos ? 'fxp-bar-fill-pos' : 'fxp-bar-fill-neg';
+        html += '<div class="fxp-bar-row"><div class="fxp-bar-flag">'+FXP_FLAGS[e.cur]+'</div><div class="fxp-bar-cur" style="color:'+FXP_COLORS[e.cur]+'">'+e.cur+'</div><div class="fxp-bar-track"><div class="fxp-bar-zero"></div><div class="'+fillClass+'" style="width:'+barWidth+'%;background:'+color+'33;border:1px solid '+color+'"></div></div><div class="fxp-bar-val" style="color:'+color+'">'+(isPos?'+':'')+e.val.toFixed(3)+'%</div></div>';
+    });
+    document.getElementById('fxpBarsContainer').innerHTML = html;
+}
+
+function fxpRenderHeatmap(results) {
+    var lookup = {};
+    FXP_PAIRS.forEach(function(pair) {
+        var p = pair.split('_'); var b = p[0], q = p[1];
+        if (!lookup[b]) lookup[b] = {}; if (!lookup[q]) lookup[q] = {};
+        var pct = results[pair]; lookup[b][q] = pct; lookup[q][b] = pct !== null ? -pct : null;
+    });
+    function heatColor(val) {
+        if (val === null) return {bg:'#111',fg:'#444'};
+        var intensity = Math.min(Math.abs(val) / 1.5, 1);
+        if (val > 0) { var g = Math.round(80 + intensity * 120); return {bg:'rgba(0,'+g+',60,0.35)',fg:'#'+(val>0.5?'14BC60':'4ddb8a')}; }
+        else { var r = Math.round(140 + intensity * 100); return {bg:'rgba('+r+',30,30,0.35)',fg:'#'+(val<-0.5?'F26666':'ff9090')}; }
+    }
+    var curs = FXP_CURRENCIES;
+    var html = '<table class="fxp-heatmap-table"><thead><tr><th></th>';
+    curs.forEach(function(c){ html += '<th>'+(IS_MOBILE ? c : FXP_FLAGS[c]+' '+c)+'</th>'; });
+    html += '</tr></thead><tbody>';
+    curs.forEach(function(base) {
+        html += '<tr><td class="fxp-row-label">'+(IS_MOBILE ? base : FXP_FLAGS[base]+' '+base)+'</td>';
+        curs.forEach(function(quote) {
+            if (base === quote) { html += '<td class="fxp-diag">—</td>'; }
+            else {
+                var val = (lookup[base] && lookup[base][quote] !== undefined) ? lookup[base][quote] : null;
+                var col = heatColor(val);
+                var display = val !== null ? (val >= 0 ? '+' : '') + val.toFixed(IS_MOBILE ? 1 : 2) + '%' : '—';
+                html += '<td style="background:'+col.bg+';color:'+col.fg+'" title="'+base+'/'+quote+'">'+display+'</td>';
+            }
+        });
+        html += '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('fxpHeatmapContainer').innerHTML = html;
 }
 
 window.addEventListener('load', function() {
@@ -1238,10 +1115,13 @@ window.addEventListener('load', function() {
     chargerCOT();
     renderRates();
     setTimeout(syncScrollbarPlaceholder, 200);
-    setInterval(function(){actualiserDonnees();},30*60*1000);
-    setInterval(function(){chargerCOT();},15*60*1000);
-    setInterval(function(){var p=document.getElementById('page-strength');if(p&&p.classList.contains('active')){csLoad();setTimeout(fxpLoad,1000);}},10*60*1000);
-    setInterval(function(){renderRates();},60*60*1000);
+    setInterval(function() { actualiserDonnees(); }, 30 * 60 * 1000);
+    setInterval(function() { chargerCOT(); }, 15 * 60 * 1000);
+    setInterval(function() {
+        var p = document.getElementById('page-strength');
+        if (p && p.classList.contains('active')) { csLoad(); setTimeout(fxpLoad, 1000); }
+    }, 10 * 60 * 1000);
+    setInterval(function() { renderRates(); }, 60 * 60 * 1000);
 });
 </script>
 </body>
