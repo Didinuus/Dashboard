@@ -77,36 +77,41 @@
             display:block !important; height:auto !important; margin:0 !important;
         }
         body.mobile .table-container {
-            height:auto !important; margin:10px 10px 0; border-radius:10px;
+            height:auto !important; margin:10px 10px 0; border-radius:10px; overflow:visible !important;
         }
-        body.mobile .table-scroll { max-height:55vh; overflow-y:scroll; overflow-x:auto; -webkit-overflow-scrolling:touch; }
-        /* Sentiment table: compact font + tight padding so all cols are visible */
-        body.mobile #sentimentScroll table { font-size:10px; table-layout:auto; min-width:0; width:100%; }
+        body.mobile .table-scroll {
+            max-height:42vh; overflow-y:scroll; overflow-x:auto;
+            -webkit-overflow-scrolling:touch; border-radius:10px;
+        }
+        body.mobile #sentimentScroll table {
+            font-size:10px; table-layout:auto; width:auto; min-width:100%;
+            border-collapse:collapse;
+        }
         body.mobile #sentimentScroll th,
-        body.mobile #sentimentScroll td { padding:4px 5px; white-space:nowrap; font-size:10px; }
-        /* Pair column slightly wider, number columns narrow */
-        body.mobile #sentimentScroll td:first-child,
-        body.mobile #sentimentScroll th:first-child { font-size:10px; min-width:52px; }
-        body.mobile #sentimentScroll td:nth-child(2),
-        body.mobile #sentimentScroll td:nth-child(3),
-        body.mobile #sentimentScroll th:nth-child(2),
-        body.mobile #sentimentScroll th:nth-child(3) { min-width:38px; }
-        body.mobile #sentimentScroll td:nth-child(n+4),
-        body.mobile #sentimentScroll th:nth-child(n+4) { min-width:52px; }
-
-        /* scroll hints */
-        body.mobile .table-wrapper-mob { position:relative; }
-        body.mobile .scroll-hint {
-            position:absolute; right:0; top:0; bottom:0; width:30px;
-            background:linear-gradient(to right, transparent, #161616);
-            pointer-events:none; z-index:1;
+        body.mobile #sentimentScroll td { padding:5px 7px; white-space:nowrap; font-size:10px; }
+        body.mobile #sentimentScroll th:first-child,
+        body.mobile #sentimentScroll td:first-child {
+            position:sticky; left:0; z-index:2;
+            background:#161616 !important;
+            min-width:58px; font-weight:bold;
+            box-shadow:2px 0 6px rgba(0,0,0,0.6);
         }
+        body.mobile #sentimentScroll th:nth-child(2),
+        body.mobile #sentimentScroll td:nth-child(2),
+        body.mobile #sentimentScroll th:nth-child(3),
+        body.mobile #sentimentScroll td:nth-child(3) { min-width:44px; }
+        body.mobile #sentimentScroll th:nth-child(n+4),
+        body.mobile #sentimentScroll td:nth-child(n+4) { min-width:58px; }
 
         /* --- MOBILE CHART (sentiment) --- */
         body.mobile .chart-sentiment {
-            margin:10px 10px 0; border-radius:10px; height:55vw !important; min-height:200px;
+            margin:10px 10px 0; border-radius:10px;
+            height:auto !important; min-height:0 !important; padding:10px;
         }
-        body.mobile .chart-sentiment-wrapper { flex:1; position:relative; min-height:0; }
+        body.mobile .chart-sentiment-wrapper {
+            position:relative; width:100%; height:600px;
+        }
+        body.mobile #sentimentChart { position:absolute; top:0; left:0; width:100% !important; height:100% !important; }
 
         /* --- MOBILE COT --- */
         body.mobile .cot-section {
@@ -875,6 +880,10 @@ function afficherGraphique(map) {
     if(sentimentChart) sentimentChart.destroy();
     var lb=[],sD=[],lD=[];
     PAIRS.forEach(function(p){var d=map[p];if(d){lb.push(p);sD.push(d.shortPercentage);lD.push(d.longPercentage);}});
+    if(document.body.classList.contains('mobile')) {
+        var wrapper = document.querySelector('.chart-sentiment-wrapper');
+        if(wrapper) { wrapper.style.height = Math.max(300, lb.length * 24) + 'px'; }
+    }
     sentimentChart=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{label:'Short',data:sD,backgroundColor:'#C03939',borderWidth:0},{label:'Long',data:lD,backgroundColor:'#2F995F',borderWidth:0}]},
         options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.x+'%';}}}},
         scales:{x:{stacked:true,max:100,display:false},y:{stacked:true,ticks:{font:{size:10},color:'#fff'},grid:{color:'#1e2230'}}}}});
