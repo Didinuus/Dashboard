@@ -35,9 +35,16 @@
         th { background:#161616; font-weight:bold; color:#fff; }
         td { background:#161616; color:#fff; }
         .table-head-fixed th:last-child { padding-right:calc(8px + 8px); box-sizing:border-box; }
-        .chart-sentiment { background:#161616; padding:15px; border:1px solid #1e2230; border-radius:8px; height:100%; display:flex; flex-direction:column; }
-        .chart-sentiment-wrapper { flex:1; position:relative; }
-        #sentimentChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
+        /* ---- SENTIMENT BAR TABLE (replaces canvas on all devices) ---- */
+        .chart-sentiment { background:#161616; border:1px solid #1e2230; border-radius:8px; height:100%; display:flex; flex-direction:column; overflow:hidden; }
+        .chart-sentiment-header { flex-shrink:0; padding:10px 14px 6px; display:flex; justify-content:space-between; font-size:11px; color:#888; font-weight:bold; border-bottom:1px solid #1e2230; }
+        .chart-sentiment-scroll { flex:1; overflow-y:scroll; overflow-x:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:thin; scrollbar-color:#888 #1e2230; }
+        .sent-bar-row { display:flex; align-items:center; gap:8px; padding:5px 12px; border-bottom:1px solid #111; }
+        .sent-bar-pair { font-size:11px; font-weight:bold; width:56px; flex-shrink:0; color:#ccc; }
+        .sent-bar-track { flex:1; height:20px; border-radius:3px; overflow:hidden; display:flex; position:relative; background:#111; }
+        .sent-bar-short { height:100%; background:#C03939; display:flex; align-items:center; justify-content:flex-end; padding-right:4px; }
+        .sent-bar-long  { height:100%; background:#2F995F; display:flex; align-items:center; padding-left:4px; }
+        .sent-bar-pct   { font-size:9px; font-weight:bold; color:#fff; white-space:nowrap; }
 
         .cot-section { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px; }
         .cot-container { display:flex; flex-direction:column; border-radius:8px; overflow:hidden; background:#161616; border:1px solid #1e2230; }
@@ -330,41 +337,11 @@
                 min-height: 0;
             }
 
-            /* ============================================================
-               FIX 2 — SENTIMENT BAR CHART
-               The chart canvas needs a real non-zero pixel height.
-               We use a block-level wrapper with explicit height so
-               Chart.js can measure it properly on mobile.
-               ============================================================ */
+            /* Sentiment bar scroll — same height as table on mobile */
             .chart-sentiment {
-                /* Remove height:100% inherited from desktop — let it size by content */
-                height: auto !important;
-                padding: 10px;
-                /* No overflow hidden — chart must paint fully */
-                overflow: visible;
-            }
-
-            .chart-sentiment-wrapper {
-                /* Must be a positioned block with explicit pixel height */
-                position: relative !important;
-                width: 100% !important;
-                /* Height is set dynamically by JS after we know pair count,
-                   but set a safe default here so first paint shows bars */
-                height: 420px !important;
-                /* Do NOT use overflow:hidden — it clips the chart on iOS */
-                overflow: visible !important;
-            }
-
-            #sentimentChart {
-                /* Fill the wrapper exactly */
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
-                /* Force GPU layer so iOS renders it */
-                transform: translateZ(0);
-                -webkit-transform: translateZ(0);
+                height: 340px !important;
+                min-height: 240px !important;
+                max-height: 400px !important;
             }
 
             /* ---- COT SECTION ---- */
@@ -556,7 +533,14 @@
                 </div>
             </div>
             <div class="chart-sentiment">
-                <div class="chart-sentiment-wrapper"><canvas id="sentimentChart"></canvas></div>
+                <div class="chart-sentiment-header">
+                    <span>&#128308; Short</span>
+                    <span>Long vs Short</span>
+                    <span>&#128994; Long</span>
+                </div>
+                <div class="chart-sentiment-scroll" id="sentimentBarsScroll">
+                    <div style="text-align:center;padding:20px;color:#aaa">Loading...</div>
+                </div>
             </div>
         </div>
 
@@ -784,7 +768,6 @@ function showTab(name) {
 var CONFIG = { email:'hamdikhireddine@icloud.com', password:'Didine@06', apiUrl:'https://www.myfxbook.com/api/' };
 var ALL_PAIRS = ['AUDUSD','EURUSD','GBPUSD','NZDUSD','USDCAD','USDCHF','USDJPY','AUDCAD','AUDCHF','AUDJPY','AUDNZD','CADCHF','CADJPY','CHFJPY','EURAUD','EURCAD','EURCHF','EURGBP','EURJPY','EURNZD','GBPAUD','GBPCAD','GBPCHF','GBPJPY','GBPNZD','NZDCAD','NZDCHF','NZDJPY'];
 var MAJOR_PAIRS = ['EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD'];
-var sentimentChart = null;
 var _sentimentMap = {};
 
 function getActivePairs() {
@@ -912,53 +895,37 @@ function gc(p, s) {
 
 function afficherGraphique(map) {
     var PAIRS = getActivePairs();
-    var canvas = document.getElementById('sentimentChart');
-    var wrapper = document.querySelector('.chart-sentiment-wrapper');
+    var container = document.getElementById('sentimentBarsScroll');
+    if (!container) return;
 
-    if (sentimentChart) { sentimentChart.destroy(); sentimentChart = null; }
-
-    var lb=[], sD=[], lD=[];
-    PAIRS.forEach(function(p){ var d=map[p]; if(d){ lb.push(p); sD.push(d.shortPercentage); lD.push(d.longPercentage); } });
-
-    if (IS_MOBILE) {
-        /* KEY FIX: set an explicit pixel height based on pair count BEFORE
-           Chart.js tries to read the canvas dimensions.
-           26px per pair, minimum 260px. */
-        var chartH = Math.max(260, lb.length * 26);
-        if (wrapper) {
-            wrapper.style.height = chartH + 'px';
-            /* Force a layout reflow so the canvas inherits the new height */
-            wrapper.offsetHeight; // eslint-disable-line no-unused-expressions
-        }
-        /* Also set the canvas size directly so Chart.js doesn't measure 0 */
-        canvas.style.height = chartH + 'px';
-        canvas.style.width  = '100%';
-    }
-
-    var tickFontSize = IS_MOBILE ? 9 : 10;
-    sentimentChart = new Chart(canvas, {
-        type: 'bar',
-        data: {
-            labels: lb,
-            datasets: [
-                {label:'Short', data:sD, backgroundColor:'#C03939', borderWidth:0},
-                {label:'Long',  data:lD, backgroundColor:'#2F995F', borderWidth:0}
-            ]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: { callbacks: { label: function(c){ return c.dataset.label+': '+c.parsed.x+'%'; } } }
-            },
-            scales: {
-                x: { stacked:true, max:100, display:false },
-                y: { stacked:true, ticks:{ font:{size:tickFontSize}, color:'#fff' }, grid:{ color:'#1e2230' } }
-            }
-        }
+    var rows = [];
+    PAIRS.forEach(function(p) {
+        var d = map[p];
+        if (!d) return;
+        rows.push({ pair: p, short: d.shortPercentage, long: d.longPercentage });
     });
+
+    if (!rows.length) { container.innerHTML = '<div style="text-align:center;padding:20px;color:#aaa">No data</div>'; return; }
+
+    var html = '';
+    rows.forEach(function(r) {
+        // Only show percentage label if bar is wide enough (>=12%)
+        var shortLabel = r.short >= 12 ? r.short + '%' : '';
+        var longLabel  = r.long  >= 12 ? r.long  + '%' : '';
+        html +=
+            '<div class="sent-bar-row">' +
+            '<div class="sent-bar-pair">' + r.pair + '</div>' +
+            '<div class="sent-bar-track">' +
+            '<div class="sent-bar-short" style="width:' + r.short + '%">' +
+            '<span class="sent-bar-pct">' + shortLabel + '</span>' +
+            '</div>' +
+            '<div class="sent-bar-long" style="width:' + r.long + '%">' +
+            '<span class="sent-bar-pct">' + longLabel + '</span>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+    });
+    container.innerHTML = html;
 }
 
 /* ========= COT ========= */
