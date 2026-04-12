@@ -54,22 +54,39 @@
             position:fixed; top:0; left:0; right:0;
             bottom:calc(56px + env(safe-area-inset-bottom,0px));
             overflow:hidden;
+            background:var(--bg); /* FIX 2: fond explicite pour éviter la zone noire */
         }
-        .m-page { display:none; height:100%; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
+        .m-page { display:none; height:100%; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; background:var(--bg); /* FIX 2 */ }
         .m-page.active { display:block; }
 
-        /* ── FIX 1: TICKER — hauteur augmentée + pas de coupure ── */
+        /* ── FIX 1: TICKER — hauteur stricte + overflow hidden + isolation du widget ── */
         .m-ticker {
             background:var(--card);
             border-bottom:1px solid var(--border);
-            height:56px;
-            overflow:visible;
+            height:44px;           /* hauteur réduite et fixe */
+            max-height:44px;       /* empêche toute expansion */
+            overflow:hidden;       /* coupe tout débordement */
             flex-shrink:0;
             display:flex;
             align-items:center;
+            position:relative;
+            z-index:1;
         }
-        .m-ticker tv-ticker-tape {
+        /* Force le widget TradingView à rester dans sa boîte */
+        .m-ticker tv-ticker-tape,
+        .m-ticker > * {
             width:100%;
+            max-height:44px;
+            overflow:hidden;
+        }
+        /* Masque le label "Ticker tape by TradingView" qui apparaît en dessous */
+        .m-ticker::after {
+            content:'';
+            position:absolute;
+            bottom:0; left:0; right:0;
+            height:4px;
+            background:var(--card);
+            z-index:2;
         }
 
         /* ── PAGE TOP ── */
@@ -130,13 +147,31 @@
         .m-hist-item canvas { width:100% !important; height:90px !important; }
 
         /* ── CS CHART ── */
-        .m-cs-wrap { margin:0 12px 12px; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+        .m-cs-wrap {
+            margin:0 12px 12px;
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:12px;
+            overflow:hidden;
+        }
         .m-tf-row { display:flex; gap:6px; padding:10px 12px 0; overflow-x:auto; }
         .m-tf-btn { padding:5px 12px; background:transparent; color:var(--muted); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:12px; font-weight:700; white-space:nowrap; flex-shrink:0; }
         .m-tf-btn.active { background:var(--accent); color:#fff; border-color:#3a4080; }
-        .m-cs-box { position:relative; height:200px; padding:8px; }
-        .m-cs-box canvas { position:absolute; inset:8px; width:calc(100% - 16px) !important; height:calc(100% - 16px) !important; }
-        .m-cs-legend { display:flex; flex-wrap:wrap; gap:6px; padding:6px 12px 10px; }
+
+        /* FIX 2: hauteur fixe du canvas + fond explicite pour éviter la zone noire */
+        .m-cs-box {
+            position:relative;
+            height:200px;
+            padding:8px;
+            background:var(--card); /* fond explicite */
+        }
+        .m-cs-box canvas {
+            position:absolute;
+            inset:8px;
+            width:calc(100% - 16px) !important;
+            height:calc(100% - 16px) !important;
+        }
+        .m-cs-legend { display:flex; flex-wrap:wrap; gap:6px; padding:6px 12px 10px; background:var(--card); /* fond explicite */ }
         .m-cs-legend-item { display:flex; align-items:center; gap:4px; font-size:10px; padding:2px 6px; border-radius:4px; border:1px solid transparent; cursor:pointer; }
         .m-cs-legend-item.hidden { opacity:0.3; }
         .m-cs-legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
@@ -348,7 +383,10 @@
             </div>
         </div>
 
-        <!-- FIX 1: Ticker avec hauteur correcte, pas coupé -->
+        <!--
+            FIX 1: Le ticker est maintenant dans un wrapper isolé avec overflow:hidden strict.
+            Le widget TradingView ne peut plus déborder sur les éléments en dessous.
+        -->
         <div class="m-ticker">
             <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js"></script>
             <tv-ticker-tape symbols="FX:EURUSD,OANDA:GBPUSD,FX:USDJPY,FX:USDCHF,FX:AUDUSD,FX:NZDUSD,FX:USDCAD,FX:AUDCAD,FX:AUDJPY,FX:EURJPY,FX:GBPJPY" theme="dark" transparent></tv-ticker-tape>
@@ -362,7 +400,6 @@
             </div>
         </div>
 
-        <!-- FIX 2: TABLE — colonnes Short Vol et Long Vol supprimées -->
         <div id="m-sent-table">
             <div class="m-card" style="margin-top:0">
                 <div class="m-tbl-wrap">
@@ -381,7 +418,6 @@
             </div>
         </div>
 
-        <!-- FIX 3: CHART — première card (Long vs Short avec canvas) supprimée, garde seulement les barres -->
         <div id="m-sent-chart" style="display:none">
             <div class="m-card" style="margin-top:0">
                 <div class="m-card-hd">Long/Short — All Pairs</div>
@@ -430,6 +466,10 @@
             <button class="m-tf-btn" onclick="csSetTF('H4',this)">4H</button>
             <button class="m-tf-btn" onclick="csSetTF('D',this)">Daily</button>
         </div>
+        <!--
+            FIX 2: .m-cs-wrap a un fond explicite (var(--card)) et le contenu
+            est immédiatement collé. Suppression du vide entre le chart et le rank.
+        -->
         <div class="m-cs-wrap" style="margin-top:10px">
             <div class="m-cs-box"><canvas id="m-csChart"></canvas></div>
             <div class="m-cs-legend" id="m-csLegend"></div>
@@ -704,7 +744,6 @@ function mSentSeg(name, btn) {
     el('m-sent-table').style.display = name==='table'?'':'none';
     el('m-sent-chart').style.display = name==='chart'?'':'none';
     el('m-sent-cot').style.display   = name==='cot'  ?'':'none';
-    // FIX 3: plus besoin de dessiner le chart canvas (supprimé), juste les barres
 }
 var _mCotSeg = 'lev';
 function mCotSeg(name, btn) {
@@ -775,7 +814,6 @@ function mAfficherTableau(map) {
     ALL_PAIRS.forEach(function(pair){
         var d=map[pair]; if(!d) return;
         var row=document.createElement('tr');
-        // FIX 2: 6 colonnes seulement (Short Vol et Long Vol supprimées)
         row.innerHTML='<td class="m-pair-lbl">'+pair+'</td>'+
             '<td style="background:'+gc(d.shortPercentage,1)+';color:#fff;font-weight:700">'+d.shortPercentage+'%</td>'+
             '<td style="background:'+gc(d.longPercentage,0)+';color:#fff;font-weight:700">'+d.longPercentage+'%</td>'+
