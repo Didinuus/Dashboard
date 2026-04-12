@@ -217,24 +217,20 @@
            MOBILE BOTTOM NAV BAR
            ============================================================ */
         .mobile-bottom-nav {
-            display: none; /* hidden on desktop */
+            display: none;
         }
 
         /* ============================================================
-           MOBILE STYLES — iPhone / small screens (max-width: 768px)
+           MOBILE STYLES
            ============================================================ */
         @media (max-width: 768px) {
             body {
                 padding: 10px 8px 0 8px;
                 -webkit-tap-highlight-color: transparent;
-                /* room for fixed bottom nav */
                 padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
             }
 
-            /* ---- TICKER ---- */
             .ticker-section { margin-bottom: 10px; padding: 2px 4px; }
-
-            /* ---- TOP TABS: hidden on mobile (replaced by bottom nav) ---- */
             .tabs { display: none !important; }
 
             /* ---- BOTTOM NAV BAR ---- */
@@ -292,6 +288,8 @@
                 gap: 8px;
                 margin-bottom: 8px;
             }
+
+            /* Stack table + chart vertically */
             .main-section {
                 grid-template-columns: 1fr;
                 height: auto;
@@ -299,13 +297,19 @@
                 margin-bottom: 12px;
             }
 
-            /* Table: fixed height with internal scroll so all pairs visible */
+            /* ============================================================
+               FIX 1 — TABLE SCROLL
+               Give the table-container a fixed height and make sure
+               the inner scroll div uses -webkit-overflow-scrolling
+               ============================================================ */
             .table-container {
-                height: 320px;
-                min-height: 220px;
-                max-height: 380px;
+                height: 340px;
+                min-height: 240px;
+                max-height: 400px;
+                display: flex;
+                flex-direction: column;
             }
-            /* Mobile table: show only essential columns */
+            /* Hide verbose columns on mobile */
             .table-container th:nth-child(4),
             .table-container th:nth-child(5),
             .table-container th:nth-child(6),
@@ -315,32 +319,52 @@
             .table-container td:nth-child(6),
             .table-container td:nth-child(7) { display: none; }
             .table-container th, .table-container td { font-size: 11px; padding: 5px 4px; }
-            /* Ensure inner scroll works on iOS */
+
+            /* CRITICAL: make scroll work on iOS */
             .table-scroll {
-                overflow-y: scroll !important;
-                -webkit-overflow-scrolling: touch;
                 flex: 1;
+                overflow-y: scroll !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+                /* Prevent iOS from collapsing the scroll container */
+                min-height: 0;
             }
 
-            /* Sentiment bar chart: scrollable wrapper */
+            /* ============================================================
+               FIX 2 — SENTIMENT BAR CHART
+               The chart canvas needs a real non-zero pixel height.
+               We use a block-level wrapper with explicit height so
+               Chart.js can measure it properly on mobile.
+               ============================================================ */
             .chart-sentiment {
-                height: auto;
+                /* Remove height:100% inherited from desktop — let it size by content */
+                height: auto !important;
                 padding: 10px;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                max-height: 380px;
+                /* No overflow hidden — chart must paint fully */
+                overflow: visible;
             }
-            /* Make chart tall enough to show all pairs, auto-sized by JS */
+
             .chart-sentiment-wrapper {
-                position: relative;
-                height: 420px;
-                overflow: hidden;
+                /* Must be a positioned block with explicit pixel height */
+                position: relative !important;
+                width: 100% !important;
+                /* Height is set dynamically by JS after we know pair count,
+                   but set a safe default here so first paint shows bars */
+                height: 420px !important;
+                /* Do NOT use overflow:hidden — it clips the chart on iOS */
+                overflow: visible !important;
             }
+
             #sentimentChart {
-                position: absolute;
-                top: 0; left: 0;
+                /* Fill the wrapper exactly */
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
                 width: 100% !important;
                 height: 100% !important;
+                /* Force GPU layer so iOS renders it */
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
             }
 
             /* ---- COT SECTION ---- */
@@ -370,7 +394,6 @@
                 gap: 12px;
             }
             .cs-chart-wrap { padding: 10px; }
-            /* KEY FIX: give the chart container an explicit pixel height */
             .cs-chart-inner {
                 height: 300px !important;
                 min-height: 300px !important;
@@ -673,7 +696,7 @@
 
 </div>
 
-<!-- MOBILE BOTTOM NAV (only visible on mobile via CSS) -->
+<!-- MOBILE BOTTOM NAV -->
 <nav class="mobile-bottom-nav" id="mobileBottomNav">
     <button class="mob-tab active" id="mobtab-sentiment" onclick="showTab('sentiment')">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -708,25 +731,15 @@
 </nav>
 
 <script>
-/* ========= MOBILE DETECTION & RESPONSIVE LAYOUT ========= */
+/* ========= MOBILE DETECTION ========= */
 var IS_MOBILE = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
 function applyMobileLayout() {
     if (!IS_MOBILE) return;
-
-    // Stack the FX performance grid vertically on mobile
     var perfGrid = document.getElementById('strength-perf-grid');
-    if (perfGrid) {
-        perfGrid.style.gridTemplateColumns = '1fr';
-    }
-
-    // Stack histGrid to 1 column
+    if (perfGrid) perfGrid.style.gridTemplateColumns = '1fr';
     var histGrid = document.getElementById('histGrid');
-    if (histGrid) {
-        histGrid.style.gridTemplateColumns = '1fr';
-    }
-
-    // Touch-friendly: increase tap targets on buttons
+    if (histGrid) histGrid.style.gridTemplateColumns = '1fr';
     document.querySelectorAll('.tab-btn, .cs-tf-btn, .fxp-tf-btn, .pairs-edit-btn').forEach(function(btn) {
         btn.style.minHeight = '40px';
     });
@@ -737,7 +750,7 @@ function fmtTime(){ return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit'
 
 /* ========= SCROLLBAR WIDTH SYNC ========= */
 function syncScrollbarPlaceholder() {
-    if (IS_MOBILE) return; // Not needed on mobile (no scrollbar gutter)
+    if (IS_MOBILE) return;
     var scroll = document.getElementById('sentimentScroll');
     var placeholder = document.getElementById('scrollbarPlaceholder');
     if (!scroll || !placeholder) return;
@@ -746,7 +759,6 @@ function syncScrollbarPlaceholder() {
 }
 window.addEventListener('resize', function() {
     syncScrollbarPlaceholder();
-    // Re-check mobile on resize (e.g. rotation)
     IS_MOBILE = window.innerWidth <= 768;
     applyMobileLayout();
 });
@@ -759,15 +771,12 @@ function showTab(name) {
     document.querySelectorAll('.tab-btn').forEach(function(b){
         if (b.getAttribute('onclick') === "showTab('"+name+"')") b.classList.add('active');
     });
-    // Sync mobile bottom nav
     document.querySelectorAll('.mob-tab').forEach(function(b){ b.classList.remove('active'); });
     var mobBtn = document.getElementById('mobtab-'+name);
     if (mobBtn) mobBtn.classList.add('active');
-
     if (name === 'strength') { csLoad(); setTimeout(fxpLoad, 1000); }
     if (name === 'macropage') renderRates();
     if (name === 'sentiment') actualiserDonnees();
-    // Scroll to top on mobile tab switch
     if (IS_MOBILE) window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -794,7 +803,6 @@ function getActivePairs() {
             if (Array.isArray(parsed) && parsed.length > 0) return parsed;
         }
     } catch(e) {}
-    // On mobile default to majors only for better readability
     return IS_MOBILE ? MAJOR_PAIRS.slice() : ALL_PAIRS.slice();
 }
 
@@ -904,20 +912,53 @@ function gc(p, s) {
 
 function afficherGraphique(map) {
     var PAIRS = getActivePairs();
-    var ctx=document.getElementById('sentimentChart');
-    if(sentimentChart) sentimentChart.destroy();
-    var lb=[],sD=[],lD=[];
-    PAIRS.forEach(function(p){var d=map[p];if(d){lb.push(p);sD.push(d.shortPercentage);lD.push(d.longPercentage);}});
-    // On mobile: make chart tall enough for all pairs (22px per pair, min 200)
+    var canvas = document.getElementById('sentimentChart');
+    var wrapper = document.querySelector('.chart-sentiment-wrapper');
+
+    if (sentimentChart) { sentimentChart.destroy(); sentimentChart = null; }
+
+    var lb=[], sD=[], lD=[];
+    PAIRS.forEach(function(p){ var d=map[p]; if(d){ lb.push(p); sD.push(d.shortPercentage); lD.push(d.longPercentage); } });
+
     if (IS_MOBILE) {
-        var chartH = Math.max(200, lb.length * 26);
-        var wrapper = document.querySelector('.chart-sentiment-wrapper');
-        if (wrapper) wrapper.style.height = chartH + 'px';
+        /* KEY FIX: set an explicit pixel height based on pair count BEFORE
+           Chart.js tries to read the canvas dimensions.
+           26px per pair, minimum 260px. */
+        var chartH = Math.max(260, lb.length * 26);
+        if (wrapper) {
+            wrapper.style.height = chartH + 'px';
+            /* Force a layout reflow so the canvas inherits the new height */
+            wrapper.offsetHeight; // eslint-disable-line no-unused-expressions
+        }
+        /* Also set the canvas size directly so Chart.js doesn't measure 0 */
+        canvas.style.height = chartH + 'px';
+        canvas.style.width  = '100%';
     }
-    var tickFontSize = IS_MOBILE ? 8 : 10;
-    sentimentChart=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{label:'Short',data:sD,backgroundColor:'#C03939',borderWidth:0},{label:'Long',data:lD,backgroundColor:'#2F995F',borderWidth:0}]},
-        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.x+'%';}}}},
-        scales:{x:{stacked:true,max:100,display:false},y:{stacked:true,ticks:{font:{size:tickFontSize},color:'#fff'},grid:{color:'#1e2230'}}}}});
+
+    var tickFontSize = IS_MOBILE ? 9 : 10;
+    sentimentChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: lb,
+            datasets: [
+                {label:'Short', data:sD, backgroundColor:'#C03939', borderWidth:0},
+                {label:'Long',  data:lD, backgroundColor:'#2F995F', borderWidth:0}
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: function(c){ return c.dataset.label+': '+c.parsed.x+'%'; } } }
+            },
+            scales: {
+                x: { stacked:true, max:100, display:false },
+                y: { stacked:true, ticks:{ font:{size:tickFontSize}, color:'#fff' }, grid:{ color:'#1e2230' } }
+            }
+        }
+    });
 }
 
 /* ========= COT ========= */
@@ -957,7 +998,7 @@ async function chargerCOT() {
 }
 function renderCOTTable(tbodyId,data,key){var tbody=document.getElementById(tbodyId);tbody.innerHTML='';data.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(d){var cat=d[key];var nc=cat.net>=0?'#2F995F':'#C03939';var dc=cat.dlt>=0?'#2F995F':'#C03939';var row=document.createElement('tr');row.innerHTML='<td style="font-weight:bold">'+d.name+'</td><td style="color:#2F995F">'+cat.lng.toLocaleString()+'</td><td style="color:#C03939">'+cat.sht.toLocaleString()+'</td><td style="color:'+nc+';font-weight:bold">'+(cat.net>=0?'+':'')+cat.net.toLocaleString()+'</td><td style="color:'+dc+'">'+(cat.dlt>=0?'+':'')+cat.dlt.toLocaleString()+'</td><td>'+(cat.net>=0?'&#128994; Bullish':'&#128308; Bearish')+'</td>';tbody.appendChild(row);});}
 var cotPieCharts={};
-function renderCOTPies(containerId,data,key){var container=document.getElementById(containerId);container.innerHTML='';Object.keys(cotPieCharts).filter(function(k){return k.startsWith(containerId);}).forEach(function(k){cotPieCharts[k].destroy();delete cotPieCharts[k];});data.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(d){var cat=d[key],total=cat.lng+cat.sht;if(!total)return;var pctL=Math.round(cat.lng/total*100),pctS=100-pctL;var item=document.createElement('div');item.className='cot-pie-item';var cid=containerId+'_'+d.name;var canvasSize = IS_MOBILE ? 60 : 80;item.innerHTML='<canvas id="'+cid+'" width="'+canvasSize+'" height="'+canvasSize+'"></canvas><div class="cot-pie-label">'+d.name+'</div>';container.appendChild(item);cotPieCharts[cid]=new Chart(document.getElementById(cid),{type:'doughnut',data:{labels:['Long','Short'],datasets:[{data:[cat.lng,cat.sht],backgroundColor:['rgb(47,153,95)','rgb(192,57,57)'],borderColor:['#161616','#161616'],borderWidth:2}]},options:{responsive:false,cutout:'45%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+(c.label==='Long'?pctL:pctS)+'%';}}}}}}); });}
+function renderCOTPies(containerId,data,key){var container=document.getElementById(containerId);container.innerHTML='';Object.keys(cotPieCharts).filter(function(k){return k.startsWith(containerId);}).forEach(function(k){cotPieCharts[k].destroy();delete cotPieCharts[k];});data.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(d){var cat=d[key],total=cat.lng+cat.sht;if(!total)return;var pctL=Math.round(cat.lng/total*100),pctS=100-pctL;var item=document.createElement('div');item.className='cot-pie-item';var cid=containerId+'_'+d.name;var canvasSize=IS_MOBILE?60:80;item.innerHTML='<canvas id="'+cid+'" width="'+canvasSize+'" height="'+canvasSize+'"></canvas><div class="cot-pie-label">'+d.name+'</div>';container.appendChild(item);cotPieCharts[cid]=new Chart(document.getElementById(cid),{type:'doughnut',data:{labels:['Long','Short'],datasets:[{data:[cat.lng,cat.sht],backgroundColor:['rgb(47,153,95)','rgb(192,57,57)'],borderColor:['#161616','#161616'],borderWidth:2}]},options:{responsive:false,cutout:'45%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+(c.label==='Long'?pctL:pctS)+'%';}}}}}}); });}
 function afficherCOT(cotData){renderCOTTable('cotBodyLev',cotData,'lev');renderCOTPies('cotPiesLev',cotData,'lev');renderCOTTable('cotBodyCom',cotData,'com');renderCOTPies('cotPiesCom',cotData,'com');renderCOTTable('cotBodyLS',cotData,'ls');renderCOTPies('cotPiesLS',cotData,'ls');}
 var CURRENCIES_ORDER=['AUD','CAD','CHF','EUR','GBP','JPY','NZD','USD'];
 var HIST_FIELDS={lev:{color:'#1e90ff',label:'Leveraged Funds',fieldL:'lev_money_positions_long',fieldS:'lev_money_positions_short'},com:{color:'#ff8c00',label:'Commercials',fieldL:'dealer_positions_long_all',fieldS:'dealer_positions_short_all'},ls:{color:'#ffd700',label:'Large Spec.',fieldL:'asset_mgr_positions_long',fieldS:'asset_mgr_positions_short'}};
@@ -980,7 +1021,6 @@ function calcRSI(closes){var period=14,rsi=new Array(closes.length).fill(null);i
 async function fetchCandles(instrument,count,tf){var tfStr=tf||CS_TF[csTF];var url=OANDA_URL+'/instruments/'+instrument+'/candles?granularity='+tfStr+'&count='+count+'&price=M';try{var r=await fetch(url,{headers:{'Authorization':'Bearer '+OANDA_KEY}});if(!r.ok)return null;var d=await r.json();if(!d.candles||!d.candles.length)return null;return{closes:d.candles.map(function(c){return parseFloat(c.mid.c);}),times:d.candles.map(function(c){return c.time;})};}catch(e){return null;}}
 function buildLabels(times,tf){var labels=[],useTF=tf||csTF;times.forEach(function(t){if(!t){labels.push('');return;}var dt=new Date(t);if(useTF==='D'){labels.push(dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}));}else{labels.push(dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));}});return labels;}
 async function csLoad(){
-    // On mobile, ensure the chart container has explicit pixel height before Chart.js tries to render
     if (IS_MOBILE) {
         var inner = document.querySelector('.cs-chart-inner');
         if (inner) { inner.style.height = '300px'; inner.style.minHeight = '300px'; }
@@ -989,7 +1029,6 @@ async function csLoad(){
 var _csHoverIdx=-1;
 function renderCSChart(labels,series){var ctx=document.getElementById('csChart');if(csChart)csChart.destroy();var datasets=CS_CURRENCIES.map(function(cur){return{label:cur,data:series[cur]||[],borderColor:CS_COLORS[cur],backgroundColor:'transparent',borderWidth:1.8,pointRadius:0,pointHoverRadius:0,tension:0.3,hidden:csHidden.has(cur)};});csChart=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{enabled:IS_MOBILE}},scales:{x:{grid:{color:'#161616'},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:IS_MOBILE?6:12,color:'#444',font:{size:IS_MOBILE?8:9}}},y:{position:'right',min:15,max:85,grid:{color:'#161616'},ticks:{color:'#555',font:{size:IS_MOBILE?8:9},stepSize:10}}}},plugins:[{id:'refLines',afterDraw:function(chart){if(chart.canvas.id!=='csChart')return;var c2=chart.ctx,ca=chart.chartArea,y=chart.scales.y;[50].forEach(function(v){var yp=y.getPixelForValue(v);if(yp<ca.top||yp>ca.bottom)return;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([]);c2.stroke();c2.restore();});}},{id:'floatingLabels',afterDraw:function(chart){if(chart.canvas.id!=='csChart')return;if(IS_MOBILE||_csHoverIdx<0)return;var c2=chart.ctx,ca=chart.chartArea,xScale=chart.scales.x,yScale=chart.scales.y,idx=_csHoverIdx,xp=xScale.getPixelForValue(idx);if(xp<ca.left||xp>ca.right)return;c2.save();c2.beginPath();c2.moveTo(xp,ca.top);c2.lineTo(xp,ca.bottom);c2.strokeStyle='rgba(200,200,200,0.25)';c2.lineWidth=1;c2.setLineDash([3,3]);c2.stroke();c2.restore();var items=[];chart.data.datasets.forEach(function(ds){if(ds.hidden)return;var val=ds.data[idx];if(val===null||val===undefined)return;var yp2=yScale.getPixelForValue(val);if(yp2<ca.top||yp2>ca.bottom)return;var prev=idx>0?ds.data[idx-1]:null,delta=(prev!==null&&prev!==undefined)?(val-prev):0;items.push({label:ds.label,color:ds.borderColor,val:val,delta:delta,yp:yp2});});items.sort(function(a,b){return a.yp-b.yp;});var LH=17;for(var pass=0;pass<5;pass++){for(var ii=1;ii<items.length;ii++){if(items[ii].yp-items[ii-1].yp<LH){var mid=(items[ii].yp+items[ii-1].yp)/2;items[ii-1].yp=mid-LH/2;items[ii].yp=mid+LH/2;}}}items.forEach(function(item){var text=item.label+' '+item.val.toFixed(1),isRight=(xp>ca.left+(ca.right-ca.left)*0.75),boxW=72,boxH=15,pad=5,bx=isRight?xp-boxW-6:xp+6,by=item.yp-boxH/2;by=Math.max(ca.top,Math.min(ca.bottom-boxH,by));c2.save();c2.fillStyle=item.color;c2.globalAlpha=0.92;var r2=4;c2.beginPath();c2.moveTo(bx+r2,by);c2.lineTo(bx+boxW-r2,by);c2.arcTo(bx+boxW,by,bx+boxW,by+boxH,r2);c2.lineTo(bx+boxW,by+boxH-r2);c2.arcTo(bx+boxW,by+boxH,bx+boxW-r2,by+boxH,r2);c2.lineTo(bx+r2,by+boxH);c2.arcTo(bx,by+boxH,bx,by+boxH-r2,r2);c2.lineTo(bx,by+r2);c2.arcTo(bx,by,bx+r2,by,r2);c2.closePath();c2.fill();c2.globalAlpha=1;c2.fillStyle='#fff';c2.font='bold 10px Arial';c2.textAlign='left';c2.textBaseline='middle';c2.fillText(text,bx+pad,by+boxH/2);c2.restore();c2.save();c2.beginPath();c2.arc(xp,item.yp,3.5,0,Math.PI*2);c2.fillStyle=item.color;c2.fill();c2.strokeStyle='#fff';c2.lineWidth=1.2;c2.stroke();c2.restore();});if(_csRawTimes[idx]){var dt=new Date(_csRawTimes[idx]),dateStr;if(csTF==='D'){dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}else{dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+'  '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}var dtBoxW=c2.measureText(dateStr).width+20,dtBoxH=18,dtX=xp-dtBoxW/2,dtY=ca.bottom+4;dtX=Math.max(ca.left,Math.min(ca.right-dtBoxW,dtX));c2.save();c2.fillStyle='rgba(30,34,48,0.95)';c2.strokeStyle='rgba(140,160,220,0.5)';c2.lineWidth=1;var br=4;c2.beginPath();c2.moveTo(dtX+br,dtY);c2.lineTo(dtX+dtBoxW-br,dtY);c2.arcTo(dtX+dtBoxW,dtY,dtX+dtBoxW,dtY+dtBoxH,br);c2.lineTo(dtX+dtBoxW,dtY+dtBoxH-br);c2.arcTo(dtX+dtBoxW,dtY+dtBoxH,dtX+dtBoxW-br,dtY+dtBoxH,br);c2.lineTo(dtX+br,dtY+dtBoxH);c2.arcTo(dtX,dtY+dtBoxH,dtX,dtY+dtBoxH-br,br);c2.lineTo(dtX,dtY+br);c2.arcTo(dtX,dtY,dtX+br,dtY,br);c2.closePath();c2.fill();c2.stroke();c2.fillStyle='#c8d4f0';c2.font='bold 10px Arial';c2.textAlign='center';c2.textBaseline='middle';c2.fillText(dateStr,dtX+dtBoxW/2,dtY+dtBoxH/2);c2.restore();}}}]});
 
-    // Mobile: touch-based chart panning via touch events
     if (IS_MOBILE) {
         var touchStartX = null, touchStartMin = null, touchStartMax = null;
         ctx.addEventListener('touchstart', function(e) {
@@ -1018,7 +1057,6 @@ function renderCSChart(labels,series){var ctx=document.getElementById('csChart')
         }, {passive: true});
         ctx.addEventListener('touchend', function() { touchStartX = null; }, {passive: true});
     } else {
-        // Desktop mouse interactions (unchanged)
         var _csDrag=null;function csSetView(newMin,newMax){var totalLen=csChart.data.labels.length;newMin=Math.max(0,newMin);newMax=Math.min(totalLen-1,newMax);if(newMax-newMin<20)return;csChart.options.scales.x.min=newMin;csChart.options.scales.x.max=newMax;csChart.update('none');}ctx.onmousedown=function(e){if(e.button!==0)return;_csDrag={startX:e.clientX,startMin:csChart.options.scales.x.min,startMax:csChart.options.scales.x.max};ctx.style.cursor='grabbing';e.preventDefault();};window.addEventListener('mouseup',function(){_csDrag=null;ctx.style.cursor='crosshair';});ctx.onmousemove=function(e){if(!csChart)return;var rect=ctx.getBoundingClientRect(),mx=e.clientX-rect.left,xScale=csChart.scales.x,ca=csChart.chartArea;if(_csDrag){var dx=e.clientX-_csDrag.startX,range=_csDrag.startMax-_csDrag.startMin,chartWidth=ca?(ca.right-ca.left):1,shift=-(dx/chartWidth)*range;csSetView(_csDrag.startMin+shift,_csDrag.startMax+shift);return;}if(!ca||mx<ca.left||mx>ca.right){_csHoverIdx=-1;csChart.draw();return;}var minIdx=Math.round(xScale.min),maxIdx=Math.round(xScale.max),best=minIdx,bestDist=Infinity;for(var i=minIdx;i<=maxIdx;i++){var xp2=xScale.getPixelForValue(i),d=Math.abs(xp2-mx);if(d<bestDist){bestDist=d;best=i;}}_csHoverIdx=best;csChart.draw();};ctx.onmouseleave=function(){_csDrag=null;ctx.style.cursor='crosshair';_csHoverIdx=-1;if(csChart)csChart.draw();};ctx.onwheel=function(e){if(!csChart)return;e.preventDefault();var rect=ctx.getBoundingClientRect(),mx=e.clientX-rect.left,ca=csChart.chartArea,curMin=csChart.options.scales.x.min,curMax=csChart.options.scales.x.max,range=curMax-curMin,factor=e.deltaY>0?1.12:0.88,newRange=Math.max(20,Math.min(csChart.data.labels.length,range*factor)),ratio=ca&&ca.width>0?(mx-ca.left)/ca.width:0.5;ratio=Math.max(0,Math.min(1,ratio));var anchor=curMin+ratio*range;csSetView(anchor-ratio*newRange,anchor+(1-ratio)*newRange);};ctx.style.cursor='crosshair';ctx.ondblclick=function(){csResetZoom();};}
 
     var totalLen=labels.length,viewLen=CS_VIEW[csTF]||100;csChart.options.scales.x.min=Math.max(0,totalLen-viewLen);csChart.options.scales.x.max=totalLen-1;csChart.update('none');buildCSLegend();}
@@ -1045,31 +1083,14 @@ var irHistCharts={};
 function renderRates(){
     var grid=document.getElementById('irCardsGrid');grid.innerHTML='';
     IR_BANKS.forEach(function(b){
-        var bpsChg = b.lastChangeBps || 0;
-        var changeStr = bpsChg===0 ? 'Unchanged' : (bpsChg>0?'&#9650; +':'&#9660; ')+Math.abs(bpsChg)+'bps';
+        var bpsChg=b.lastChangeBps||0;
+        var changeStr=bpsChg===0?'Unchanged':(bpsChg>0?'&#9650; +':'&#9660; ')+Math.abs(bpsChg)+'bps';
         var changeBg=bpsChg>0?'rgba(20,188,96,0.15)':bpsChg<0?'rgba(242,102,102,0.15)':'rgba(100,100,100,0.15)';
         var changeCol=bpsChg>0?'#14BC60':bpsChg<0?'#F26666':'#888';
         var expColor=b.expectationDir>0?'#14BC60':b.expectationDir<0?'#F26666':'#888';
-        var rateDisplay = b.short==='Fed' ? '3.50–3.75' : b.rate.toFixed(2)+'%';
+        var rateDisplay=b.short==='Fed'?'3.50–3.75':b.rate.toFixed(2)+'%';
         var card=document.createElement('div');card.className='ir-card';
-        card.innerHTML=
-            '<div class="ir-accent-bar" style="background:'+b.color+'"></div>'+
-            '<div class="ir-card-top"><span class="ir-bank-name">'+b.short+'</span><span class="ir-flag">'+b.flag+'</span></div>'+
-            '<div class="ir-currency">'+b.name+'</div>'+
-            '<div class="ir-rate" style="font-size:28px"><span class="ir-rate-pct">'+rateDisplay+'</span></div>'+
-            '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px">'+
-            '<div class="ir-change-badge" style="background:'+changeBg+';color:'+changeCol+'">'+changeStr+'</div>'+
-            '<div style="font-size:10px;color:#666">Last: '+(b.lastChange||'—')+'</div>'+
-            '</div>'+
-            '<div style="margin-top:6px;display:flex;align-items:center;gap:6px">'+
-            '<span style="font-size:10px;color:#888">CPI:</span>'+
-            '<span style="font-size:12px;font-weight:bold;color:#f0c040">'+b.cpi+'%</span>'+
-            '</div>'+
-            '<div class="ir-next-meeting">'+
-            '<div class="ir-next-label">Next meeting</div>'+
-            '<div class="ir-next-date">'+b.nextMeeting+'</div>'+
-            '<div class="ir-expectation" style="color:'+expColor+'">Fcst: '+b.expectation+'</div>'+
-            '</div>';
+        card.innerHTML='<div class="ir-accent-bar" style="background:'+b.color+'"></div><div class="ir-card-top"><span class="ir-bank-name">'+b.short+'</span><span class="ir-flag">'+b.flag+'</span></div><div class="ir-currency">'+b.name+'</div><div class="ir-rate" style="font-size:28px"><span class="ir-rate-pct">'+rateDisplay+'</span></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px"><div class="ir-change-badge" style="background:'+changeBg+';color:'+changeCol+'">'+changeStr+'</div><div style="font-size:10px;color:#666">Last: '+(b.lastChange||'—')+'</div></div><div style="margin-top:6px;display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:#888">CPI:</span><span style="font-size:12px;font-weight:bold;color:#f0c040">'+b.cpi+'%</span></div><div class="ir-next-meeting"><div class="ir-next-label">Next meeting</div><div class="ir-next-date">'+b.nextMeeting+'</div><div class="ir-expectation" style="color:'+expColor+'">Fcst: '+b.expectation+'</div></div>';
         grid.appendChild(card);
     });
     var maxRate=Math.max.apply(null,IR_BANKS.map(function(b){return b.rate;}));
@@ -1097,131 +1118,17 @@ function renderRates(){
 }
 
 /* ========= FX PERFORMANCE ========= */
-var FXP_CURRENCIES = ['EUR','USD','GBP','AUD','CHF','JPY','CAD','NZD'];
-var FXP_FLAGS = {EUR:'&#127466;&#127482;',USD:'&#127482;&#127480;',GBP:'&#127468;&#127463;',AUD:'&#127462;&#127482;',CHF:'&#127464;&#127469;',JPY:'&#127471;&#127477;',CAD:'&#127464;&#127462;',NZD:'&#127475;&#127487;'};
-var FXP_COLORS = {EUR:'#1C79B3',USD:'#AD4055',GBP:'#2E832B',AUD:'#6C2835',CHF:'#885713',JPY:'#999999',CAD:'#13527B',NZD:'#1A4817'};
-var FXP_PAIRS = [
-    'EUR_USD','GBP_USD','AUD_USD','NZD_USD',
-    'USD_JPY','USD_CAD','USD_CHF',
-    'EUR_GBP','EUR_JPY','EUR_CAD','EUR_CHF','EUR_AUD',
-    'GBP_JPY','GBP_CAD','GBP_CHF','GBP_AUD',
-    'AUD_JPY','AUD_CAD','AUD_CHF','AUD_NZD',
-    'CAD_JPY','CAD_CHF','CHF_JPY','NZD_JPY','NZD_CAD','NZD_CHF'
-];
-var FXP_TF_CONFIG = {
-    D:  {granularity:'H1',  count:25,  label:'Today'},
-    W:  {granularity:'H4',  count:42,  label:'1 Week'},
-    M:  {granularity:'D',   count:22,  label:'1 Month'},
-    M3: {granularity:'D',   count:65,  label:'3 Months'},
-    Y:  {granularity:'W',   count:52,  label:'1 Year'}
-};
-var fxpTF = 'D';
-
-function fxpSetTF(tf, btn) {
-    fxpTF = tf;
-    document.querySelectorAll('.fxp-tf-btn').forEach(function(b){ b.classList.remove('active'); });
-    if (btn) btn.classList.add('active');
-    fxpLoad();
-}
-
-async function fxpFetchPair(pair) {
-    var cfg = FXP_TF_CONFIG[fxpTF];
-    var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.granularity + '&count=' + cfg.count + '&price=M';
-    try {
-        var r = await fetch(url, {headers:{'Authorization':'Bearer ' + OANDA_KEY}});
-        if (!r.ok) return null;
-        var d = await r.json();
-        if (!d.candles || d.candles.length < 2) return null;
-        var first = parseFloat(d.candles[0].mid.o);
-        var last  = parseFloat(d.candles[d.candles.length-1].mid.c);
-        if (!first) return null;
-        return ((last - first) / first) * 100;
-    } catch(e) { return null; }
-}
-
-async function fxpLoad() {
-    var elStatus = document.getElementById('fxpStatus');
-    var elBars   = document.getElementById('fxpBarsContainer');
-    var elHeat   = document.getElementById('fxpHeatmapContainer');
-    if (!elBars || !elHeat) return;
-    if (elStatus) elStatus.textContent = 'Loading...';
-    elBars.innerHTML = '<div class="fxp-loading">Loading...</div>';
-    elHeat.innerHTML = '<div class="fxp-loading">Loading...</div>';
-    var results = {};
-    var fetches = FXP_PAIRS.map(async function(pair) { results[pair] = await fxpFetchPair(pair); });
-    await Promise.all(fetches);
-    var gotData = FXP_PAIRS.some(function(p){ return results[p] !== null && results[p] !== undefined; });
-    if (!gotData) {
-        elBars.innerHTML = '<div class="fxp-loading" style="color:#F26666">&#10060; No data — check OANDA key</div>';
-        elHeat.innerHTML = '';
-        if (elStatus) elStatus.textContent = 'Error';
-        return;
-    }
-    var curPerf = {};
-    FXP_CURRENCIES.forEach(function(cur) {
-        var sum = 0, cnt = 0;
-        FXP_PAIRS.forEach(function(pair) {
-            var parts = pair.split('_');
-            var pct = results[pair];
-            if (pct === null || pct === undefined) return;
-            if (parts[0] === cur) { sum += pct; cnt++; }
-            else if (parts[1] === cur) { sum -= pct; cnt++; }
-        });
-        curPerf[cur] = cnt > 0 ? sum / cnt : null;
-    });
-    fxpRenderBars(curPerf);
-    fxpRenderHeatmap(results);
-    if (elStatus) elStatus.textContent = fmtTime();
-}
-
-function fxpRenderBars(curPerf) {
-    var entries = FXP_CURRENCIES.map(function(c){ return {cur:c, val:curPerf[c]}; }).filter(function(x){ return x.val !== null; }).sort(function(a,b){ return b.val - a.val; });
-    var maxAbs = Math.max.apply(null, entries.map(function(e){ return Math.abs(e.val); }));
-    if (!maxAbs) maxAbs = 1;
-    var html = '';
-    entries.forEach(function(e) {
-        var isPos = e.val >= 0;
-        var color = isPos ? '#C03939' : '#2F995F';
-        var barWidth = (Math.abs(e.val) / maxAbs * 50).toFixed(1);
-        var fillClass = isPos ? 'fxp-bar-fill-pos' : 'fxp-bar-fill-neg';
-        html += '<div class="fxp-bar-row"><div class="fxp-bar-flag">'+FXP_FLAGS[e.cur]+'</div><div class="fxp-bar-cur" style="color:'+FXP_COLORS[e.cur]+'">'+e.cur+'</div><div class="fxp-bar-track"><div class="fxp-bar-zero"></div><div class="'+fillClass+'" style="width:'+barWidth+'%;background:'+color+'33;border:1px solid '+color+'"></div></div><div class="fxp-bar-val" style="color:'+color+'">'+(isPos?'+':'')+e.val.toFixed(3)+'%</div></div>';
-    });
-    document.getElementById('fxpBarsContainer').innerHTML = html;
-}
-
-function fxpRenderHeatmap(results) {
-    var lookup = {};
-    FXP_PAIRS.forEach(function(pair) {
-        var p = pair.split('_'); var b = p[0], q = p[1];
-        if (!lookup[b]) lookup[b] = {}; if (!lookup[q]) lookup[q] = {};
-        var pct = results[pair]; lookup[b][q] = pct; lookup[q][b] = pct !== null ? -pct : null;
-    });
-    function heatColor(val) {
-        if (val === null) return {bg:'#111',fg:'#444'};
-        var intensity = Math.min(Math.abs(val) / 1.5, 1);
-        if (val > 0) { var g = Math.round(80 + intensity * 120); return {bg:'rgba(0,'+g+',60,0.35)',fg:'#'+(val>0.5?'14BC60':'4ddb8a')}; }
-        else { var r = Math.round(140 + intensity * 100); return {bg:'rgba('+r+',30,30,0.35)',fg:'#'+(val<-0.5?'F26666':'ff9090')}; }
-    }
-    var curs = FXP_CURRENCIES;
-    var html = '<table class="fxp-heatmap-table"><thead><tr><th></th>';
-    curs.forEach(function(c){ html += '<th>'+(IS_MOBILE ? c : FXP_FLAGS[c]+' '+c)+'</th>'; });
-    html += '</tr></thead><tbody>';
-    curs.forEach(function(base) {
-        html += '<tr><td class="fxp-row-label">'+(IS_MOBILE ? base : FXP_FLAGS[base]+' '+base)+'</td>';
-        curs.forEach(function(quote) {
-            if (base === quote) { html += '<td class="fxp-diag">—</td>'; }
-            else {
-                var val = (lookup[base] && lookup[base][quote] !== undefined) ? lookup[base][quote] : null;
-                var col = heatColor(val);
-                var display = val !== null ? (val >= 0 ? '+' : '') + val.toFixed(IS_MOBILE ? 1 : 2) + '%' : '—';
-                html += '<td style="background:'+col.bg+';color:'+col.fg+'" title="'+base+'/'+quote+'">'+display+'</td>';
-            }
-        });
-        html += '</tr>';
-    });
-    html += '</tbody></table>';
-    document.getElementById('fxpHeatmapContainer').innerHTML = html;
-}
+var FXP_CURRENCIES=['EUR','USD','GBP','AUD','CHF','JPY','CAD','NZD'];
+var FXP_FLAGS={EUR:'&#127466;&#127482;',USD:'&#127482;&#127480;',GBP:'&#127468;&#127463;',AUD:'&#127462;&#127482;',CHF:'&#127464;&#127469;',JPY:'&#127471;&#127477;',CAD:'&#127464;&#127462;',NZD:'&#127475;&#127487;'};
+var FXP_COLORS={EUR:'#1C79B3',USD:'#AD4055',GBP:'#2E832B',AUD:'#6C2835',CHF:'#885713',JPY:'#999999',CAD:'#13527B',NZD:'#1A4817'};
+var FXP_PAIRS=['EUR_USD','GBP_USD','AUD_USD','NZD_USD','USD_JPY','USD_CAD','USD_CHF','EUR_GBP','EUR_JPY','EUR_CAD','EUR_CHF','EUR_AUD','GBP_JPY','GBP_CAD','GBP_CHF','GBP_AUD','AUD_JPY','AUD_CAD','AUD_CHF','AUD_NZD','CAD_JPY','CAD_CHF','CHF_JPY','NZD_JPY','NZD_CAD','NZD_CHF'];
+var FXP_TF_CONFIG={D:{granularity:'H1',count:25,label:'Today'},W:{granularity:'H4',count:42,label:'1 Week'},M:{granularity:'D',count:22,label:'1 Month'},M3:{granularity:'D',count:65,label:'3 Months'},Y:{granularity:'W',count:52,label:'1 Year'}};
+var fxpTF='D';
+function fxpSetTF(tf,btn){fxpTF=tf;document.querySelectorAll('.fxp-tf-btn').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');fxpLoad();}
+async function fxpFetchPair(pair){var cfg=FXP_TF_CONFIG[fxpTF];var url=OANDA_URL+'/instruments/'+pair+'/candles?granularity='+cfg.granularity+'&count='+cfg.count+'&price=M';try{var r=await fetch(url,{headers:{'Authorization':'Bearer '+OANDA_KEY}});if(!r.ok)return null;var d=await r.json();if(!d.candles||d.candles.length<2)return null;var first=parseFloat(d.candles[0].mid.o);var last=parseFloat(d.candles[d.candles.length-1].mid.c);if(!first)return null;return((last-first)/first)*100;}catch(e){return null;}}
+async function fxpLoad(){var elStatus=document.getElementById('fxpStatus');var elBars=document.getElementById('fxpBarsContainer');var elHeat=document.getElementById('fxpHeatmapContainer');if(!elBars||!elHeat)return;if(elStatus)elStatus.textContent='Loading...';elBars.innerHTML='<div class="fxp-loading">Loading...</div>';elHeat.innerHTML='<div class="fxp-loading">Loading...</div>';var results={};var fetches=FXP_PAIRS.map(async function(pair){results[pair]=await fxpFetchPair(pair);});await Promise.all(fetches);var gotData=FXP_PAIRS.some(function(p){return results[p]!==null&&results[p]!==undefined;});if(!gotData){elBars.innerHTML='<div class="fxp-loading" style="color:#F26666">&#10060; No data — check OANDA key</div>';elHeat.innerHTML='';if(elStatus)elStatus.textContent='Error';return;}var curPerf={};FXP_CURRENCIES.forEach(function(cur){var sum=0,cnt=0;FXP_PAIRS.forEach(function(pair){var parts=pair.split('_');var pct=results[pair];if(pct===null||pct===undefined)return;if(parts[0]===cur){sum+=pct;cnt++;}else if(parts[1]===cur){sum-=pct;cnt++;}});curPerf[cur]=cnt>0?sum/cnt:null;});fxpRenderBars(curPerf);fxpRenderHeatmap(results);if(elStatus)elStatus.textContent=fmtTime();}
+function fxpRenderBars(curPerf){var entries=FXP_CURRENCIES.map(function(c){return{cur:c,val:curPerf[c]};}).filter(function(x){return x.val!==null;}).sort(function(a,b){return b.val-a.val;});var maxAbs=Math.max.apply(null,entries.map(function(e){return Math.abs(e.val);}));if(!maxAbs)maxAbs=1;var html='';entries.forEach(function(e){var isPos=e.val>=0;var color=isPos?'#C03939':'#2F995F';var barWidth=(Math.abs(e.val)/maxAbs*50).toFixed(1);var fillClass=isPos?'fxp-bar-fill-pos':'fxp-bar-fill-neg';html+='<div class="fxp-bar-row"><div class="fxp-bar-flag">'+FXP_FLAGS[e.cur]+'</div><div class="fxp-bar-cur" style="color:'+FXP_COLORS[e.cur]+'">'+e.cur+'</div><div class="fxp-bar-track"><div class="fxp-bar-zero"></div><div class="'+fillClass+'" style="width:'+barWidth+'%;background:'+color+'33;border:1px solid '+color+'"></div></div><div class="fxp-bar-val" style="color:'+color+'">'+(isPos?'+':'')+e.val.toFixed(3)+'%</div></div>';});document.getElementById('fxpBarsContainer').innerHTML=html;}
+function fxpRenderHeatmap(results){var lookup={};FXP_PAIRS.forEach(function(pair){var p=pair.split('_');var b=p[0],q=p[1];if(!lookup[b])lookup[b]={};if(!lookup[q])lookup[q]={};var pct=results[pair];lookup[b][q]=pct;lookup[q][b]=pct!==null?-pct:null;});function heatColor(val){if(val===null)return{bg:'#111',fg:'#444'};var intensity=Math.min(Math.abs(val)/1.5,1);if(val>0){var g=Math.round(80+intensity*120);return{bg:'rgba(0,'+g+',60,0.35)',fg:'#'+(val>0.5?'14BC60':'4ddb8a')};}else{var r=Math.round(140+intensity*100);return{bg:'rgba('+r+',30,30,0.35)',fg:'#'+(val<-0.5?'F26666':'ff9090')};}}var curs=FXP_CURRENCIES;var html='<table class="fxp-heatmap-table"><thead><tr><th></th>';curs.forEach(function(c){html+='<th>'+(IS_MOBILE?c:FXP_FLAGS[c]+' '+c)+'</th>';});html+='</tr></thead><tbody>';curs.forEach(function(base){html+='<tr><td class="fxp-row-label">'+(IS_MOBILE?base:FXP_FLAGS[base]+' '+base)+'</td>';curs.forEach(function(quote){if(base===quote){html+='<td class="fxp-diag">—</td>';}else{var val=(lookup[base]&&lookup[base][quote]!==undefined)?lookup[base][quote]:null;var col=heatColor(val);var display=val!==null?(val>=0?'+':'')+val.toFixed(IS_MOBILE?1:2)+'%':'—';html+='<td style="background:'+col.bg+';color:'+col.fg+'" title="'+base+'/'+quote+'">'+display+'</td>';}});html+='</tr>';});html+='</tbody></table>';document.getElementById('fxpHeatmapContainer').innerHTML=html;}
 
 window.addEventListener('load', function() {
     applyMobileLayout();
@@ -1229,13 +1136,10 @@ window.addEventListener('load', function() {
     chargerCOT();
     renderRates();
     setTimeout(syncScrollbarPlaceholder, 200);
-    setInterval(function() { actualiserDonnees(); }, 30 * 60 * 1000);
-    setInterval(function() { chargerCOT(); }, 15 * 60 * 1000);
-    setInterval(function() {
-        var p = document.getElementById('page-strength');
-        if (p && p.classList.contains('active')) { csLoad(); setTimeout(fxpLoad, 1000); }
-    }, 10 * 60 * 1000);
-    setInterval(function() { renderRates(); }, 60 * 60 * 1000);
+    setInterval(function(){ actualiserDonnees(); }, 30*60*1000);
+    setInterval(function(){ chargerCOT(); }, 15*60*1000);
+    setInterval(function(){var p=document.getElementById('page-strength');if(p&&p.classList.contains('active')){csLoad();setTimeout(fxpLoad,1000);}}, 10*60*1000);
+    setInterval(function(){ renderRates(); }, 60*60*1000);
 });
 </script>
 </body>
