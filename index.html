@@ -58,12 +58,18 @@
         .m-page { display:none; height:100%; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
         .m-page.active { display:block; }
 
-        /* ── TICKER ── */
+        /* ── FIX 1: TICKER — hauteur augmentée + pas de coupure ── */
         .m-ticker {
             background:var(--card);
             border-bottom:1px solid var(--border);
-            height:36px; overflow:hidden;
+            height:56px;
+            overflow:visible;
             flex-shrink:0;
+            display:flex;
+            align-items:center;
+        }
+        .m-ticker tv-ticker-tape {
+            width:100%;
         }
 
         /* ── PAGE TOP ── */
@@ -341,10 +347,13 @@
                 <button class="m-rfrsh" onclick="actualiserDonnees(this)">↻</button>
             </div>
         </div>
+
+        <!-- FIX 1: Ticker avec hauteur correcte, pas coupé -->
         <div class="m-ticker">
             <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js"></script>
             <tv-ticker-tape symbols="FX:EURUSD,OANDA:GBPUSD,FX:USDJPY,FX:USDCHF,FX:AUDUSD,FX:NZDUSD,FX:USDCAD,FX:AUDCAD,FX:AUDJPY,FX:EURJPY,FX:GBPJPY" theme="dark" transparent></tv-ticker-tape>
         </div>
+
         <div style="padding:10px 12px 0">
             <div class="m-seg">
                 <div class="m-seg-btn active" onclick="mSentSeg('table',this)">Table</div>
@@ -352,35 +361,34 @@
                 <div class="m-seg-btn" onclick="mSentSeg('cot',this)">COT</div>
             </div>
         </div>
-        <!-- TABLE -->
+
+        <!-- FIX 2: TABLE — colonnes Short Vol et Long Vol supprimées -->
         <div id="m-sent-table">
             <div class="m-card" style="margin-top:0">
                 <div class="m-tbl-wrap">
                     <table class="m-tbl">
                         <thead><tr>
                             <th style="text-align:left;padding-left:10px">Pair</th>
-                            <th>% Short</th><th>% Long</th>
-                            <th>Short Vol</th><th>Long Vol</th>
-                            <th>Short Pos</th><th>Long Pos</th><th>Total</th>
+                            <th>% Short</th>
+                            <th>% Long</th>
+                            <th>Short Pos</th>
+                            <th>Long Pos</th>
+                            <th>Total</th>
                         </tr></thead>
-                        <tbody id="m-sentBody"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody>
+                        <tbody id="m-sentBody"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
         </div>
-        <!-- CHART -->
+
+        <!-- FIX 3: CHART — première card (Long vs Short avec canvas) supprimée, garde seulement les barres -->
         <div id="m-sent-chart" style="display:none">
             <div class="m-card" style="margin-top:0">
-                <div class="m-card-hd">Long vs Short</div>
-                <div style="position:relative;height:420px;padding:10px">
-                    <canvas id="m-sentChart" style="position:absolute;inset:10px;width:calc(100% - 20px) !important;height:calc(100% - 20px) !important"></canvas>
-                </div>
-            </div>
-            <div class="m-card">
                 <div class="m-card-hd">Long/Short — All Pairs</div>
                 <div class="m-sbars" id="m-sentBars"></div>
             </div>
         </div>
+
         <!-- COT -->
         <div id="m-sent-cot" style="display:none">
             <div style="padding:6px 12px 4px;display:flex;align-items:center;justify-content:space-between">
@@ -696,7 +704,7 @@ function mSentSeg(name, btn) {
     el('m-sent-table').style.display = name==='table'?'':'none';
     el('m-sent-chart').style.display = name==='chart'?'':'none';
     el('m-sent-cot').style.display   = name==='cot'  ?'':'none';
-    if (name==='chart' && Object.keys(_sentMap).length) mAfficherGraphique(_sentMap);
+    // FIX 3: plus besoin de dessiner le chart canvas (supprimé), juste les barres
 }
 var _mCotSeg = 'lev';
 function mCotSeg(name, btn) {
@@ -767,11 +775,12 @@ function mAfficherTableau(map) {
     ALL_PAIRS.forEach(function(pair){
         var d=map[pair]; if(!d) return;
         var row=document.createElement('tr');
+        // FIX 2: 6 colonnes seulement (Short Vol et Long Vol supprimées)
         row.innerHTML='<td class="m-pair-lbl">'+pair+'</td>'+
             '<td style="background:'+gc(d.shortPercentage,1)+';color:#fff;font-weight:700">'+d.shortPercentage+'%</td>'+
             '<td style="background:'+gc(d.longPercentage,0)+';color:#fff;font-weight:700">'+d.longPercentage+'%</td>'+
-            '<td>'+d.shortVolume.toLocaleString()+'</td><td>'+d.longVolume.toLocaleString()+'</td>'+
-            '<td>'+d.shortPositions.toLocaleString()+'</td><td>'+d.longPositions.toLocaleString()+'</td>'+
+            '<td>'+d.shortPositions.toLocaleString()+'</td>'+
+            '<td>'+d.longPositions.toLocaleString()+'</td>'+
             '<td>'+d.totalPositions.toLocaleString()+'</td>';
         tbody.appendChild(row);
     });
@@ -787,14 +796,6 @@ function mAfficherBars(map) {
             '<div class="m-sbar-l">'+d.longPercentage+'%</div></div>';
         c.appendChild(row);
     });
-}
-function mAfficherGraphique(map) {
-    var ctx=el('m-sentChart'); if(!ctx) return;
-    if(_sentChart) _sentChart.destroy();
-    var lb=[],sD=[],lD=[];
-    ALL_PAIRS.forEach(function(p){var d=map[p];if(d){lb.push(p);sD.push(d.shortPercentage);lD.push(d.longPercentage);}});
-    _sentChart=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{label:'Short',data:sD,backgroundColor:'#C03939',borderWidth:0},{label:'Long',data:lD,backgroundColor:'#2F995F',borderWidth:0}]},
-        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.x+'%';}}}}  ,scales:{x:{stacked:true,max:100,display:false},y:{stacked:true,ticks:{font:{size:8},color:'#fff'},grid:{color:'#1e2230'}}}}});
 }
 
 /* ── DESKTOP sentiment ── */
@@ -888,7 +889,7 @@ function renderCOTPies(containerId,data,key){
         var cid=containerId+'_'+d.name;
         item.innerHTML='<canvas id="'+cid+'" width="'+sz+'" height="'+sz+'"></canvas><div class="'+(isMini?'m-cot-pie-lbl':'d-cot-pie-label')+'">'+d.name+'</div>';
         container.appendChild(item);
-        _cotPieCharts[cid]=new Chart(el(cid),{type:'doughnut',data:{labels:['Long','Short'],datasets:[{data:[cat.lng,cat.sht],backgroundColor:['rgb(47,153,95)','rgb(192,57,57)'],borderColor:['#161616','#161616'],borderWidth:2}]},options:{responsive:false,cutout:'45%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+(c.label==='Long'?pctL:pctS)+'%';}}}}}});
+        _cotPieCharts[cid]=new Chart(el(cid),{type:'doughnut',data:{labels:['Long','Short'],datasets:[{data:[cat.lng,cat.sht],backgroundColor:['rgb(47,153,95)','rgb(192,57,57)'],borderColor:['#161616','#161616'],borderWidth:2}]},options:{responsive:false,cutout:'45%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+c.label+': '+(c.label==='Long'?pctL:pctS)+'%';}}}}}});
     });
 }
 
@@ -974,7 +975,6 @@ function renderCSChart(labels,series){
     _csChart.options.scales.x.max=totalLen-1;
     _csChart.update('none');
     buildCSLegend();
-    // Desktop: add wheel/drag
     if (!IS_MOBILE) { addCSInteractions(ctx); }
 }
 
@@ -1114,7 +1114,6 @@ function renderRates(){
     var isMini=IS_MOBILE;
     var cardsId=isMini?'m-irCards':'d-irCards', barsId=isMini?'m-irBars':'d-irBars', histId=isMini?'m-irHist':'d-irHist', stId=isMini?'m-irStatus':'d-irStatus';
 
-    // Cards
     var grid=el(cardsId); if(grid){ grid.innerHTML='';
     IR_BANKS.forEach(function(b){
         var bps=b.lastChangeBps||0,changeStr=bps===0?'Unchanged':(bps>0?'▲ +':'▼ ')+Math.abs(bps)+'bps';
@@ -1146,7 +1145,6 @@ function renderRates(){
         grid.appendChild(card);
     });}
 
-    // Bars
     var maxRate=Math.max.apply(null,IR_BANKS.map(function(b){return b.rate;}));
     var barsContainer=el(barsId); if(barsContainer){ barsContainer.innerHTML='';
     IR_BANKS.slice().sort(function(a,b){return b.rate-a.rate;}).forEach(function(b){
@@ -1162,7 +1160,6 @@ function renderRates(){
         barsContainer.appendChild(row);
     });}
 
-    // Hist
     var histGrid=el(histId); if(histGrid){ histGrid.innerHTML='';
     IR_BANKS.forEach(function(b){
         var wrap=document.createElement('div'); wrap.className=isMini?'m-ir-hist-item':'d-ir-hist-card';
