@@ -35,7 +35,7 @@
         th { background:#161616; font-weight:bold; color:#fff; }
         td { background:#161616; color:#fff; }
         .table-head-fixed th:last-child { padding-right:calc(8px + 8px); box-sizing:border-box; }
-        /* ---- SENTIMENT BAR TABLE (replaces canvas on all devices) ---- */
+
         .chart-sentiment { background:#161616; border:1px solid #1e2230; border-radius:8px; height:100%; display:flex; flex-direction:column; overflow:hidden; }
         .chart-sentiment-header { flex-shrink:0; padding:10px 14px 6px; display:flex; justify-content:space-between; font-size:11px; color:#888; font-weight:bold; border-bottom:1px solid #1e2230; }
         .chart-sentiment-scroll { flex:1; overflow-y:scroll; overflow-x:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:thin; scrollbar-color:#888 #1e2230; }
@@ -54,9 +54,6 @@
         .cot-chart-wrap h3 { text-align:center; margin-bottom:10px; font-size:14px; color:#fff; font-weight:bold; }
 
         .calendar-section { background:#161616; padding:15px 15px 6px 15px; border:1px solid #1e2230; border-radius:8px; height:95vh; display:flex; flex-direction:column; }
-        .ecw-copyright { text-align:center; font-size:10px; color:#555; margin-top:4px; }
-        .ecw-copyright a { color:#555; text-decoration:none; }
-        .ecw-copyright a:hover { color:#888; }
 
         .cot-pies { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px; }
         .cot-pie-item { display:flex; flex-direction:column; align-items:center; gap:4px; }
@@ -101,7 +98,6 @@
         .cs-tf-btn { padding:5px 12px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; }
         .cs-tf-btn:hover { background:#1e2230; color:#fff; }
         .cs-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
-        .cs-header-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
         .cs-legend { display:flex; flex-wrap:wrap; gap:8px; }
         .cs-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; cursor:pointer; padding:3px 7px; border-radius:4px; border:1px solid transparent; transition:border-color .15s; }
         .cs-legend-item:hover { border-color:#1e2230; }
@@ -109,7 +105,6 @@
         .cs-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
         .cs-layout { display:grid; grid-template-columns:1fr 340px; gap:15px; height:60vh; }
 
-        /* INTEREST RATES */
         .ir-layout { display:flex; flex-direction:column; gap:15px; }
         .ir-cards-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:6px; }
         .ir-card { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:6px; position:relative; overflow:hidden; transition:border-color .2s; }
@@ -139,16 +134,13 @@
         .ir-hist-title { font-size:12px; font-weight:bold; color:#ccc; margin-bottom:10px; text-align:center; }
         .ir-hist-wrap { position:relative; height:120px; }
 
-        /* MACRO PAGE */
         .macro-page-section { margin-bottom:30px; }
         .macro-page-section-title { background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:14px; color:#fff; border:1px solid #1e2230; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0; }
         .macro-page-section-title .section-title-text { flex:1; text-align:center; }
         .macro-page-section-title .section-right { display:flex; align-items:center; gap:8px; width:160px; justify-content:flex-end; }
         .macro-page-section-title .section-left { width:160px; }
-
         .source-badge { font-size:9px; color:#555; padding:2px 6px; border:1px solid #222; border-radius:4px; }
 
-        /* PAIRS SELECTOR */
         .pairs-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
         .pairs-modal-overlay.open { display:flex; }
         .pairs-modal { background:#161616; border:1px solid #1e2230; border-radius:12px; padding:24px; width:600px; max-width:95vw; max-height:85vh; display:flex; flex-direction:column; gap:14px; }
@@ -171,12 +163,10 @@
         .pairs-edit-btn { padding:5px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px; color:#aaa; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; }
         .pairs-edit-btn:hover { background:#1e2230; color:#fff; }
 
-        /* FX PERFORMANCE */
         .fxp-tf-btn { padding:6px 16px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; transition:all .15s; }
         .fxp-tf-btn:hover { background:#1e2230; color:#fff; }
         .fxp-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
 
-        /* Performance bars */
         .fxp-bars-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
         .fxp-bars-title { font-size:12px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
         .fxp-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
@@ -188,7 +178,6 @@
         .fxp-bar-val { font-size:11px; font-weight:bold; width:54px; text-align:right; flex-shrink:0; }
         .fxp-bar-flag { font-size:14px; width:20px; flex-shrink:0; }
 
-        /* Heatmap */
         .fxp-heatmap-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
         .fxp-heatmap-title { font-size:12px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
         .fxp-heatmap-table { border-collapse:collapse; width:100%; min-width:560px; }
@@ -199,33 +188,15 @@
         .fxp-heatmap-table .fxp-diag { background:#111; color:#555; }
         .fxp-loading { text-align:center; padding:40px; color:#555; font-size:13px; }
 
-        /* ---- SCROLLBAR WIDTH COMPENSATION ---- */
-        .table-head-fixed .scrollbar-spacer {
-            display: inline-block;
-            width: 10px;
-            flex-shrink: 0;
-        }
-        .table-head-fixed-inner {
-            display: flex;
-            align-items: stretch;
-        }
-        .table-head-fixed-inner table {
-            flex: 1;
-            min-width: 0;
-        }
-        .scrollbar-placeholder {
-            width: 10px;
-            flex-shrink: 0;
-            background: #161616;
-            border-bottom: 1px solid #1e2230;
-        }
+        .table-head-fixed .scrollbar-spacer { display: inline-block; width: 10px; flex-shrink: 0; }
+        .table-head-fixed-inner { display: flex; align-items: stretch; }
+        .table-head-fixed-inner table { flex: 1; min-width: 0; }
+        .scrollbar-placeholder { width: 10px; flex-shrink: 0; background: #161616; border-bottom: 1px solid #1e2230; }
 
         /* ============================================================
-           MOBILE BOTTOM NAV BAR
+           MOBILE BOTTOM NAV
            ============================================================ */
-        .mobile-bottom-nav {
-            display: none;
-        }
+        .mobile-bottom-nav { display: none; }
 
         /* ============================================================
            MOBILE STYLES
@@ -240,7 +211,6 @@
             .ticker-section { margin-bottom: 10px; padding: 2px 4px; }
             .tabs { display: none !important; }
 
-            /* ---- BOTTOM NAV BAR ---- */
             .mobile-bottom-nav {
                 display: flex;
                 position: fixed;
@@ -255,68 +225,63 @@
                 align-items: stretch;
             }
             .mob-tab {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 3px;
-                background: transparent;
-                border: none;
-                color: #555;
-                font-size: 10px;
-                font-weight: 600;
-                cursor: pointer;
-                padding: 6px 2px;
-                transition: color 0.15s;
-                -webkit-tap-highlight-color: transparent;
+                flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                gap: 3px; background: transparent; border: none; color: #555; font-size: 10px; font-weight: 600;
+                cursor: pointer; padding: 6px 2px; transition: color 0.15s; -webkit-tap-highlight-color: transparent;
             }
             .mob-tab.active { color: #4a8fff; }
             .mob-tab svg { width: 22px; height: 22px; stroke-width: 1.6; fill: none; }
             .mob-tab.active svg { stroke: #4a8fff; }
             .mob-tab:not(.active) svg { stroke: #555; }
 
-            /* ---- PAGE HEADER ---- */
             .page-header {
-                height: auto;
-                min-height: 44px;
-                padding: 8px 10px;
-                flex-wrap: wrap;
-                gap: 6px;
-                font-size: 12px;
+                height: auto; min-height: 44px; padding: 8px 10px;
+                flex-wrap: wrap; gap: 6px; font-size: 12px;
             }
             .page-header .ph-left { width: auto; }
             .page-header .ph-right { width: auto; }
             .page-header .ph-center { flex: none; width: 100%; text-align: center; order: -1; }
 
-            /* ---- SENTIMENT PAGE ---- */
-            .sentiment-headers {
-                grid-template-columns: 1fr;
-                gap: 8px;
-                margin-bottom: 8px;
-            }
+            .sentiment-headers { grid-template-columns: 1fr; gap: 8px; margin-bottom: 8px; }
 
-            /* Stack table + chart vertically */
+            /* ============================================================
+               FIX PRINCIPAL — Stack vertical + hauteurs fixes + scroll iOS
+               ============================================================ */
             .main-section {
                 grid-template-columns: 1fr;
                 height: auto;
-                gap: 12px;
+                gap: 0;
                 margin-bottom: 12px;
+                /* On ne met PAS de height fixe ici, chaque enfant gère sa hauteur */
             }
 
-            /* ============================================================
-               FIX 1 — TABLE SCROLL
-               Give the table-container a fixed height and make sure
-               the inner scroll div uses -webkit-overflow-scrolling
-               ============================================================ */
+            /* TABLE : hauteur fixe, flex colonne, scroll interne */
             .table-container {
-                height: 340px;
-                min-height: 240px;
-                max-height: 400px;
-                display: flex;
-                flex-direction: column;
+                height: 300px !important;
+                min-height: 300px !important;
+                max-height: 300px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+                border-radius: 8px 8px 0 0 !important;
+                border-bottom: none !important;
             }
-            /* Hide verbose columns on mobile */
+
+            /* L'en-tête ne bouge pas */
+            .table-head-fixed {
+                flex-shrink: 0 !important;
+            }
+
+            /* Zone de scroll — CRITIQUE pour iOS */
+            .table-scroll {
+                flex: 1 !important;
+                min-height: 0 !important;
+                overflow-y: scroll !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+
+            /* Cacher colonnes verbose sur mobile */
             .table-container th:nth-child(4),
             .table-container th:nth-child(5),
             .table-container th:nth-child(6),
@@ -327,61 +292,49 @@
             .table-container td:nth-child(7) { display: none; }
             .table-container th, .table-container td { font-size: 11px; padding: 5px 4px; }
 
-            /* CRITICAL: make scroll work on iOS */
-            .table-scroll {
-                flex: 1;
+            /* BARRES SENTIMENT : hauteur fixe identique, raccordé au tableau */
+            .chart-sentiment {
+                height: 300px !important;
+                min-height: 300px !important;
+                max-height: 300px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+                border-radius: 0 0 8px 8px !important;
+                border-top: none !important;
+            }
+
+            /* Header fixe des barres */
+            .chart-sentiment-header {
+                flex-shrink: 0 !important;
+            }
+
+            /* Scroll des barres — CRITIQUE pour iOS */
+            .chart-sentiment-scroll {
+                flex: 1 !important;
+                min-height: 0 !important;
                 overflow-y: scroll !important;
                 overflow-x: hidden !important;
                 -webkit-overflow-scrolling: touch !important;
-                /* Prevent iOS from collapsing the scroll container */
-                min-height: 0;
-            }
-
-            /* Sentiment bar scroll — same height as table on mobile */
-            .chart-sentiment {
-                height: 340px !important;
-                min-height: 240px !important;
-                max-height: 400px !important;
+                /* Forcer un contexte de scroll sur iOS */
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
             }
 
             /* ---- COT SECTION ---- */
-            .cot-section {
-                grid-template-columns: 1fr;
-                gap: 10px;
-                margin-bottom: 12px;
-            }
-            .cot-pies {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 4px;
-                padding: 8px;
-            }
+            .cot-section { grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
+            .cot-pies { grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 8px; }
             .cot-pie-item canvas { width: 60px!important; height: 60px!important; }
             .cot-pie-label { font-size: 9px; }
             .cot-scroll table th, .cot-scroll table td { font-size: 10px; padding: 4px 3px; }
-            .cot-scroll table th:nth-child(5),
-            .cot-scroll table td:nth-child(5) { display: none; }
+            .cot-scroll table th:nth-child(5), .cot-scroll table td:nth-child(5) { display: none; }
 
-            /* ---- HIST GRID ---- */
             #histGrid { grid-template-columns: 1fr!important; gap: 10px!important; }
 
-            /* ---- CURRENCY STRENGTH ---- */
-            .cs-layout {
-                grid-template-columns: 1fr;
-                height: auto;
-                gap: 12px;
-            }
+            .cs-layout { grid-template-columns: 1fr; height: auto; gap: 12px; }
             .cs-chart-wrap { padding: 10px; }
-            .cs-chart-inner {
-                height: 300px !important;
-                min-height: 300px !important;
-                position: relative !important;
-            }
-            #csChart {
-                position: absolute !important;
-                top: 0 !important; left: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
-            }
+            .cs-chart-inner { height: 300px !important; min-height: 300px !important; position: relative !important; }
+            #csChart { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; }
             .cs-sidebar { flex-direction: column; }
             .cs-rank-card { max-height: 320px; }
             .cs-rank-body { max-height: 250px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -391,7 +344,6 @@
             .cs-legend { gap: 5px; }
             .cs-legend-item { font-size: 10px; padding: 2px 5px; }
 
-            /* ---- FX PERFORMANCE ---- */
             .fxp-tf-btn { padding: 6px 8px; font-size: 11px; min-height: 36px; }
             #strength-perf-grid { grid-template-columns: 1fr!important; }
             .fxp-bars-card { padding: 12px; }
@@ -404,7 +356,6 @@
             .fxp-bar-val { font-size: 10px; width: 46px; }
             .fxp-bar-flag { font-size: 12px; }
 
-            /* ---- INTEREST RATES ---- */
             .ir-cards-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
             .ir-card { padding: 12px; gap: 4px; }
             .ir-bank-name { font-size: 10px; }
@@ -418,35 +369,24 @@
             .ir-bar-row { gap: 6px; }
             .ir-bar-label { width: 36px; font-size: 11px; }
 
-            /* ---- MACRO PAGE SECTION TITLE ---- */
             .macro-page-section-title {
-                height: auto;
-                min-height: 44px;
-                padding: 8px 10px;
-                flex-wrap: wrap;
-                font-size: 12px;
+                height: auto; min-height: 44px; padding: 8px 10px; flex-wrap: wrap; font-size: 12px;
             }
             .macro-page-section-title .section-left { width: auto; }
             .macro-page-section-title .section-right { width: auto; }
             .macro-page-section-title .section-title-text { width: 100%; text-align: center; order: -1; }
 
-            /* ---- CALENDAR ---- */
             .calendar-section { height: 85vh; padding: 8px; }
 
-            /* ---- PAIRS MODAL ---- */
             .pairs-modal { padding: 16px; gap: 10px; width: 95vw; max-height: 90vh; }
             .pairs-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; }
             .pair-chip { padding: 5px 6px; font-size: 11px; }
 
-            /* ---- COT DATE / HEADER ---- */
             .cot-header { font-size: 12px; padding: 8px; }
-
-            /* History chart wrappers */
             #histGrid > div { padding: 8px!important; }
             #histGrid canvas { height: 110px!important; }
         }
 
-        /* Extra small phones */
         @media (max-width: 375px) {
             .ir-cards-grid { grid-template-columns: 1fr; }
             .cot-pies { grid-template-columns: repeat(4, 1fr); }
@@ -715,7 +655,6 @@
 </nav>
 
 <script>
-/* ========= MOBILE DETECTION ========= */
 var IS_MOBILE = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
 function applyMobileLayout() {
@@ -724,15 +663,10 @@ function applyMobileLayout() {
     if (perfGrid) perfGrid.style.gridTemplateColumns = '1fr';
     var histGrid = document.getElementById('histGrid');
     if (histGrid) histGrid.style.gridTemplateColumns = '1fr';
-    document.querySelectorAll('.tab-btn, .cs-tf-btn, .fxp-tf-btn, .pairs-edit-btn').forEach(function(btn) {
-        btn.style.minHeight = '40px';
-    });
 }
 
-/* ========= HELPERS ========= */
 function fmtTime(){ return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
 
-/* ========= SCROLLBAR WIDTH SYNC ========= */
 function syncScrollbarPlaceholder() {
     if (IS_MOBILE) return;
     var scroll = document.getElementById('sentimentScroll');
@@ -747,7 +681,6 @@ window.addEventListener('resize', function() {
     applyMobileLayout();
 });
 
-/* ========= TAB NAV ========= */
 function showTab(name) {
     document.querySelectorAll('.tab-page').forEach(function(p){ p.classList.remove('active'); });
     document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
@@ -878,18 +811,11 @@ function afficherTableau(map) {
 }
 
 function gc(p, s) {
-    var i = p / 100;
-    var bg = 24;
+    var i = p / 100, bg = 24;
     if (s) {
-        var r = ~~(bg + (192 - bg) * i);
-        var g = ~~(bg + (57  - bg) * i);
-        var b = ~~(bg + (57  - bg) * i);
-        return 'rgb(' + r + ',' + g + ',' + b + ')';
+        return 'rgb('+~~(bg+(192-bg)*i)+','+~~(bg+(57-bg)*i)+','+~~(bg+(57-bg)*i)+')';
     } else {
-        var r2 = ~~(bg + (47  - bg) * i);
-        var g2 = ~~(bg + (153 - bg) * i);
-        var b2 = ~~(bg + (95  - bg) * i);
-        return 'rgb(' + r2 + ',' + g2 + ',' + b2 + ')';
+        return 'rgb('+~~(bg+(47-bg)*i)+','+~~(bg+(153-bg)*i)+','+~~(bg+(95-bg)*i)+')';
     }
 }
 
@@ -897,33 +823,23 @@ function afficherGraphique(map) {
     var PAIRS = getActivePairs();
     var container = document.getElementById('sentimentBarsScroll');
     if (!container) return;
-
     var rows = [];
     PAIRS.forEach(function(p) {
         var d = map[p];
         if (!d) return;
         rows.push({ pair: p, short: d.shortPercentage, long: d.longPercentage });
     });
-
     if (!rows.length) { container.innerHTML = '<div style="text-align:center;padding:20px;color:#aaa">No data</div>'; return; }
-
     var html = '';
     rows.forEach(function(r) {
-        // Only show percentage label if bar is wide enough (>=12%)
         var shortLabel = r.short >= 12 ? r.short + '%' : '';
         var longLabel  = r.long  >= 12 ? r.long  + '%' : '';
-        html +=
-            '<div class="sent-bar-row">' +
-            '<div class="sent-bar-pair">' + r.pair + '</div>' +
-            '<div class="sent-bar-track">' +
-            '<div class="sent-bar-short" style="width:' + r.short + '%">' +
-            '<span class="sent-bar-pct">' + shortLabel + '</span>' +
-            '</div>' +
-            '<div class="sent-bar-long" style="width:' + r.long + '%">' +
-            '<span class="sent-bar-pct">' + longLabel + '</span>' +
-            '</div>' +
-            '</div>' +
-            '</div>';
+        html += '<div class="sent-bar-row">'+
+            '<div class="sent-bar-pair">'+r.pair+'</div>'+
+            '<div class="sent-bar-track">'+
+            '<div class="sent-bar-short" style="width:'+r.short+'%"><span class="sent-bar-pct">'+shortLabel+'</span></div>'+
+            '<div class="sent-bar-long" style="width:'+r.long+'%"><span class="sent-bar-pct">'+longLabel+'</span></div>'+
+            '</div></div>';
     });
     container.innerHTML = html;
 }
@@ -999,27 +915,18 @@ function renderCSChart(labels,series){var ctx=document.getElementById('csChart')
     if (IS_MOBILE) {
         var touchStartX = null, touchStartMin = null, touchStartMax = null;
         ctx.addEventListener('touchstart', function(e) {
-            if (e.touches.length === 1) {
-                touchStartX = e.touches[0].clientX;
-                touchStartMin = csChart.options.scales.x.min;
-                touchStartMax = csChart.options.scales.x.max;
-            }
+            if (e.touches.length === 1) { touchStartX = e.touches[0].clientX; touchStartMin = csChart.options.scales.x.min; touchStartMax = csChart.options.scales.x.max; }
         }, {passive: true});
         ctx.addEventListener('touchmove', function(e) {
             if (e.touches.length === 1 && touchStartX !== null && csChart) {
                 var dx = e.touches[0].clientX - touchStartX;
                 var rect = ctx.getBoundingClientRect();
-                var chartWidth = rect.width;
                 var range = touchStartMax - touchStartMin;
-                var shift = -(dx / chartWidth) * range;
+                var shift = -(dx / rect.width) * range;
                 var totalLen = csChart.data.labels.length;
                 var newMin = Math.max(0, touchStartMin + shift);
                 var newMax = Math.min(totalLen - 1, touchStartMax + shift);
-                if (newMax - newMin >= 20) {
-                    csChart.options.scales.x.min = newMin;
-                    csChart.options.scales.x.max = newMax;
-                    csChart.update('none');
-                }
+                if (newMax - newMin >= 20) { csChart.options.scales.x.min = newMin; csChart.options.scales.x.max = newMax; csChart.update('none'); }
             }
         }, {passive: true});
         ctx.addEventListener('touchend', function() { touchStartX = null; }, {passive: true});
@@ -1033,9 +940,7 @@ function renderCSRank(series,bodyId){var vals=CS_CURRENCIES.map(function(cur){va
 function csSetTF(tf,btn){csTF=tf;document.querySelectorAll('#sub-rsi .cs-tf-btn').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');csLoad();}
 function csRefresh(){csLoad();}
 
-/* =============================================
-   INTEREST RATES
-   ============================================= */
+/* ========= INTEREST RATES ========= */
 var IR_BANKS=[
     {name:'Federal Reserve',short:'Fed',flag:'&#127482;&#127480;',currency:'USD',rate:3.625,prev:4.375,color:'#1C79B3',nextMeeting:'Apr 28, 2026',expectation:'Hold (3.5–3.75)',expectationDir:0,cpi:2.4,history:[5.50,5.25,5.00,4.75,4.50,4.25,4.00,3.75,3.50,3.25,3.00,2.75,3.625,3.625],lastChange:'Dec 10, 2025',lastChangeBps:-25},
     {name:'European Central Bank',short:'ECB',flag:'&#127466;&#127482;',currency:'EUR',rate:2.15,prev:2.40,color:'#2E832B',nextMeeting:'Apr 29, 2026',expectation:'Hold — Iran war risk',expectationDir:0,cpi:2.6,history:[4.50,4.00,3.75,3.50,3.25,3.00,2.75,2.50,2.40,2.25,2.15,2.15,2.15,2.15],lastChange:'Jun 5, 2025',lastChangeBps:0},
