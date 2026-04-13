@@ -83,6 +83,7 @@
         .cs-chart-wrap { background:#0e111a; border:1px solid #1e2230; border-radius:8px; padding:15px; display:flex; flex-direction:column; }
         .cs-chart-inner { flex:1; position:relative; min-height:0; margin-top:10px; background:#101010; border-radius:6px; overflow:hidden; }
         #csChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
+        #csmChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
         .cs-sidebar { display:flex; flex-direction:column; gap:10px; }
         .cs-rank-card { background:#0e111a; border:1px solid #1e2230; border-radius:8px; overflow:hidden; flex:1; display:flex; flex-direction:column; }
         .cs-rank-header { padding:10px 14px; font-weight:bold; font-size:13px; border-bottom:1px solid #1e2230; text-align:center; }
@@ -530,6 +531,37 @@
                     <div class="fxp-heatmap-card" style="display:flex;flex-direction:column;">
                         <div class="fxp-heatmap-title">Pair Performance Heatmap</div>
                         <div id="fxpHeatmapContainer" style="flex:1;overflow-x:auto;"><div class="fxp-loading">Loading...</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ Currency Strength (Mataf-style cumulative index) ============ -->
+            <div style="margin-top:15px;">
+                <div class="page-header">
+                    <div class="ph-left"></div>
+                    <div class="ph-center">Currency Strength Index &mdash; Mataf Method</div>
+                    <div class="ph-right"><span class="ph-status" id="csmStatus">Loading...</span></div>
+                </div>
+                <div class="cs-layout">
+                    <div class="cs-chart-wrap">
+                        <div class="cs-header-row">
+                            <div class="cs-tf-btns">
+                                <button class="cs-tf-btn" onclick="csmSetTF('M5',this)">5 Min</button>
+                                <button class="cs-tf-btn" onclick="csmSetTF('M15',this)">15 Min</button>
+                                <button class="cs-tf-btn active" onclick="csmSetTF('H1',this)">Hourly</button>
+                                <button class="cs-tf-btn" onclick="csmSetTF('H4',this)">4H</button>
+                                <button class="cs-tf-btn" onclick="csmSetTF('D',this)">Daily</button>
+                                <button class="cs-tf-btn" onclick="csmRefresh()" style="margin-left:4px">&#8634;</button>
+                            </div>
+                            <div class="cs-legend" id="csmLegend"></div>
+                        </div>
+                        <div class="cs-chart-inner"><canvas id="csmChart"></canvas></div>
+                    </div>
+                    <div class="cs-sidebar">
+                        <div class="cs-rank-card">
+                            <div class="cs-rank-header">Strength (Cumulative %)</div>
+                            <div class="cs-rank-body" id="csmRankBody"><div class="loading">Loading...</div></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1154,8 +1186,107 @@ function renderCSChart(labels,series){
 function csResetZoom(){if(!csChart)return;var totalLen=csChart.data.labels.length,viewLen=CS_VIEW[csTF]||100;var xMin=Math.max(0,totalLen-viewLen);csChart.options.scales.x.min=xMin;csChart.options.scales.x.max=totalLen-1;csChart.update('none');}
 function buildCSLegend(){var legend=document.getElementById('csLegend');if(!legend)return;legend.innerHTML='';CS_CURRENCIES.forEach(function(cur){var item=document.createElement('div');item.className='cs-legend-item'+(csHidden.has(cur)?' hidden':'');item.innerHTML='<div class="cs-legend-dot" style="background:'+CS_COLORS[cur]+'"></div><span>'+cur+'</span>';item.onclick=function(){if(csHidden.has(cur)){csHidden.delete(cur);item.classList.remove('hidden');}else{csHidden.add(cur);item.classList.add('hidden');}if(!csChart)return;var ds=csChart.data.datasets.find(function(d){return d.label===cur;});if(ds){ds.hidden=csHidden.has(cur);csChart.update();}};legend.appendChild(item);});}
 function renderCSRank(series,bodyId){var vals=CS_CURRENCIES.map(function(cur){var s=series[cur],f=s?s.filter(function(v){return v!==null;}):[];return{cur:cur,val:f.length?f[f.length-1]:null};}).filter(function(x){return x.val!==null;});vals.sort(function(a,b){return b.val-a.val;});var body=document.getElementById(bodyId);if(!body)return;body.innerHTML='';var max=vals.length?vals[0].val:100,min=vals.length?vals[vals.length-1].val:0;vals.forEach(function(item,i){var pct=max===min?50:Math.round((item.val-min)/(max-min)*100),color=CS_COLORS[item.cur],row=document.createElement('div');var isPC=bodyId==='csRankBody';row.className=isPC?'cs-rank-row':'mob-cs-rank-row';row.innerHTML='<div class="'+(isPC?'cs':'mob-cs')+'-rank-pos">'+(i+1)+'</div><div class="'+(isPC?'cs':'mob-cs')+'-rank-dot" style="background:'+color+'"></div><div class="'+(isPC?'cs':'mob-cs')+'-rank-name">'+item.cur+'</div><div class="'+(isPC?'cs':'mob-cs')+'-rank-bar-wrap"><div class="'+(isPC?'cs':'mob-cs')+'-rank-bar" style="width:'+pct+'%;background:'+color+'"></div></div><div class="'+(isPC?'cs':'mob-cs')+'-rank-val" style="color:'+color+'">'+item.val.toFixed(1)+'</div>';body.appendChild(row);});var strong=vals.filter(function(x){return x.val>=55;}).map(function(x){return x.cur;}),weak=vals.filter(function(x){return x.val<=45;}).map(function(x){return x.cur;});if(strong.length||weak.length){var s=document.createElement('div');s.style.cssText='margin-top:8px;padding:8px;border-top:1px solid #1e2230;font-size:11px;color:#aaa;line-height:1.7';s.innerHTML=(strong.length?'<div><b style="color:#2E832B">Bullish</b>: '+strong.join(', ')+'</div>':'')+(weak.length?'<div><b style="color:#AD3644">Bearish</b>: '+weak.join(', ')+'</div>':'');body.appendChild(s);}}
-function csSetTF(tf,btn){csTF=tf;document.querySelectorAll('#sub-rsi .cs-tf-btn').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');csLoad();}
+function csSetTF(tf,btn){csTF=tf;if(btn){var parent=btn.parentElement;parent.querySelectorAll('.cs-tf-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');}csLoad();}
 function csRefresh(){csLoad();}
+
+/* =========================================================
+   CURRENCY STRENGTH — MATAF METHOD (cumulative average of % variations)
+   Each currency = arithmetic mean of % variations vs the 7 others, base=0 at first candle of window
+   ========================================================= */
+var csmTF='H1', csmChart=null, csmHidden=new Set(), _csmRawTimes=[], _csmHoverIdx=-1;
+var CSM_PAIRS_NEEDED=['EUR_USD','EUR_GBP','EUR_AUD','EUR_JPY','EUR_CAD','EUR_CHF','EUR_NZD','GBP_USD','GBP_AUD','GBP_JPY','GBP_CAD','GBP_CHF','GBP_NZD','AUD_USD','AUD_JPY','AUD_CAD','AUD_CHF','AUD_NZD','USD_JPY','USD_CAD','USD_CHF','NZD_USD','NZD_CAD','NZD_CHF','NZD_JPY','CAD_JPY','CAD_CHF','CHF_JPY'];
+function csmGetRate(pair,closes,i){
+    /* returns price[i] of base/quote relationship as a ratio normalized to first index of window */
+    return closes[i];
+}
+async function csmLoad(){
+    var el=document.getElementById('csmStatus'); if(el)el.textContent='Loading...';
+    var results={};
+    await Promise.all(CSM_PAIRS_NEEDED.map(async function(p){results[p]=await fetchCandles(p,CS_COUNT[csmTF]+5,CS_TF[csmTF]);}));
+    var ok=CSM_PAIRS_NEEDED.filter(function(p){return results[p]&&results[p].closes.length>5;});
+    if(!ok.length){if(el)el.textContent='Error';return;}
+    var lens=ok.map(function(p){return results[p].closes.length;}),minLen=Math.min.apply(null,lens),chartLen=Math.min(minLen,CS_COUNT[csmTF]);
+    /* trim each pair to last chartLen candles */
+    var trimmed={},rawTimes=null;
+    ok.forEach(function(p){var c=results[p].closes,t=results[p].times,start=c.length-chartLen;trimmed[p]={closes:c.slice(start),times:t.slice(start)};if(!rawTimes)rawTimes=trimmed[p].times;});
+    _csmRawTimes=rawTimes.slice();
+    var labels=buildLabels(_csmRawTimes);
+
+    /* For each currency, build cumulative-variation series.
+       Mataf method: index_t(CUR) = mean over all 7 other currencies of: 100 * (rate(CUR/OTHER, t) / rate(CUR/OTHER, 0) - 1)
+       rate(CUR/OTHER) is derived from available pairs (invert if needed). */
+    function getRate(cur,other,i){
+        if(cur===other)return 1;
+        var direct=cur+'_'+other; if(trimmed[direct])return trimmed[direct].closes[i];
+        var inv=other+'_'+cur; if(trimmed[inv])return 1/trimmed[inv].closes[i];
+        return null;
+    }
+    var strengthSeries={};
+    CS_CURRENCIES.forEach(function(cur){
+        var series=new Array(chartLen).fill(null);
+        /* base rates at i=0 */
+        var bases={};CS_CURRENCIES.forEach(function(o){if(o!==cur){bases[o]=getRate(cur,o,0);}});
+        for(var i=0;i<chartLen;i++){
+            var sum=0,cnt=0;
+            CS_CURRENCIES.forEach(function(o){
+                if(o===cur)return;
+                var r=getRate(cur,o,i),b=bases[o];
+                if(r==null||b==null||b===0)return;
+                sum+=100*(r/b-1); cnt++;
+            });
+            series[i]=cnt>0?parseFloat((sum/cnt).toFixed(4)):null;
+        }
+        strengthSeries[cur]=series;
+    });
+    var viewLen=CS_VIEW[csmTF]||100,EMPTY_RIGHT=Math.round(viewLen*0.10);
+    for(var e=0;e<EMPTY_RIGHT;e++){labels.push('');CS_CURRENCIES.forEach(function(cur){strengthSeries[cur].push(null);});_csmRawTimes.push(null);}
+    renderCSMChart(labels,strengthSeries);
+    renderCSMRank(strengthSeries,'csmRankBody');
+    buildCSMLegend();
+    if(el)el.textContent=fmtTime();
+}
+
+function renderCSMChart(labels,series){
+    var ctx=document.getElementById('csmChart'); if(!ctx)return;
+    if(csmChart)csmChart.destroy();
+    /* compute y range from data */
+    var allVals=[];CS_CURRENCIES.forEach(function(cur){(series[cur]||[]).forEach(function(v){if(v!=null)allVals.push(v);});});
+    var dmin=allVals.length?Math.min.apply(null,allVals):-1,dmax=allVals.length?Math.max.apply(null,allVals):1;
+    var pad=Math.max(0.05,(dmax-dmin)*0.1);
+    var datasets=CS_CURRENCIES.map(function(cur){return{label:cur,data:series[cur]||[],borderColor:CS_COLORS[cur],backgroundColor:'transparent',borderWidth:1.8,pointRadius:0,pointHoverRadius:0,tension:0.3,hidden:csmHidden.has(cur)};});
+    csmChart=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{grid:{color:'#0e111a'},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12,color:'#444',font:{size:9}}},y:{position:'right',min:dmin-pad,max:dmax+pad,grid:{color:'#0e111a'},ticks:{color:'#555',font:{size:9},callback:function(v){return v.toFixed(2)+'%';}}}}},plugins:[{id:'refLineZero',afterDraw:function(chart){if(chart.canvas.id!=='csmChart')return;var c2=chart.ctx,ca=chart.chartArea,y=chart.scales.y,yp=y.getPixelForValue(0);if(yp<ca.top||yp>ca.bottom)return;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.stroke();c2.restore();}},{id:'csmFloating',afterDraw:function(chart){if(chart.canvas.id!=='csmChart')return;if(_csmHoverIdx<0)return;var c2=chart.ctx,ca=chart.chartArea,xScale=chart.scales.x,yScale=chart.scales.y,idx=_csmHoverIdx,xp=xScale.getPixelForValue(idx);if(xp<ca.left||xp>ca.right)return;c2.save();c2.beginPath();c2.moveTo(xp,ca.top);c2.lineTo(xp,ca.bottom);c2.strokeStyle='rgba(200,200,200,0.25)';c2.lineWidth=1;c2.setLineDash([3,3]);c2.stroke();c2.restore();var items=[];chart.data.datasets.forEach(function(ds){if(ds.hidden)return;var val=ds.data[idx];if(val===null||val===undefined)return;var yp2=yScale.getPixelForValue(val);if(yp2<ca.top||yp2>ca.bottom)return;items.push({label:ds.label,color:ds.borderColor,val:val,yp:yp2});});items.sort(function(a,b){return a.yp-b.yp;});var LH=17;for(var pass=0;pass<5;pass++){for(var ii=1;ii<items.length;ii++){if(items[ii].yp-items[ii-1].yp<LH){var mid=(items[ii].yp+items[ii-1].yp)/2;items[ii-1].yp=mid-LH/2;items[ii].yp=mid+LH/2;}}}items.forEach(function(item){var text=item.label+' '+(item.val>=0?'+':'')+item.val.toFixed(2)+'%',isRight=(xp>ca.left+(ca.right-ca.left)*0.75),boxW=82,boxH=15,pad=5,bx=isRight?xp-boxW-6:xp+6,by=item.yp-boxH/2;by=Math.max(ca.top,Math.min(ca.bottom-boxH,by));c2.save();c2.fillStyle=item.color;c2.globalAlpha=0.92;var r2=4;c2.beginPath();c2.moveTo(bx+r2,by);c2.lineTo(bx+boxW-r2,by);c2.arcTo(bx+boxW,by,bx+boxW,by+boxH,r2);c2.lineTo(bx+boxW,by+boxH-r2);c2.arcTo(bx+boxW,by+boxH,bx+boxW-r2,by+boxH,r2);c2.lineTo(bx+r2,by+boxH);c2.arcTo(bx,by+boxH,bx,by+boxH-r2,r2);c2.lineTo(bx,by+r2);c2.arcTo(bx,by,bx+r2,by,r2);c2.closePath();c2.fill();c2.globalAlpha=1;c2.fillStyle='#fff';c2.font='bold 10px Arial';c2.textAlign='left';c2.textBaseline='middle';c2.fillText(text,bx+pad,by+boxH/2);c2.restore();c2.save();c2.beginPath();c2.arc(xp,item.yp,3.5,0,Math.PI*2);c2.fillStyle=item.color;c2.fill();c2.strokeStyle='#fff';c2.lineWidth=1.2;c2.stroke();c2.restore();});if(_csmRawTimes[idx]){var dt=new Date(_csmRawTimes[idx]),dateStr;if(csmTF==='D'){dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}else{dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+'  '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}var dtBoxW=c2.measureText(dateStr).width+20,dtBoxH=18,dtX=xp-dtBoxW/2,dtY=ca.bottom+4;dtX=Math.max(ca.left,Math.min(ca.right-dtBoxW,dtX));c2.save();c2.fillStyle='rgba(30,34,48,0.95)';c2.strokeStyle='rgba(140,160,220,0.5)';c2.lineWidth=1;var br=4;c2.beginPath();c2.moveTo(dtX+br,dtY);c2.lineTo(dtX+dtBoxW-br,dtY);c2.arcTo(dtX+dtBoxW,dtY,dtX+dtBoxW,dtY+dtBoxH,br);c2.lineTo(dtX+dtBoxW,dtY+dtBoxH-br);c2.arcTo(dtX+dtBoxW,dtY+dtBoxH,dtX+dtBoxW-br,dtY+dtBoxH,br);c2.lineTo(dtX+br,dtY+dtBoxH);c2.arcTo(dtX,dtY+dtBoxH,dtX,dtY+dtBoxH-br,br);c2.lineTo(dtX,dtY+br);c2.arcTo(dtX,dtY,dtX+br,dtY,br);c2.closePath();c2.fill();c2.stroke();c2.fillStyle='#c8d4f0';c2.font='bold 10px Arial';c2.textAlign='center';c2.textBaseline='middle';c2.fillText(dateStr,dtX+dtBoxW/2,dtY+dtBoxH/2);c2.restore();}}}]});
+    var _csmDrag=null;
+    function csmSetView(newMin,newMax){var totalLen=csmChart.data.labels.length;newMin=Math.max(0,newMin);newMax=Math.min(totalLen-1,newMax);if(newMax-newMin<20)return;csmChart.options.scales.x.min=newMin;csmChart.options.scales.x.max=newMax;csmChart.update('none');}
+    ctx.onmousedown=function(e){if(e.button!==0)return;_csmDrag={startX:e.clientX,startMin:csmChart.options.scales.x.min,startMax:csmChart.options.scales.x.max};ctx.style.cursor='grabbing';e.preventDefault();};
+    document.addEventListener('mouseup',function(){_csmDrag=null;if(ctx)ctx.style.cursor='crosshair';});
+    ctx.onmousemove=function(e){if(!csmChart)return;var rect=ctx.getBoundingClientRect(),mx=e.clientX-rect.left,xScale=csmChart.scales.x,ca=csmChart.chartArea;if(_csmDrag){var dx=e.clientX-_csmDrag.startX,range=_csmDrag.startMax-_csmDrag.startMin,chartWidth=ca?(ca.right-ca.left):1,shift=-(dx/chartWidth)*range;csmSetView(_csmDrag.startMin+shift,_csmDrag.startMax+shift);return;}if(!ca||mx<ca.left||mx>ca.right){_csmHoverIdx=-1;csmChart.draw();return;}var minIdx=Math.round(xScale.min),maxIdx=Math.round(xScale.max),best=minIdx,bestDist=Infinity;for(var i=minIdx;i<=maxIdx;i++){var xp2=xScale.getPixelForValue(i),d=Math.abs(xp2-mx);if(d<bestDist){bestDist=d;best=i;}}_csmHoverIdx=best;csmChart.draw();};
+    ctx.onmouseleave=function(){_csmDrag=null;ctx.style.cursor='crosshair';_csmHoverIdx=-1;if(csmChart)csmChart.draw();};
+    ctx.onwheel=function(e){if(!csmChart)return;e.preventDefault();var rect=ctx.getBoundingClientRect(),mx=e.clientX-rect.left,ca=csmChart.chartArea,curMin=csmChart.options.scales.x.min,curMax=csmChart.options.scales.x.max,range=curMax-curMin,factor=e.deltaY>0?1.12:0.88,newRange=Math.max(20,Math.min(csmChart.data.labels.length,range*factor)),ratio=ca&&ca.width>0?(mx-ca.left)/ca.width:0.5;ratio=Math.max(0,Math.min(1,ratio));var anchor=curMin+ratio*range;csmSetView(anchor-ratio*newRange,anchor+(1-ratio)*newRange);};
+    var totalLen=csmChart.data.labels.length,viewLen=CS_VIEW[csmTF]||100;
+    csmChart.options.scales.x.min=Math.max(0,totalLen-viewLen);
+    csmChart.options.scales.x.max=totalLen-1;
+    csmChart.update('none');
+}
+
+function buildCSMLegend(){var legend=document.getElementById('csmLegend');if(!legend)return;legend.innerHTML='';CS_CURRENCIES.forEach(function(cur){var item=document.createElement('div');item.className='cs-legend-item'+(csmHidden.has(cur)?' hidden':'');item.innerHTML='<div class="cs-legend-dot" style="background:'+CS_COLORS[cur]+'"></div><span>'+cur+'</span>';item.onclick=function(){if(csmHidden.has(cur)){csmHidden.delete(cur);item.classList.remove('hidden');}else{csmHidden.add(cur);item.classList.add('hidden');}if(!csmChart)return;var ds=csmChart.data.datasets.find(function(d){return d.label===cur;});if(ds){ds.hidden=csmHidden.has(cur);csmChart.update();}};legend.appendChild(item);});}
+
+function renderCSMRank(series,bodyId){
+    var vals=CS_CURRENCIES.map(function(cur){var s=series[cur],f=s?s.filter(function(v){return v!==null;}):[];return{cur:cur,val:f.length?f[f.length-1]:null};}).filter(function(x){return x.val!==null;});
+    vals.sort(function(a,b){return b.val-a.val;});
+    var body=document.getElementById(bodyId);if(!body)return;body.innerHTML='';
+    var max=vals.length?vals[0].val:0,min=vals.length?vals[vals.length-1].val:0,range=Math.max(Math.abs(max),Math.abs(min),0.001);
+    vals.forEach(function(item,i){
+        var pct=Math.round(Math.abs(item.val)/range*100),color=CS_COLORS[item.cur],sign=item.val>=0?'+':'';
+        var row=document.createElement('div');row.className='cs-rank-row';
+        row.innerHTML='<div class="cs-rank-pos">'+(i+1)+'</div><div class="cs-rank-dot" style="background:'+color+'"></div><div class="cs-rank-name">'+item.cur+'</div><div class="cs-rank-bar-wrap"><div class="cs-rank-bar" style="width:'+pct+'%;background:'+color+'"></div></div><div class="cs-rank-val" style="color:'+(item.val>=0?'#2E832B':'#AD3644')+'">'+sign+item.val.toFixed(2)+'%</div>';
+        body.appendChild(row);
+    });
+    var strong=vals.filter(function(x){return x.val>0;}).map(function(x){return x.cur;}),weak=vals.filter(function(x){return x.val<0;}).map(function(x){return x.cur;});
+    if(strong.length||weak.length){var s=document.createElement('div');s.style.cssText='margin-top:8px;padding:8px;border-top:1px solid #1e2230;font-size:11px;color:#aaa;line-height:1.7';s.innerHTML=(strong.length?'<div><b style="color:#2E832B">Strong</b>: '+strong.join(', ')+'</div>':'')+(weak.length?'<div><b style="color:#AD3644">Weak</b>: '+weak.join(', ')+'</div>':'');body.appendChild(s);}
+}
+
+function csmSetTF(tf,btn){csmTF=tf;if(btn){var parent=btn.parentElement;parent.querySelectorAll('.cs-tf-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');}csmLoad();}
+function csmRefresh(){csmLoad();}
 
 /* =========================================================
    CURRENCY STRENGTH — MOBILE
@@ -1474,7 +1605,7 @@ window.addEventListener('load', function() {
     setInterval(function(){
         if (!IS_MOBILE) {
             var p=document.getElementById('page-strength');
-            if(p&&p.classList.contains('active')){csLoad();setTimeout(fxpLoad,1000);}
+            if(p&&p.classList.contains('active')){csLoad();csmLoad();setTimeout(fxpLoad,1000);}
         } else {
             var mp=document.getElementById('mob-page-strength');
             if(mp&&mp.classList.contains('active')){mobCsLoad();setTimeout(mobFxpLoad,1000);}
@@ -1488,7 +1619,7 @@ function showTab(name){
     document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
     document.getElementById('page-'+name).classList.add('active');
     document.querySelectorAll('.tab-btn').forEach(function(b){if(b.getAttribute('onclick')==="showTab('"+name+"')")b.classList.add('active');});
-    if(name==='strength'){csLoad();setTimeout(fxpLoad,1000);}
+    if(name==='strength'){csLoad();csmLoad();setTimeout(fxpLoad,1000);}
     if(name==='macropage')renderRates();
     if(name==='sentiment')actualiserDonnees();
 }
