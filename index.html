@@ -1384,11 +1384,15 @@ function mobFxpRenderBars(curPerf){
     var html='';
     entries.forEach(function(e){
         var isPos=e.val>=0,color=isPos?'#C03939':'#2F995F',barWidth=(Math.abs(e.val)/maxAbs*50).toFixed(1);
+        /* FIX: added position:relative to mob-bar-track so absolute children stay contained */
         html+='<div class="mob-bar-row">'+
             '<div style="font-size:13px;width:20px;flex-shrink:0">'+FXP_FLAGS[e.cur]+'</div>'+
             '<div class="mob-bar-label" style="text-align:left;width:36px;color:'+FXP_COLORS[e.cur]+'">'+e.cur+'</div>'+
-            '<div class="mob-bar-track"><div class="fxp-bar-zero" style="position:absolute;top:0;bottom:0;width:2px;left:50%;background:#333;transform:translateX(-50%);z-index:1"></div>'+
-            (isPos?'<div style="position:absolute;top:0;left:50%;height:100%;border-radius:0 4px 4px 0;background:'+color+'33;border:1px solid '+color+';width:'+barWidth+'%"></div>':'<div style="position:absolute;top:0;right:50%;height:100%;border-radius:4px 0 0 4px;background:'+color+'33;border:1px solid '+color+';width:'+barWidth+'%"></div>')+
+            '<div class="mob-bar-track" style="position:relative">'+
+                '<div style="position:absolute;top:0;bottom:0;width:2px;left:50%;background:#333;transform:translateX(-50%);z-index:1"></div>'+
+                (isPos
+                    ? '<div style="position:absolute;top:0;left:50%;height:100%;border-radius:0 4px 4px 0;background:'+color+'33;border:1px solid '+color+';width:'+barWidth+'%"></div>'
+                    : '<div style="position:absolute;top:0;right:50%;height:100%;border-radius:4px 0 0 4px;background:'+color+'33;border:1px solid '+color+';width:'+barWidth+'%"></div>')+
             '</div>'+
             '<div class="fxp-bar-val" style="color:'+color+';width:54px;text-align:right;font-size:11px;font-weight:bold;flex-shrink:0">'+(isPos?'+':'')+e.val.toFixed(3)+'%</div>'+
         '</div>';
