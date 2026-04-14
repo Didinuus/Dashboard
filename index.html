@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,388 +9,384 @@
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:Arial,sans-serif; background:#111111; color:#fff; }
 
-```
-    /* =============================================
-       PC STYLES (unchanged)
-       ============================================= */
-    .pc-only { display:block; }
-    .mobile-only { display:none; }
+        /* =============================================
+           PC STYLES (unchanged)
+           ============================================= */
+        .pc-only { display:block; }
+        .mobile-only { display:none; }
 
-    /* PC layout wrapper */
-    .pc-layout { padding:30px; max-width:1600px; margin:0 auto; }
+        /* PC layout wrapper */
+        .pc-layout { padding:30px; max-width:1600px; margin:0 auto; }
 
-    .ticker-section { margin-bottom:20px; overflow:hidden; border-radius:8px; border:1px solid #1e2230; background:#161616; padding:4px 8px; }
+        .ticker-section { margin-bottom:20px; overflow:hidden; border-radius:8px; border:1px solid #1e2230; background:#161616; padding:4px 8px; }
 
-    .refresh-icon-btn {
-        background: transparent; border: none; color: #aaa; cursor: pointer;
-        font-size: 16px; padding: 0 5px; transition: color 0.2s;
-        display: flex; align-items: center;
-    }
-    .refresh-icon-btn:hover { color: #fff; }
-    .refresh-icon-btn.spinning { animation: spin 1s linear infinite; }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-    .sentiment-headers { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:12px; }
-    .sentiment-headers .page-header { margin-bottom:0; }
-
-    .main-section { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px; height:95vh; border-radius:8px; }
-    .table-container { display:flex; flex-direction:column; height:100%; border-radius:8px; background:#161616; border:1px solid #1e2230; overflow:hidden; }
-    .table-head-fixed { flex-shrink:0; background:#161616; overflow:hidden; }
-    .table-head-fixed table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
-    .table-scroll { overflow-y:scroll; overflow-x:hidden; flex:1; scrollbar-width:thin; scrollbar-color:#888 #1e2230; background:#161616; }
-    .table-scroll table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
-    table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
-    th, td { padding:6px 8px; text-align:center; border:1px solid #1e2230; }
-    th { background:#161616; font-weight:bold; color:#fff; }
-    td { background:#161616; color:#fff; }
-    .table-head-fixed th:last-child { padding-right:calc(8px + 8px); box-sizing:border-box; }
-    .chart-sentiment { background:#161616; padding:15px; border:1px solid #1e2230; border-radius:8px; height:100%; display:flex; flex-direction:column; }
-    .chart-sentiment-wrapper { flex:1; position:relative; }
-    #sentimentChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
-
-    .cot-section { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px; }
-    .cot-container { display:flex; flex-direction:column; border-radius:8px; overflow:hidden; background:#161616; border:1px solid #1e2230; }
-    .cot-header { background:#161616; padding:12px; text-align:center; font-weight:bold; font-size:14px; color:#fff; border-bottom:1px solid #1e2230; }
-    .cot-scroll { overflow-y:auto; overflow-x:hidden; scrollbar-width:none; }
-    .cot-chart-wrap { background:#161616; padding:15px; border:1px solid #1e2230; border-radius:8px; display:flex; flex-direction:column; }
-    .cot-chart-wrap h3 { text-align:center; margin-bottom:10px; font-size:14px; color:#fff; font-weight:bold; }
-
-    .calendar-section { background:#161616; padding:15px 15px 6px 15px; border:1px solid #1e2230; border-radius:8px; height:95vh; display:flex; flex-direction:column; }
-
-    .cot-pies { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px; }
-    .cot-pie-item { display:flex; flex-direction:column; align-items:center; gap:4px; }
-    .cot-pie-item canvas { width:80px!important; height:80px!important; }
-    .cot-pie-label { font-size:10px; color:#aaa; text-align:center; }
-
-    .tabs { display:flex; gap:6px; justify-content:center; margin-bottom:20px; flex-wrap:wrap; }
-    .tab-btn { padding:9px 24px; background:#161616; color:#aaa; border:1px solid #1e2230; border-radius:6px; cursor:pointer; font-weight:bold; font-size:13px; transition:all .15s; }
-    .tab-btn:hover { background:#1e2230; color:#fff; }
-    .tab-btn.active { background:#1e2230; color:#fff; border-color:#1e2230; }
-    .tab-page { display:none; }
-    .tab-page.active { display:block; }
-    .loading { text-align:center; padding:20px; color:#aaa; }
-    .short-cell, .long-cell { font-weight:bold; }
-
-    .page-header {
-        background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:14px; color:#fff;
-        border:1px solid #1e2230; border-radius:8px; margin-bottom:12px; display:flex;
-        justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0;
-    }
-    .page-header .ph-left { width:200px; display:flex; align-items:center; gap:6px; }
-    .page-header .ph-center { flex:1; text-align:center; }
-    .page-header .ph-right { width:200px; display:flex; align-items:center; gap:6px; justify-content:flex-end; }
-    .page-header .ph-status { color:#aaa; font-size:11px; font-weight:normal; }
-
-    .cs-header-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
-    .cs-chart-wrap { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:15px; display:flex; flex-direction:column; }
-    .cs-chart-inner { flex:1; position:relative; min-height:0; margin-top:10px; background:#101010; border-radius:6px; overflow:hidden; }
-    #csChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
-    .cs-sidebar { display:flex; flex-direction:column; gap:10px; }
-    .cs-rank-card { background:#161616; border:1px solid #1e2230; border-radius:8px; overflow:hidden; flex:1; display:flex; flex-direction:column; }
-    .cs-rank-header { padding:10px 14px; font-weight:bold; font-size:13px; border-bottom:1px solid #1e2230; text-align:center; }
-    .cs-rank-body { flex:1; overflow-y:auto; padding:8px; scrollbar-width:thin; scrollbar-color:#888 #1e2230; }
-    .cs-rank-row { display:flex; align-items:center; gap:10px; padding:7px 8px; border-radius:6px; margin-bottom:4px; }
-    .cs-rank-pos { font-size:10px; color:#555; width:14px; text-align:right; flex-shrink:0; }
-    .cs-rank-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-    .cs-rank-name { font-weight:bold; font-size:13px; flex:1; }
-    .cs-rank-val { font-size:12px; font-weight:bold; }
-    .cs-rank-bar-wrap { flex:2; height:6px; background:#1e2230; border-radius:3px; overflow:hidden; }
-    .cs-rank-bar { height:100%; border-radius:3px; transition:width .4s ease; }
-    .cs-tf-btns { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
-    .cs-tf-btn { padding:5px 12px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; }
-    .cs-tf-btn:hover { background:#1e2230; color:#fff; }
-    .cs-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
-    .cs-legend { display:flex; flex-wrap:wrap; gap:8px; }
-    .cs-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; cursor:pointer; padding:3px 7px; border-radius:4px; border:1px solid transparent; transition:border-color .15s; }
-    .cs-legend-item:hover { border-color:#1e2230; }
-    .cs-legend-item.hidden { opacity:0.3; }
-    .cs-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-    .cs-layout { display:grid; grid-template-columns:1fr 340px; gap:15px; height:60vh; }
-
-    /* INTEREST RATES */
-    .ir-layout { display:flex; flex-direction:column; gap:15px; }
-    .ir-cards-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:6px; }
-    .ir-card { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:6px; position:relative; overflow:hidden; transition:border-color .2s; }
-    .ir-card:hover { border-color:#333; }
-    .ir-card-top { display:flex; align-items:center; justify-content:space-between; }
-    .ir-bank-name { font-size:11px; color:#888; font-weight:bold; letter-spacing:1px; text-transform:uppercase; }
-    .ir-flag { font-size:18px; }
-    .ir-currency { font-size:13px; font-weight:bold; color:#aaa; margin-top:2px; }
-    .ir-rate { font-size:40px; font-weight:900; line-height:1.1; }
-    .ir-rate-pct { font-size:16px; font-weight:bold; }
-    .ir-change-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:bold; margin-top:4px; width:fit-content; }
-    .ir-next-meeting { margin-top:10px; padding-top:10px; border-top:1px solid #1e2230; }
-    .ir-next-label { font-size:10px; color:#666; text-transform:uppercase; letter-spacing:0.5px; }
-    .ir-next-date { font-size:12px; color:#ccc; font-weight:bold; margin-top:2px; }
-    .ir-expectation { font-size:11px; margin-top:3px; font-weight:bold; }
-    .ir-accent-bar { position:absolute; left:0; top:0; bottom:0; width:3px; }
-    .ir-comparison-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
-    .ir-comp-title { font-size:12px; color:#aaa; font-weight:bold; letter-spacing:1px; text-transform:uppercase; margin-bottom:16px; }
-    .ir-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-    .ir-bar-label { font-size:12px; font-weight:bold; width:50px; flex-shrink:0; }
-    .ir-bar-outer { flex:1; height:24px; background:#111; border-radius:4px; overflow:hidden; position:relative; }
-    .ir-bar-inner { height:100%; border-radius:4px; display:flex; align-items:center; padding-left:8px; transition:width .8s ease; }
-    .ir-bar-rate-text { font-size:11px; font-weight:bold; color:#fff; }
-    .ir-bar-rate-right { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:11px; color:#666; }
-    .ir-hist-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; }
-    .ir-hist-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:14px; }
-    .ir-hist-title { font-size:12px; font-weight:bold; color:#ccc; margin-bottom:10px; text-align:center; }
-    .ir-hist-wrap { position:relative; height:120px; }
-
-    /* MACRO PAGE */
-    .macro-page-section { margin-bottom:30px; }
-    .macro-page-section-title { background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:14px; color:#fff; border:1px solid #1e2230; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0; }
-    .macro-page-section-title .section-title-text { flex:1; text-align:center; }
-    .macro-page-section-title .section-right { display:flex; align-items:center; gap:8px; width:160px; justify-content:flex-end; }
-    .macro-page-section-title .section-left { width:160px; }
-
-    .source-badge { font-size:9px; color:#555; padding:2px 6px; border:1px solid #222; border-radius:4px; }
-
-    /* PAIRS SELECTOR */
-    .pairs-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
-    .pairs-modal-overlay.open { display:flex; }
-    .pairs-modal { background:#161616; border:1px solid #1e2230; border-radius:12px; padding:24px; width:600px; max-width:95vw; max-height:85vh; display:flex; flex-direction:column; gap:14px; }
-    .pairs-modal-header { display:flex; align-items:center; justify-content:space-between; }
-    .pairs-modal-header h3 { font-size:15px; font-weight:bold; color:#fff; }
-    .pairs-modal-close { background:transparent; border:none; color:#aaa; font-size:20px; cursor:pointer; line-height:1; }
-    .pairs-modal-close:hover { color:#fff; }
-    .pairs-modal-actions { display:flex; gap:8px; flex-wrap:wrap; }
-    .pairs-action-btn { padding:5px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px; color:#aaa; font-size:11px; cursor:pointer; }
-    .pairs-action-btn:hover { background:#1e2230; color:#fff; }
-    .pairs-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; overflow-y:auto; padding-right:4px; scrollbar-width:thin; scrollbar-color:#888 #1e2230; }
-    .pair-chip { display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:6px; border:1px solid #1e2230; cursor:pointer; font-size:12px; font-weight:bold; color:#aaa; transition:all .15s; user-select:none; }
-    .pair-chip:hover { border-color:#333; color:#fff; }
-    .pair-chip.active { border-color:#2a3060; background:#1a2050; color:#fff; }
-    .pair-chip .chip-dot { width:7px; height:7px; border-radius:50%; background:#1e2230; flex-shrink:0; transition:background .15s; }
-    .pair-chip.active .chip-dot { background:#4a8fff; }
-    .pairs-modal-footer { display:flex; justify-content:flex-end; gap:8px; border-top:1px solid #1e2230; padding-top:12px; }
-    .pairs-save-btn { padding:8px 20px; background:#2a3060; color:#fff; border:1px solid #3a4080; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer; }
-    .pairs-save-btn:hover { background:#3a4080; }
-    .pairs-edit-btn { padding:5px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px; color:#aaa; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; }
-    .pairs-edit-btn:hover { background:#1e2230; color:#fff; }
-
-    /* FX PERFORMANCE */
-    .fxp-tf-btn { padding:6px 16px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; transition:all .15s; }
-    .fxp-tf-btn:hover { background:#1e2230; color:#fff; }
-    .fxp-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
-
-    .fxp-bars-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
-    .fxp-bars-title { font-size:12px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
-    .fxp-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-    .fxp-bar-cur { font-size:13px; font-weight:bold; width:36px; flex-shrink:0; }
-    .fxp-bar-track { flex:1; height:28px; background:#111; border-radius:4px; position:relative; overflow:hidden; }
-    .fxp-bar-fill-pos { height:100%; position:absolute; top:0; left:50%; border-radius:0 4px 4px 0; }
-    .fxp-bar-fill-neg { height:100%; position:absolute; top:0; right:50%; border-radius:4px 0 0 4px; }
-    .fxp-bar-zero { position:absolute; top:0; bottom:0; width:2px; left:50%; background:#333; transform:translateX(-50%); z-index:1; }
-    .fxp-bar-val { font-size:11px; font-weight:bold; width:54px; text-align:right; flex-shrink:0; }
-    .fxp-bar-flag { font-size:14px; width:20px; flex-shrink:0; }
-
-    .fxp-heatmap-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
-    .fxp-heatmap-title { font-size:12px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
-    .fxp-heatmap-table { border-collapse:collapse; width:100%; min-width:560px; }
-    .fxp-heatmap-table th { font-size:11px; font-weight:bold; padding:8px 6px; text-align:center; color:#888; border:1px solid #1e2230; background:#111; }
-    .fxp-heatmap-table td { font-size:11px; font-weight:bold; padding:8px 6px; text-align:center; border:1px solid #1e2230; cursor:default; transition:filter .15s; }
-    .fxp-heatmap-table td:hover { filter:brightness(1.3); }
-    .fxp-heatmap-table .fxp-row-label { font-size:12px; font-weight:bold; color:#fff; background:#111; }
-    .fxp-heatmap-table .fxp-diag { background:#111; color:#555; }
-    .fxp-loading { text-align:center; padding:40px; color:#555; font-size:13px; }
-
-    .table-head-fixed-inner { display: flex; align-items: stretch; }
-    .table-head-fixed-inner table { flex: 1; min-width: 0; }
-    .scrollbar-placeholder { width: 10px; flex-shrink: 0; background: #161616; border-bottom: 1px solid #1e2230; }
-
-    /* =============================================
-       MOBILE STYLES
-       ============================================= */
-    @media (max-width: 768px) {
-        .pc-only { display:none !important; }
-        .mobile-only { display:block; }
-
-        body { background:#111; overflow-x:hidden; }
-
-        /* Mobile wrapper */
-        .mobile-layout {
-            display:flex; flex-direction:column; height:100dvh; height:100vh;
-            position:relative; overflow:hidden;
+        .refresh-icon-btn {
+            background: transparent; border: none; color: #aaa; cursor: pointer;
+            font-size: 16px; padding: 0 5px; transition: color 0.2s;
+            display: flex; align-items: center;
         }
+        .refresh-icon-btn:hover { color: #fff; }
+        .refresh-icon-btn.spinning { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Ticker always on top */
-        .mob-ticker {
-            flex-shrink:0; background:#161616; border-bottom:1px solid #1e2230;
-            padding:4px 8px; overflow:hidden;
+        .sentiment-headers { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:12px; }
+        .sentiment-headers .page-header { margin-bottom:0; }
+
+        .main-section { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px; height:95vh; border-radius:8px; }
+        .table-container { display:flex; flex-direction:column; height:100%; border-radius:8px; background:#161616; border:1px solid #1e2230; overflow:hidden; }
+        .table-head-fixed { flex-shrink:0; background:#161616; overflow:hidden; }
+        .table-head-fixed table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
+        .table-scroll { overflow-y:scroll; overflow-x:hidden; flex:1; scrollbar-width:thin; scrollbar-color:#888 #1e2230; background:#161616; }
+        .table-scroll table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
+        table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
+        th, td { padding:6px 8px; text-align:center; border:1px solid #1e2230; }
+        th { background:#161616; font-weight:bold; color:#fff; }
+        td { background:#161616; color:#fff; }
+        .table-head-fixed th:last-child { padding-right:calc(8px + 8px); box-sizing:border-box; }
+        .chart-sentiment { background:#161616; padding:15px; border:1px solid #1e2230; border-radius:8px; height:100%; display:flex; flex-direction:column; }
+        .chart-sentiment-wrapper { flex:1; position:relative; }
+        #sentimentChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
+
+        .cot-section { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px; }
+        .cot-container { display:flex; flex-direction:column; border-radius:8px; overflow:hidden; background:#161616; border:1px solid #1e2230; }
+        .cot-header { background:#161616; padding:12px; text-align:center; font-weight:bold; font-size:14px; color:#fff; border-bottom:1px solid #1e2230; }
+        .cot-scroll { overflow-y:auto; overflow-x:hidden; scrollbar-width:none; }
+        .cot-chart-wrap { background:#161616; padding:15px; border:1px solid #1e2230; border-radius:8px; display:flex; flex-direction:column; }
+        .cot-chart-wrap h3 { text-align:center; margin-bottom:10px; font-size:14px; color:#fff; font-weight:bold; }
+
+        .calendar-section { background:#161616; padding:15px 15px 6px 15px; border:1px solid #1e2230; border-radius:8px; height:95vh; display:flex; flex-direction:column; }
+
+        .cot-pies { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px; }
+        .cot-pie-item { display:flex; flex-direction:column; align-items:center; gap:4px; }
+        .cot-pie-item canvas { width:80px!important; height:80px!important; }
+        .cot-pie-label { font-size:10px; color:#aaa; text-align:center; }
+
+        .tabs { display:flex; gap:6px; justify-content:center; margin-bottom:20px; flex-wrap:wrap; }
+        .tab-btn { padding:9px 24px; background:#161616; color:#aaa; border:1px solid #1e2230; border-radius:6px; cursor:pointer; font-weight:bold; font-size:13px; transition:all .15s; }
+        .tab-btn:hover { background:#1e2230; color:#fff; }
+        .tab-btn.active { background:#1e2230; color:#fff; border-color:#1e2230; }
+        .tab-page { display:none; }
+        .tab-page.active { display:block; }
+        .loading { text-align:center; padding:20px; color:#aaa; }
+        .short-cell, .long-cell { font-weight:bold; }
+
+        .page-header {
+            background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:14px; color:#fff;
+            border:1px solid #1e2230; border-radius:8px; margin-bottom:12px; display:flex;
+            justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0;
         }
+        .page-header .ph-left { width:200px; display:flex; align-items:center; gap:6px; }
+        .page-header .ph-center { flex:1; text-align:center; }
+        .page-header .ph-right { width:200px; display:flex; align-items:center; gap:6px; justify-content:flex-end; }
+        .page-header .ph-status { color:#aaa; font-size:11px; font-weight:normal; }
 
-        /* Content area — bottom padding accounts for nav height + safe area */
-        .mob-content {
-            flex:1; overflow-y:auto; overflow-x:hidden;
-            -webkit-overflow-scrolling:touch;
-            padding:12px 12px 0 12px;
-            padding-bottom:calc(64px + env(safe-area-inset-bottom) + 12px);
+        .cs-header-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+        .cs-chart-wrap { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:15px; display:flex; flex-direction:column; }
+        .cs-chart-inner { flex:1; position:relative; min-height:0; margin-top:10px; background:#101010; border-radius:6px; overflow:hidden; }
+        #csChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
+        .cs-sidebar { display:flex; flex-direction:column; gap:10px; }
+        .cs-rank-card { background:#161616; border:1px solid #1e2230; border-radius:8px; overflow:hidden; flex:1; display:flex; flex-direction:column; }
+        .cs-rank-header { padding:10px 14px; font-weight:bold; font-size:13px; border-bottom:1px solid #1e2230; text-align:center; }
+        .cs-rank-body { flex:1; overflow-y:auto; padding:8px; scrollbar-width:thin; scrollbar-color:#888 #1e2230; }
+        .cs-rank-row { display:flex; align-items:center; gap:10px; padding:7px 8px; border-radius:6px; margin-bottom:4px; }
+        .cs-rank-pos { font-size:10px; color:#555; width:14px; text-align:right; flex-shrink:0; }
+        .cs-rank-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+        .cs-rank-name { font-weight:bold; font-size:13px; flex:1; }
+        .cs-rank-val { font-size:12px; font-weight:bold; }
+        .cs-rank-bar-wrap { flex:2; height:6px; background:#1e2230; border-radius:3px; overflow:hidden; }
+        .cs-rank-bar { height:100%; border-radius:3px; transition:width .4s ease; }
+        .cs-tf-btns { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+        .cs-tf-btn { padding:5px 12px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; }
+        .cs-tf-btn:hover { background:#1e2230; color:#fff; }
+        .cs-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
+        .cs-legend { display:flex; flex-wrap:wrap; gap:8px; }
+        .cs-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; cursor:pointer; padding:3px 7px; border-radius:4px; border:1px solid transparent; transition:border-color .15s; }
+        .cs-legend-item:hover { border-color:#1e2230; }
+        .cs-legend-item.hidden { opacity:0.3; }
+        .cs-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+        .cs-layout { display:grid; grid-template-columns:1fr 340px; gap:15px; height:60vh; }
+
+        /* INTEREST RATES */
+        .ir-layout { display:flex; flex-direction:column; gap:15px; }
+        .ir-cards-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:6px; }
+        .ir-card { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:6px; position:relative; overflow:hidden; transition:border-color .2s; }
+        .ir-card:hover { border-color:#333; }
+        .ir-card-top { display:flex; align-items:center; justify-content:space-between; }
+        .ir-bank-name { font-size:11px; color:#888; font-weight:bold; letter-spacing:1px; text-transform:uppercase; }
+        .ir-flag { font-size:18px; }
+        .ir-currency { font-size:13px; font-weight:bold; color:#aaa; margin-top:2px; }
+        .ir-rate { font-size:40px; font-weight:900; line-height:1.1; }
+        .ir-rate-pct { font-size:16px; font-weight:bold; }
+        .ir-change-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:bold; margin-top:4px; width:fit-content; }
+        .ir-next-meeting { margin-top:10px; padding-top:10px; border-top:1px solid #1e2230; }
+        .ir-next-label { font-size:10px; color:#666; text-transform:uppercase; letter-spacing:0.5px; }
+        .ir-next-date { font-size:12px; color:#ccc; font-weight:bold; margin-top:2px; }
+        .ir-expectation { font-size:11px; margin-top:3px; font-weight:bold; }
+        .ir-accent-bar { position:absolute; left:0; top:0; bottom:0; width:3px; }
+        .ir-comparison-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
+        .ir-comp-title { font-size:12px; color:#aaa; font-weight:bold; letter-spacing:1px; text-transform:uppercase; margin-bottom:16px; }
+        .ir-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+        .ir-bar-label { font-size:12px; font-weight:bold; width:50px; flex-shrink:0; }
+        .ir-bar-outer { flex:1; height:24px; background:#111; border-radius:4px; overflow:hidden; position:relative; }
+        .ir-bar-inner { height:100%; border-radius:4px; display:flex; align-items:center; padding-left:8px; transition:width .8s ease; }
+        .ir-bar-rate-text { font-size:11px; font-weight:bold; color:#fff; }
+        .ir-bar-rate-right { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:11px; color:#666; }
+        .ir-hist-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; }
+        .ir-hist-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:14px; }
+        .ir-hist-title { font-size:12px; font-weight:bold; color:#ccc; margin-bottom:10px; text-align:center; }
+        .ir-hist-wrap { position:relative; height:120px; }
+
+        /* MACRO PAGE */
+        .macro-page-section { margin-bottom:30px; }
+        .macro-page-section-title { background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:14px; color:#fff; border:1px solid #1e2230; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0; }
+        .macro-page-section-title .section-title-text { flex:1; text-align:center; }
+        .macro-page-section-title .section-right { display:flex; align-items:center; gap:8px; width:160px; justify-content:flex-end; }
+        .macro-page-section-title .section-left { width:160px; }
+
+        .source-badge { font-size:9px; color:#555; padding:2px 6px; border:1px solid #222; border-radius:4px; }
+
+        /* PAIRS SELECTOR */
+        .pairs-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
+        .pairs-modal-overlay.open { display:flex; }
+        .pairs-modal { background:#161616; border:1px solid #1e2230; border-radius:12px; padding:24px; width:600px; max-width:95vw; max-height:85vh; display:flex; flex-direction:column; gap:14px; }
+        .pairs-modal-header { display:flex; align-items:center; justify-content:space-between; }
+        .pairs-modal-header h3 { font-size:15px; font-weight:bold; color:#fff; }
+        .pairs-modal-close { background:transparent; border:none; color:#aaa; font-size:20px; cursor:pointer; line-height:1; }
+        .pairs-modal-close:hover { color:#fff; }
+        .pairs-modal-actions { display:flex; gap:8px; flex-wrap:wrap; }
+        .pairs-action-btn { padding:5px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px; color:#aaa; font-size:11px; cursor:pointer; }
+        .pairs-action-btn:hover { background:#1e2230; color:#fff; }
+        .pairs-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; overflow-y:auto; padding-right:4px; scrollbar-width:thin; scrollbar-color:#888 #1e2230; }
+        .pair-chip { display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:6px; border:1px solid #1e2230; cursor:pointer; font-size:12px; font-weight:bold; color:#aaa; transition:all .15s; user-select:none; }
+        .pair-chip:hover { border-color:#333; color:#fff; }
+        .pair-chip.active { border-color:#2a3060; background:#1a2050; color:#fff; }
+        .pair-chip .chip-dot { width:7px; height:7px; border-radius:50%; background:#1e2230; flex-shrink:0; transition:background .15s; }
+        .pair-chip.active .chip-dot { background:#4a8fff; }
+        .pairs-modal-footer { display:flex; justify-content:flex-end; gap:8px; border-top:1px solid #1e2230; padding-top:12px; }
+        .pairs-save-btn { padding:8px 20px; background:#2a3060; color:#fff; border:1px solid #3a4080; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer; }
+        .pairs-save-btn:hover { background:#3a4080; }
+        .pairs-edit-btn { padding:5px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px; color:#aaa; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; }
+        .pairs-edit-btn:hover { background:#1e2230; color:#fff; }
+
+        /* FX PERFORMANCE */
+        .fxp-tf-btn { padding:6px 16px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; transition:all .15s; }
+        .fxp-tf-btn:hover { background:#1e2230; color:#fff; }
+        .fxp-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
+
+        .fxp-bars-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
+        .fxp-bars-title { font-size:12px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
+        .fxp-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+        .fxp-bar-cur { font-size:13px; font-weight:bold; width:36px; flex-shrink:0; }
+        .fxp-bar-track { flex:1; height:28px; background:#111; border-radius:4px; position:relative; overflow:hidden; }
+        .fxp-bar-fill-pos { height:100%; position:absolute; top:0; left:50%; border-radius:0 4px 4px 0; }
+        .fxp-bar-fill-neg { height:100%; position:absolute; top:0; right:50%; border-radius:4px 0 0 4px; }
+        .fxp-bar-zero { position:absolute; top:0; bottom:0; width:2px; left:50%; background:#333; transform:translateX(-50%); z-index:1; }
+        .fxp-bar-val { font-size:11px; font-weight:bold; width:54px; text-align:right; flex-shrink:0; }
+        .fxp-bar-flag { font-size:14px; width:20px; flex-shrink:0; }
+
+        .fxp-heatmap-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
+        .fxp-heatmap-title { font-size:12px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
+        .fxp-heatmap-table { border-collapse:collapse; width:100%; min-width:560px; }
+        .fxp-heatmap-table th { font-size:11px; font-weight:bold; padding:8px 6px; text-align:center; color:#888; border:1px solid #1e2230; background:#111; }
+        .fxp-heatmap-table td { font-size:11px; font-weight:bold; padding:8px 6px; text-align:center; border:1px solid #1e2230; cursor:default; transition:filter .15s; }
+        .fxp-heatmap-table td:hover { filter:brightness(1.3); }
+        .fxp-heatmap-table .fxp-row-label { font-size:12px; font-weight:bold; color:#fff; background:#111; }
+        .fxp-heatmap-table .fxp-diag { background:#111; color:#555; }
+        .fxp-loading { text-align:center; padding:40px; color:#555; font-size:13px; }
+
+        .table-head-fixed-inner { display: flex; align-items: stretch; }
+        .table-head-fixed-inner table { flex: 1; min-width: 0; }
+        .scrollbar-placeholder { width: 10px; flex-shrink: 0; background: #161616; border-bottom: 1px solid #1e2230; }
+
+        /* =============================================
+           MOBILE STYLES
+           ============================================= */
+        @media (max-width: 768px) {
+            .pc-only { display:none !important; }
+            .mobile-only { display:block; }
+
+            body { background:#111; overflow-x:hidden; }
+
+            /* Mobile wrapper */
+            .mobile-layout {
+                display:flex; flex-direction:column; height:100dvh; height:100vh;
+                position:relative; overflow:hidden;
+            }
+
+            /* Ticker always on top */
+            .mob-ticker {
+                flex-shrink:0; background:#161616; border-bottom:1px solid #1e2230;
+                padding:4px 8px; overflow:hidden;
+            }
+
+            /* Content area — bottom padding accounts for nav height + safe area */
+            .mob-content {
+                flex:1; overflow-y:auto; overflow-x:hidden;
+                -webkit-overflow-scrolling:touch;
+                padding:12px 12px 0 12px;
+                padding-bottom:calc(64px + env(safe-area-inset-bottom) + 12px);
+            }
+
+            /* Bottom nav */
+            .mob-nav {
+                position:fixed; bottom:0; left:0; right:0; z-index:100;
+                background:#161616; border-top:1px solid #1e2230;
+                display:flex; align-items:stretch;
+                /* Height = 64px buttons + iOS safe area gap */
+                height:calc(64px + env(safe-area-inset-bottom));
+                padding-bottom:env(safe-area-inset-bottom);
+            }
+            .mob-nav-btn {
+                flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+                gap:4px; background:transparent; border:none; color:#666;
+                font-size:10px; font-weight:600; cursor:pointer;
+                transition:color 0.15s; padding:8px 0; letter-spacing:0.3px;
+                -webkit-tap-highlight-color:transparent;
+                /* Only fill the 64px button area, not the safe-area */
+                margin-bottom:0;
+                height:64px;
+                align-self:flex-start;
+            }
+            .mob-nav-btn.active { color:#fff; }
+            .mob-nav-btn svg { width:22px; height:22px; }
+            .mob-nav-btn.active svg path, .mob-nav-btn.active svg rect, .mob-nav-btn.active svg polyline, .mob-nav-btn.active svg circle { stroke:#fff; }
+            .mob-nav-indicator {
+                position:absolute; top:0; height:2px; background:#4a8fff;
+                border-radius:0 0 2px 2px; transition:left 0.25s cubic-bezier(.4,0,.2,1), width 0.25s;
+            }
+
+            /* Mobile pages */
+            .mob-page { display:none; }
+            .mob-page.active { display:block; }
+
+            /* Mobile section header */
+            .mob-section-header {
+                display:flex; align-items:center; justify-content:space-between;
+                padding:10px 14px; background:#161616; border:1px solid #1e2230;
+                border-radius:8px; margin-bottom:10px;
+            }
+            .mob-section-header .msh-title { font-size:13px; font-weight:bold; color:#fff; }
+            .mob-section-header .msh-right { display:flex; align-items:center; gap:8px; }
+            .mob-section-header .msh-status { font-size:11px; color:#666; }
+
+            /* Mobile sentiment table */
+            .mob-sentiment-table {
+                background:#161616; border:1px solid #1e2230; border-radius:8px;
+                overflow:hidden; margin-bottom:12px;
+            }
+            .mob-sentiment-table table {
+                width:100%; border-collapse:collapse; font-size:12px;
+            }
+            .mob-sentiment-table th {
+                background:#1a1a2a; color:#888; font-size:10px; font-weight:bold;
+                padding:8px 6px; text-align:center; border-bottom:1px solid #1e2230;
+                letter-spacing:0.5px;
+            }
+            .mob-sentiment-table td {
+                padding:9px 6px; text-align:center; border-bottom:1px solid #111;
+                font-size:12px; background:#161616; color:#fff;
+            }
+            .mob-sentiment-table tr:last-child td { border-bottom:none; }
+            .mob-pair-name { font-weight:bold; font-size:11px; text-align:left !important; padding-left:10px !important; }
+
+            /* Mobile bar chart sentiment */
+            .mob-chart-card {
+                background:#161616; border:1px solid #1e2230; border-radius:8px;
+                padding:14px; margin-bottom:12px;
+            }
+            .mob-chart-title { font-size:12px; font-weight:bold; color:#aaa; margin-bottom:12px; text-align:center; letter-spacing:0.5px; }
+            .mob-bar-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+            .mob-bar-label { font-size:10px; font-weight:bold; color:#fff; width:58px; flex-shrink:0; text-align:right; }
+            .mob-bar-track { flex:1; height:22px; border-radius:4px; overflow:hidden; display:flex; }
+            .mob-bar-short { background:#C03939; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
+            .mob-bar-long  { background:#2F995F; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
+
+            /* Mobile COT */
+            .mob-cot-section { margin-bottom:12px; }
+            .mob-cot-header { background:#161616; border:1px solid #1e2230; border-radius:8px 8px 0 0; padding:10px 14px; font-size:13px; font-weight:bold; text-align:center; }
+            .mob-cot-table { background:#161616; border:1px solid #1e2230; border-top:none; border-radius:0 0 8px 8px; overflow:hidden; }
+            .mob-cot-table table { width:100%; border-collapse:collapse; font-size:11px; }
+            .mob-cot-table th { background:#1a1a2a; color:#888; padding:7px 5px; font-size:10px; text-align:center; border-bottom:1px solid #1e2230; }
+            .mob-cot-table td { padding:8px 5px; text-align:center; border-bottom:1px solid #111; color:#fff; font-size:11px; }
+            .mob-cot-table tr:last-child td { border-bottom:none; }
+
+            /* Mobile pie grid */
+            .mob-pies { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:10px; background:#161616; border:1px solid #1e2230; border-radius:8px; margin-top:8px; }
+            .mob-pie-item { display:flex; flex-direction:column; align-items:center; gap:3px; }
+            .mob-pie-item canvas { width:65px!important; height:65px!important; }
+            .mob-pie-label { font-size:9px; color:#aaa; text-align:center; }
+
+            /* Mobile CS chart */
+            .mob-cs-chart-wrap {
+                background:#161616; border:1px solid #1e2230; border-radius:8px;
+                padding:12px; margin-bottom:10px;
+            }
+            .mob-cs-chart-inner {
+                position:relative; height:260px; background:#101010; border-radius:6px; overflow:hidden;
+                touch-action:none;
+            }
+            #mob-csChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
+            .mob-cs-tf-row { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+            .mob-cs-tf-btn { padding:6px 12px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; font-size:12px; font-weight:bold; flex:1; text-align:center; }
+            .mob-cs-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
+            .mob-cs-rank-list { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:10px; margin-bottom:10px; }
+            .mob-cs-rank-row { display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:5px; margin-bottom:2px; }
+            .mob-cs-rank-pos { font-size:10px; color:#555; width:14px; text-align:right; flex-shrink:0; }
+            .mob-cs-rank-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+            .mob-cs-rank-name { font-weight:bold; font-size:13px; flex:1; }
+            .mob-cs-rank-bar-wrap { flex:2; height:5px; background:#1e2230; border-radius:3px; overflow:hidden; }
+            .mob-cs-rank-bar { height:100%; border-radius:3px; }
+            .mob-cs-rank-val { font-size:12px; font-weight:bold; width:36px; text-align:right; flex-shrink:0; }
+            .mob-cs-legend { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; }
+            .mob-cs-legend-item { display:flex; align-items:center; gap:4px; font-size:10px; padding:3px 6px; border-radius:4px; border:1px solid #1e2230; }
+            .mob-cs-legend-item.hidden { opacity:0.35; }
+            .mob-cs-legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+            /* Mobile FX Performance */
+            .mob-fxp-tf-row { display:flex; gap:5px; margin-bottom:10px; }
+            .mob-fxp-tf-btn { flex:1; padding:7px 4px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; font-size:11px; font-weight:bold; text-align:center; }
+            .mob-fxp-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
+
+            /* Mobile Macro */
+            .mob-ir-cards-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+            .mob-ir-card { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:14px; position:relative; overflow:hidden; }
+            .mob-ir-accent-bar { position:absolute; left:0; top:0; bottom:0; width:3px; }
+            .mob-ir-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+            .mob-ir-bank { font-size:10px; color:#888; font-weight:bold; letter-spacing:1px; }
+            .mob-ir-flag { font-size:16px; }
+            .mob-ir-rate { font-size:22px; font-weight:900; line-height:1.1; margin-bottom:4px; }
+            .mob-ir-badge { display:inline-flex; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:bold; margin-bottom:6px; }
+            .mob-ir-next-label { font-size:9px; color:#555; text-transform:uppercase; letter-spacing:0.5px; }
+            .mob-ir-next-date { font-size:11px; color:#ccc; font-weight:bold; }
+            .mob-ir-exp { font-size:10px; font-weight:bold; margin-top:2px; }
+            .mob-ir-hist-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+            .mob-ir-hist-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:10px; }
+            .mob-ir-hist-title { font-size:10px; font-weight:bold; color:#ccc; margin-bottom:8px; text-align:center; }
+            .mob-ir-hist-wrap { position:relative; height:90px; }
+
+            /* Mobile Calendar */
+            .mob-calendar-wrap {
+                background:#161616; border:1px solid #1e2230; border-radius:8px;
+                overflow:hidden; height:calc(100dvh - 180px); height:calc(100vh - 180px);
+            }
+
+            /* Edit pairs modal mobile */
+            .pairs-modal { width:95vw; max-height:80vh; padding:16px; }
+            .pairs-grid { grid-template-columns:repeat(3,1fr); }
+
+            /* Pairs edit btn mobile */
+            .mob-edit-pairs-btn {
+                padding:6px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px;
+                color:#aaa; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px;
+            }
         }
-
-        /* Bottom nav */
-        .mob-nav {
-            position:fixed; bottom:0; left:0; right:0; z-index:100;
-            background:#161616; border-top:1px solid #1e2230;
-            display:flex; align-items:stretch;
-            height:calc(64px + env(safe-area-inset-bottom));
-            padding-bottom:env(safe-area-inset-bottom);
-        }
-        .mob-nav-btn {
-            flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-            gap:4px; background:transparent; border:none; color:#666;
-            font-size:10px; font-weight:600; cursor:pointer;
-            transition:color 0.15s; padding:8px 0; letter-spacing:0.3px;
-            -webkit-tap-highlight-color:transparent;
-            margin-bottom:0;
-            height:64px;
-            align-self:flex-start;
-        }
-        .mob-nav-btn.active { color:#fff; }
-        .mob-nav-btn svg { width:22px; height:22px; }
-        .mob-nav-btn.active svg path, .mob-nav-btn.active svg rect, .mob-nav-btn.active svg polyline, .mob-nav-btn.active svg circle { stroke:#fff; }
-        .mob-nav-indicator {
-            position:absolute; top:0; height:2px; background:#4a8fff;
-            border-radius:0 0 2px 2px; transition:left 0.25s cubic-bezier(.4,0,.2,1), width 0.25s;
-        }
-
-        /* Mobile pages */
-        .mob-page { display:none; }
-        .mob-page.active { display:block; }
-
-        /* Mobile section header */
-        .mob-section-header {
-            display:flex; align-items:center; justify-content:space-between;
-            padding:10px 14px; background:#161616; border:1px solid #1e2230;
-            border-radius:8px; margin-bottom:10px;
-        }
-        .mob-section-header .msh-title { font-size:13px; font-weight:bold; color:#fff; }
-        .mob-section-header .msh-right { display:flex; align-items:center; gap:8px; }
-        .mob-section-header .msh-status { font-size:11px; color:#666; }
-
-        /* Mobile sentiment table */
-        .mob-sentiment-table {
-            background:#161616; border:1px solid #1e2230; border-radius:8px;
-            overflow:hidden; margin-bottom:12px;
-        }
-        .mob-sentiment-table table {
-            width:100%; border-collapse:collapse; font-size:12px;
-        }
-        .mob-sentiment-table th {
-            background:#1a1a2a; color:#888; font-size:10px; font-weight:bold;
-            padding:8px 6px; text-align:center; border-bottom:1px solid #1e2230;
-            letter-spacing:0.5px;
-        }
-        .mob-sentiment-table td {
-            padding:9px 6px; text-align:center; border-bottom:1px solid #111;
-            font-size:12px; background:#161616; color:#fff;
-        }
-        .mob-sentiment-table tr:last-child td { border-bottom:none; }
-        .mob-pair-name { font-weight:bold; font-size:11px; text-align:left !important; padding-left:10px !important; }
-
-        /* Mobile bar chart sentiment */
-        .mob-chart-card {
-            background:#161616; border:1px solid #1e2230; border-radius:8px;
-            padding:14px; margin-bottom:12px;
-        }
-        .mob-chart-title { font-size:12px; font-weight:bold; color:#aaa; margin-bottom:12px; text-align:center; letter-spacing:0.5px; }
-        .mob-bar-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-        .mob-bar-label { font-size:10px; font-weight:bold; color:#fff; width:58px; flex-shrink:0; text-align:right; }
-        .mob-bar-track { flex:1; height:22px; border-radius:4px; overflow:hidden; display:flex; }
-        .mob-bar-short { background:#C03939; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
-        .mob-bar-long  { background:#2F995F; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
-
-        /* Mobile COT */
-        .mob-cot-section { margin-bottom:12px; }
-        .mob-cot-header { background:#161616; border:1px solid #1e2230; border-radius:8px 8px 0 0; padding:10px 14px; font-size:13px; font-weight:bold; text-align:center; }
-        .mob-cot-table { background:#161616; border:1px solid #1e2230; border-top:none; border-radius:0 0 8px 8px; overflow:hidden; }
-        .mob-cot-table table { width:100%; border-collapse:collapse; font-size:11px; }
-        .mob-cot-table th { background:#1a1a2a; color:#888; padding:7px 5px; font-size:10px; text-align:center; border-bottom:1px solid #1e2230; }
-        .mob-cot-table td { padding:8px 5px; text-align:center; border-bottom:1px solid #111; color:#fff; font-size:11px; }
-        .mob-cot-table tr:last-child td { border-bottom:none; }
-
-        /* Mobile pie grid */
-        .mob-pies { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:10px; background:#161616; border:1px solid #1e2230; border-radius:8px; margin-top:8px; }
-        .mob-pie-item { display:flex; flex-direction:column; align-items:center; gap:3px; }
-        .mob-pie-item canvas { width:65px!important; height:65px!important; }
-        .mob-pie-label { font-size:9px; color:#aaa; text-align:center; }
-
-        /* Mobile CS chart */
-        .mob-cs-chart-wrap {
-            background:#161616; border:1px solid #1e2230; border-radius:8px;
-            padding:12px; margin-bottom:10px;
-        }
-        .mob-cs-chart-inner {
-            position:relative; height:260px; background:#101010; border-radius:6px; overflow:hidden;
-            touch-action:none;
-        }
-        #mob-csChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
-        .mob-cs-tf-row { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
-        .mob-cs-tf-btn { padding:6px 12px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; font-size:12px; font-weight:bold; flex:1; text-align:center; }
-        .mob-cs-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
-        .mob-cs-rank-list { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:10px; margin-bottom:10px; }
-        .mob-cs-rank-row { display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:5px; margin-bottom:2px; }
-        .mob-cs-rank-pos { font-size:10px; color:#555; width:14px; text-align:right; flex-shrink:0; }
-        .mob-cs-rank-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
-        .mob-cs-rank-name { font-weight:bold; font-size:13px; flex:1; }
-        .mob-cs-rank-bar-wrap { flex:2; height:5px; background:#1e2230; border-radius:3px; overflow:hidden; }
-        .mob-cs-rank-bar { height:100%; border-radius:3px; }
-        .mob-cs-rank-val { font-size:12px; font-weight:bold; width:36px; text-align:right; flex-shrink:0; }
-        .mob-cs-legend { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; }
-        .mob-cs-legend-item { display:flex; align-items:center; gap:4px; font-size:10px; padding:3px 6px; border-radius:4px; border:1px solid #1e2230; }
-        .mob-cs-legend-item.hidden { opacity:0.35; }
-        .mob-cs-legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-
-        /* Mobile FX Performance */
-        .mob-fxp-tf-row { display:flex; gap:5px; margin-bottom:10px; }
-        .mob-fxp-tf-btn { flex:1; padding:7px 4px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; font-size:11px; font-weight:bold; text-align:center; }
-        .mob-fxp-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
-
-        /* Mobile Macro */
-        .mob-ir-cards-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
-        .mob-ir-card { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:14px; position:relative; overflow:hidden; }
-        .mob-ir-accent-bar { position:absolute; left:0; top:0; bottom:0; width:3px; }
-        .mob-ir-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
-        .mob-ir-bank { font-size:10px; color:#888; font-weight:bold; letter-spacing:1px; }
-        .mob-ir-flag { font-size:16px; }
-        .mob-ir-rate { font-size:22px; font-weight:900; line-height:1.1; margin-bottom:4px; }
-        .mob-ir-badge { display:inline-flex; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:bold; margin-bottom:6px; }
-        .mob-ir-next-label { font-size:9px; color:#555; text-transform:uppercase; letter-spacing:0.5px; }
-        .mob-ir-next-date { font-size:11px; color:#ccc; font-weight:bold; }
-        .mob-ir-exp { font-size:10px; font-weight:bold; margin-top:2px; }
-
-        /* *** FIX: single column, taller charts *** */
-        .mob-ir-hist-grid { display:grid; grid-template-columns:1fr; gap:10px; }
-        .mob-ir-hist-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:10px; }
-        .mob-ir-hist-title { font-size:10px; font-weight:bold; color:#ccc; margin-bottom:8px; text-align:center; }
-        .mob-ir-hist-wrap { position:relative; height:120px; }
-
-        /* Mobile Calendar */
-        .mob-calendar-wrap {
-            background:#161616; border:1px solid #1e2230; border-radius:8px;
-            overflow:hidden; height:calc(100dvh - 180px); height:calc(100vh - 180px);
-        }
-
-        /* Edit pairs modal mobile */
-        .pairs-modal { width:95vw; max-height:80vh; padding:16px; }
-        .pairs-grid { grid-template-columns:repeat(3,1fr); }
-
-        /* Pairs edit btn mobile */
-        .mob-edit-pairs-btn {
-            padding:6px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px;
-            color:#aaa; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px;
-        }
-    }
-</style>
-```
-
+    </style>
 </head>
 <body>
 
 <!-- ================================================
      PC LAYOUT (unchanged from original)
      ================================================ -->
-
 <div class="pc-only">
 <div class="pc-layout">
     <div class="ticker-section">
@@ -399,389 +394,198 @@
         <tv-ticker-tape symbols="FX:AUDUSD,FX:EURUSD,OANDA:GBPUSD,FX:NZDUSD,FX:USDCAD,FX:USDCHF,FX:USDJPY,FX:AUDCAD,FX:AUDCHF,FX:AUDJPY,FX:AUDNZD,FX:CADCHF,FX:CADJPY,FX:CHFJPY,FX:EURAUD,FX:EURCAD,FX:EURCHF,FX:EURGBP,FX:EURJPY,FX:EURNZD,FX:GBPAUD,FX:GBPCAD,FX:GBPCHF,FX:GBPJPY,FX:GBPNZD,FX:NZDCAD,FX:NZDCHF,FX:NZDJPY" theme="dark" transparent></tv-ticker-tape>
     </div>
 
-```
-<div class="tabs">
-    <button class="tab-btn active"  onclick="showTab('sentiment')">Traders Sentiment</button>
-    <button class="tab-btn"         onclick="showTab('strength')">Currency Strength</button>
-    <button class="tab-btn"         onclick="showTab('macropage')">Macro</button>
-    <button class="tab-btn"         onclick="showTab('calendar')">Economic Calendar</button>
-</div>
-
-<div class="pairs-modal-overlay" id="pairsModalOverlay" onclick="if(event.target===this)closePairsModal()">
-    <div class="pairs-modal">
-        <div class="pairs-modal-header">
-            <h3>Select Pairs to Display</h3>
-            <button class="pairs-modal-close" onclick="closePairsModal()">&#10005;</button>
-        </div>
-        <div class="pairs-modal-actions">
-            <button class="pairs-action-btn" onclick="pairsSelectAll()">Select All</button>
-            <button class="pairs-action-btn" onclick="pairsSelectNone()">Deselect All</button>
-            <button class="pairs-action-btn" onclick="pairsSelectMajors()">Majors Only</button>
-        </div>
-        <div class="pairs-grid" id="pairsGrid"></div>
-        <div class="pairs-modal-footer">
-            <button class="pairs-action-btn" onclick="closePairsModal()">Cancel</button>
-            <button class="pairs-save-btn" onclick="savePairsSelection()">Save &amp; Apply</button>
-        </div>
+    <div class="tabs">
+        <button class="tab-btn active"  onclick="showTab('sentiment')">Traders Sentiment</button>
+        <button class="tab-btn"         onclick="showTab('strength')">Currency Strength</button>
+        <button class="tab-btn"         onclick="showTab('macropage')">Macro</button>
+        <button class="tab-btn"         onclick="showTab('calendar')">Economic Calendar</button>
     </div>
-</div>
 
-<!-- SENTIMENT -->
-<div class="tab-page active" id="page-sentiment">
-    <div class="sentiment-headers">
-        <div class="page-header">
-            <div class="ph-left">
-                <button class="pairs-edit-btn" onclick="openPairsModal()">&#9881; Edit Pairs</button>
+    <div class="pairs-modal-overlay" id="pairsModalOverlay" onclick="if(event.target===this)closePairsModal()">
+        <div class="pairs-modal">
+            <div class="pairs-modal-header">
+                <h3>Select Pairs to Display</h3>
+                <button class="pairs-modal-close" onclick="closePairsModal()">&#10005;</button>
             </div>
-            <div class="ph-center">Traders Sentiment</div>
-            <div class="ph-right">
-                <span class="ph-status" id="lastUpdate">Loading...</span>
-                <button class="refresh-icon-btn" onclick="actualiserDonnees()">&#8634;</button>
+            <div class="pairs-modal-actions">
+                <button class="pairs-action-btn" onclick="pairsSelectAll()">Select All</button>
+                <button class="pairs-action-btn" onclick="pairsSelectNone()">Deselect All</button>
+                <button class="pairs-action-btn" onclick="pairsSelectMajors()">Majors Only</button>
             </div>
-        </div>
-        <div class="page-header" style="justify-content:center;"><span>Long vs Short &mdash; Traders Sentiment</span></div>
-    </div>
-    <div class="main-section">
-        <div class="table-container">
-            <div class="table-head-fixed">
-                <div class="table-head-fixed-inner">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Pair</th><th>% Short</th><th>% Long</th><th>Short Volume</th><th>Long Volume</th><th>Short Positions</th><th>Long Positions</th><th>Total Positions</th>
-                            </tr>
-                        </thead>
-                    </table>
-                    <div class="scrollbar-placeholder" id="scrollbarPlaceholder"></div>
-                </div>
+            <div class="pairs-grid" id="pairsGrid"></div>
+            <div class="pairs-modal-footer">
+                <button class="pairs-action-btn" onclick="closePairsModal()">Cancel</button>
+                <button class="pairs-save-btn" onclick="savePairsSelection()">Save &amp; Apply</button>
             </div>
-            <div class="table-scroll" id="sentimentScroll">
-                <table>
-                    <tbody id="sentimentBody"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody>
-                </table>
-            </div>
-        </div>
-        <div class="chart-sentiment">
-            <div class="chart-sentiment-wrapper"><canvas id="sentimentChart"></canvas></div>
         </div>
     </div>
 
-    <div style="margin-top:20px;">
-        <div class="page-header">
-            <div class="ph-left"></div>
-            <div class="ph-center">COT Report &mdash; CFTC Commitments of Traders</div>
-            <div class="ph-right"><span class="ph-status" id="cotDate">Loading...</span></div>
-        </div>
-        <div class="cot-section" style="margin-bottom:15px">
-            <div class="cot-container">
-                <div class="cot-header">Leveraged Funds (Hedge Funds)</div>
-                <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyLev"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
-            </div>
-            <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Leveraged Funds</h3><div class="cot-pies" id="cotPiesLev"></div></div>
-        </div>
-        <div class="cot-section" style="margin-bottom:15px">
-            <div class="cot-container">
-                <div class="cot-header">Commercials (Dealer/Intermediary)</div>
-                <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyCom"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
-            </div>
-            <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Commercials</h3><div class="cot-pies" id="cotPiesCom"></div></div>
-        </div>
-        <div class="cot-section" style="margin-bottom:0">
-            <div class="cot-container">
-                <div class="cot-header">Large Speculators (Asset Manager)</div>
-                <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyLS"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
-            </div>
-            <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Large Speculators</h3><div class="cot-pies" id="cotPiesLS"></div></div>
-        </div>
-        <div style="margin-top:15px">
-            <div class="page-header" style="justify-content:center;">Net Positions</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="histGrid"></div>
-        </div>
-    </div>
-</div>
-
-<!-- STRENGTH -->
-<div class="tab-page" id="page-strength">
-    <div id="sub-rsi">
-        <div class="page-header">
-            <div class="ph-left"></div>
-            <div class="ph-center">Currency Strength Index</div>
-            <div class="ph-right"><span class="ph-status" id="csStatus">Loading...</span></div>
-        </div>
-        <div class="cs-layout">
-            <div class="cs-chart-wrap">
-                <div class="cs-header-row">
-                    <div class="cs-tf-btns">
-                        <button class="cs-tf-btn" onclick="csSetTF('M5',this)">5 Min</button>
-                        <button class="cs-tf-btn" onclick="csSetTF('M15',this)">15 Min</button>
-                        <button class="cs-tf-btn active" onclick="csSetTF('H1',this)">Hourly</button>
-                        <button class="cs-tf-btn" onclick="csSetTF('H4',this)">4H</button>
-                        <button class="cs-tf-btn" onclick="csSetTF('D',this)">Daily</button>
-                        <button class="cs-tf-btn" onclick="csRefresh()" style="margin-left:4px">&#8634;</button>
-                    </div>
-                    <div class="cs-legend" id="csLegend"></div>
-                </div>
-                <div class="cs-chart-inner"><canvas id="csChart"></canvas></div>
-            </div>
-            <div class="cs-sidebar">
-                <div class="cs-rank-card">
-                    <div class="cs-rank-header">Strength</div>
-                    <div class="cs-rank-body" id="csRankBody"><div class="loading">Loading...</div></div>
-                </div>
-            </div>
-        </div>
-        <div style="margin-top:15px;">
+    <!-- SENTIMENT -->
+    <div class="tab-page active" id="page-sentiment">
+        <div class="sentiment-headers">
             <div class="page-header">
                 <div class="ph-left">
-                    <div style="display:flex;gap:6px;">
-                        <button class="fxp-tf-btn active" onclick="fxpSetTF('D',this)">Today</button>
-                        <button class="fxp-tf-btn" onclick="fxpSetTF('W',this)">1W</button>
-                        <button class="fxp-tf-btn" onclick="fxpSetTF('M',this)">1M</button>
-                        <button class="fxp-tf-btn" onclick="fxpSetTF('M3',this)">3M</button>
-                        <button class="fxp-tf-btn" onclick="fxpSetTF('Y',this)">1Y</button>
+                    <button class="pairs-edit-btn" onclick="openPairsModal()">&#9881; Edit Pairs</button>
+                </div>
+                <div class="ph-center">Traders Sentiment</div>
+                <div class="ph-right">
+                    <span class="ph-status" id="lastUpdate">Loading...</span>
+                    <button class="refresh-icon-btn" onclick="actualiserDonnees()">&#8634;</button>
+                </div>
+            </div>
+            <div class="page-header" style="justify-content:center;"><span>Long vs Short &mdash; Traders Sentiment</span></div>
+        </div>
+        <div class="main-section">
+            <div class="table-container">
+                <div class="table-head-fixed">
+                    <div class="table-head-fixed-inner">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Pair</th><th>% Short</th><th>% Long</th><th>Short Volume</th><th>Long Volume</th><th>Short Positions</th><th>Long Positions</th><th>Total Positions</th>
+                                </tr>
+                            </thead>
+                        </table>
+                        <div class="scrollbar-placeholder" id="scrollbarPlaceholder"></div>
                     </div>
                 </div>
-                <div class="ph-center">FX Performance</div>
-                <div class="ph-right">
-                    <span class="ph-status" id="fxpStatus">&mdash;</span>
-                    <button class="refresh-icon-btn" onclick="fxpLoad()">&#8634;</button>
+                <div class="table-scroll" id="sentimentScroll">
+                    <table>
+                        <tbody id="sentimentBody"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody>
+                    </table>
                 </div>
             </div>
-            <div style="display:grid;grid-template-columns:420px 1fr;gap:15px;align-items:stretch;">
-                <div class="fxp-bars-card" style="display:flex;flex-direction:column;">
-                    <div class="fxp-bars-title">Currency Performance</div>
-                    <div id="fxpBarsContainer" style="flex:1;"><div class="fxp-loading">Loading...</div></div>
+            <div class="chart-sentiment">
+                <div class="chart-sentiment-wrapper"><canvas id="sentimentChart"></canvas></div>
+            </div>
+        </div>
+
+        <div style="margin-top:20px;">
+            <div class="page-header">
+                <div class="ph-left"></div>
+                <div class="ph-center">COT Report &mdash; CFTC Commitments of Traders</div>
+                <div class="ph-right"><span class="ph-status" id="cotDate">Loading...</span></div>
+            </div>
+            <div class="cot-section" style="margin-bottom:15px">
+                <div class="cot-container">
+                    <div class="cot-header">Leveraged Funds (Hedge Funds)</div>
+                    <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyLev"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
                 </div>
-                <div class="fxp-heatmap-card" style="display:flex;flex-direction:column;">
-                    <div class="fxp-heatmap-title">Pair Performance Heatmap</div>
-                    <div id="fxpHeatmapContainer" style="flex:1;overflow-x:auto;"><div class="fxp-loading">Loading...</div></div>
+                <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Leveraged Funds</h3><div class="cot-pies" id="cotPiesLev"></div></div>
+            </div>
+            <div class="cot-section" style="margin-bottom:15px">
+                <div class="cot-container">
+                    <div class="cot-header">Commercials (Dealer/Intermediary)</div>
+                    <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyCom"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
                 </div>
+                <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Commercials</h3><div class="cot-pies" id="cotPiesCom"></div></div>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- MACRO PAGE -->
-<div class="tab-page" id="page-macropage">
-    <div class="macro-page-section">
-        <div class="macro-page-section-title">
-            <div class="section-left"></div>
-            <span class="section-title-text">Central Bank Interest Rates</span>
-            <div class="section-right">
-                <span class="source-badge">Static + verified</span>
-                <span style="color:#aaa;font-size:10px" id="irStatus">&mdash;</span>
-                <button class="refresh-icon-btn" onclick="renderRates()">&#8634;</button>
-            </div>
-        </div>
-        <div class="ir-layout">
-            <div class="ir-cards-grid" id="irCardsGrid"></div>
-            <div class="ir-comparison-card">
-                <div class="ir-comp-title">Rate Comparison &mdash; Central Banks</div>
-                <div id="irBarsContainer"></div>
-            </div>
-            <div>
-                <div class="page-header" style="justify-content:center;">Interest Rate History</div>
-                <div class="ir-hist-grid" id="irHistGrid"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- CALENDAR -->
-<div class="tab-page" id="page-calendar">
-    <div class="page-header" style="justify-content:center;">Economic Calendar</div>
-    <div class="calendar-section">
-        <div class="tradingview-widget-container" style="flex:1;min-height:0;">
-            <div class="tradingview-widget-container__widget" style="height:100%;"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-            {"colorTheme":"dark","isTransparent":true,"locale":"en","countryFilter":"us,ca,eu,fr,de,es,ch,it,gb,au,nz,jp","importanceFilter":"-1,0,1","width":"100%","height":"100%"}
-            </script>
-        </div>
-    </div>
-</div>
-```
-
-</div><!-- end pc-layout -->
-</div><!-- end pc-only -->
-
-<!-- ================================================
-     MOBILE LAYOUT
-     ================================================ -->
-
-<div class="mobile-only">
-<div class="mobile-layout">
-
-```
-<!-- Ticker always visible at top -->
-<div class="mob-ticker">
-    <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js" id="mobTickerScript"></script>
-    <tv-ticker-tape id="mobTickerTape" symbols="FX:AUDUSD,FX:EURUSD,OANDA:GBPUSD,FX:NZDUSD,FX:USDCAD,FX:USDCHF,FX:USDJPY,FX:AUDCAD,FX:AUDCHF,FX:AUDJPY,FX:AUDNZD,FX:CADCHF,FX:CADJPY,FX:CHFJPY,FX:EURAUD,FX:EURCAD,FX:EURCHF,FX:EURGBP,FX:EURJPY,FX:EURNZD,FX:GBPAUD,FX:GBPCAD,FX:GBPCHF,FX:GBPJPY,FX:GBPNZD,FX:NZDCAD,FX:NZDCHF,FX:NZDJPY" theme="dark" transparent></tv-ticker-tape>
-</div>
-
-<!-- Scrollable content -->
-<div class="mob-content" id="mobContent">
-
-    <!-- SENTIMENT PAGE -->
-    <div class="mob-page active" id="mob-page-sentiment">
-        <div class="mob-section-header">
-            <button class="mob-edit-pairs-btn" onclick="openPairsModal()">&#9881; Pairs</button>
-            <span class="msh-title">Traders Sentiment</span>
-            <div class="msh-right">
-                <span class="msh-status" id="mob-lastUpdate">...</span>
-                <button class="refresh-icon-btn" onclick="actualiserDonnees()" style="font-size:18px">&#8634;</button>
-            </div>
-        </div>
-
-        <!-- Tabs: Table / Chart / COT -->
-        <div style="display:flex;gap:0;margin-bottom:10px;border:1px solid #1e2230;border-radius:8px;overflow:hidden;">
-            <button class="mob-subtab-btn active" onclick="mobShowSub('table',this)" style="flex:1;padding:10px;background:#1e2230;color:#fff;border:none;font-size:12px;font-weight:bold;cursor:pointer;">Table</button>
-            <button class="mob-subtab-btn" onclick="mobShowSub('chart',this)" style="flex:1;padding:10px;background:#161616;color:#888;border:none;border-left:1px solid #1e2230;font-size:12px;font-weight:bold;cursor:pointer;">Chart</button>
-            <button class="mob-subtab-btn" onclick="mobShowSub('cot',this)" style="flex:1;padding:10px;background:#161616;color:#888;border:none;border-left:1px solid #1e2230;font-size:12px;font-weight:bold;cursor:pointer;">COT</button>
-        </div>
-
-        <!-- Sub: Table -->
-        <div id="mob-sub-table" class="mob-sub-content">
-            <div class="mob-sentiment-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="text-align:left;padding-left:10px;">Pair</th>
-                            <th>% Short</th>
-                            <th>% Long</th>
-                            <th>Short Pos</th>
-                            <th>Long Pos</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mob-sentimentBody"><tr><td colspan="6" style="padding:20px;text-align:center;color:#aaa;">Loading...</td></tr></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Sub: Chart (bars) -->
-        <div id="mob-sub-chart" class="mob-sub-content" style="display:none;">
-            <div class="mob-chart-card">
-                <div class="mob-chart-title">LONG / SHORT — ALL PAIRS</div>
-                <div id="mob-sentBarsContainer">
-                    <div style="text-align:center;color:#aaa;padding:20px;">Loading...</div>
+            <div class="cot-section" style="margin-bottom:0">
+                <div class="cot-container">
+                    <div class="cot-header">Large Speculators (Asset Manager)</div>
+                    <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyLS"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
                 </div>
+                <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Large Speculators</h3><div class="cot-pies" id="cotPiesLS"></div></div>
             </div>
-        </div>
-
-        <!-- Sub: COT -->
-        <div id="mob-sub-cot" class="mob-sub-content" style="display:none;">
-            <div style="text-align:center;color:#aaa;font-size:11px;margin-bottom:8px;" id="mob-cotDate">Loading...</div>
-
-            <div class="mob-cot-section">
-                <div class="mob-cot-header">Leveraged Funds (Hedge Funds)</div>
-                <div class="mob-cot-table"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916;</th><th>Bias</th></tr></thead><tbody id="mob-cotBodyLev"><tr><td colspan="6" style="padding:14px;text-align:center;color:#aaa;">Loading...</td></tr></tbody></table></div>
-                <div class="mob-pies" id="mob-cotPiesLev"></div>
-            </div>
-
-            <div class="mob-cot-section" style="margin-top:12px;">
-                <div class="mob-cot-header">Commercials (Dealer/Intermediary)</div>
-                <div class="mob-cot-table"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916;</th><th>Bias</th></tr></thead><tbody id="mob-cotBodyCom"><tr><td colspan="6" style="padding:14px;text-align:center;color:#aaa;">Loading...</td></tr></tbody></table></div>
-                <div class="mob-pies" id="mob-cotPiesCom"></div>
-            </div>
-
-            <div class="mob-cot-section" style="margin-top:12px;">
-                <div class="mob-cot-header">Large Speculators (Asset Manager)</div>
-                <div class="mob-cot-table"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916;</th><th>Bias</th></tr></thead><tbody id="mob-cotBodyLS"><tr><td colspan="6" style="padding:14px;text-align:center;color:#aaa;">Loading...</td></tr></tbody></table></div>
-                <div class="mob-pies" id="mob-cotPiesLS"></div>
-            </div>
-
-            <div style="margin-top:12px;">
-                <div style="background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px;text-align:center;font-size:12px;font-weight:bold;margin-bottom:10px;">Net Positions</div>
-                <div id="mob-histGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+            <div style="margin-top:15px">
+                <div class="page-header" style="justify-content:center;">Net Positions</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="histGrid"></div>
             </div>
         </div>
     </div>
 
-    <!-- STRENGTH PAGE -->
-    <div class="mob-page" id="mob-page-strength">
-        <div class="mob-section-header">
-            <span class="msh-title">Currency Strength</span>
-            <div class="msh-right">
-                <span class="msh-status" id="mob-csStatus">...</span>
-                <button class="refresh-icon-btn" onclick="mobCsRefresh()" style="font-size:18px">&#8634;</button>
+    <!-- STRENGTH -->
+    <div class="tab-page" id="page-strength">
+        <div id="sub-rsi">
+            <div class="page-header">
+                <div class="ph-left"></div>
+                <div class="ph-center">Currency Strength Index</div>
+                <div class="ph-right"><span class="ph-status" id="csStatus">Loading...</span></div>
             </div>
-        </div>
-
-        <!-- TF buttons -->
-        <div class="mob-cs-tf-row">
-            <button class="mob-cs-tf-btn" onclick="mobCsSetTF('M5',this)">5M</button>
-            <button class="mob-cs-tf-btn" onclick="mobCsSetTF('M15',this)">15M</button>
-            <button class="mob-cs-tf-btn active" onclick="mobCsSetTF('H1',this)">1H</button>
-            <button class="mob-cs-tf-btn" onclick="mobCsSetTF('H4',this)">4H</button>
-            <button class="mob-cs-tf-btn" onclick="mobCsSetTF('D',this)">D</button>
-        </div>
-
-        <!-- Legend -->
-        <div class="mob-cs-legend" id="mob-csLegend"></div>
-
-        <!-- Chart -->
-        <div class="mob-cs-chart-wrap">
-            <div class="mob-cs-chart-inner" id="mobCsChartInner">
-                <canvas id="mob-csChart"></canvas>
+            <div class="cs-layout">
+                <div class="cs-chart-wrap">
+                    <div class="cs-header-row">
+                        <div class="cs-tf-btns">
+                            <button class="cs-tf-btn" onclick="csSetTF('M5',this)">5 Min</button>
+                            <button class="cs-tf-btn" onclick="csSetTF('M15',this)">15 Min</button>
+                            <button class="cs-tf-btn active" onclick="csSetTF('H1',this)">Hourly</button>
+                            <button class="cs-tf-btn" onclick="csSetTF('H4',this)">4H</button>
+                            <button class="cs-tf-btn" onclick="csSetTF('D',this)">Daily</button>
+                            <button class="cs-tf-btn" onclick="csRefresh()" style="margin-left:4px">&#8634;</button>
+                        </div>
+                        <div class="cs-legend" id="csLegend"></div>
+                    </div>
+                    <div class="cs-chart-inner"><canvas id="csChart"></canvas></div>
+                </div>
+                <div class="cs-sidebar">
+                    <div class="cs-rank-card">
+                        <div class="cs-rank-header">Strength</div>
+                        <div class="cs-rank-body" id="csRankBody"><div class="loading">Loading...</div></div>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <!-- Rank list -->
-        <div class="mob-cs-rank-list">
-            <div style="font-size:12px;font-weight:bold;margin-bottom:8px;color:#aaa;text-align:center;">STRENGTH RANKING</div>
-            <div id="mob-csRankBody"><div style="text-align:center;color:#aaa;padding:10px;">Loading...</div></div>
-        </div>
-
-        <!-- FX Performance -->
-        <div class="mob-section-header" style="margin-top:4px;">
-            <span class="msh-title">FX Performance</span>
-            <div class="msh-right">
-                <span class="msh-status" id="mob-fxpStatus">...</span>
-                <button class="refresh-icon-btn" onclick="mobFxpLoad()" style="font-size:18px">&#8634;</button>
+            <div style="margin-top:15px;">
+                <div class="page-header">
+                    <div class="ph-left">
+                        <div style="display:flex;gap:6px;">
+                            <button class="fxp-tf-btn active" onclick="fxpSetTF('D',this)">Today</button>
+                            <button class="fxp-tf-btn" onclick="fxpSetTF('W',this)">1W</button>
+                            <button class="fxp-tf-btn" onclick="fxpSetTF('M',this)">1M</button>
+                            <button class="fxp-tf-btn" onclick="fxpSetTF('M3',this)">3M</button>
+                            <button class="fxp-tf-btn" onclick="fxpSetTF('Y',this)">1Y</button>
+                        </div>
+                    </div>
+                    <div class="ph-center">FX Performance</div>
+                    <div class="ph-right">
+                        <span class="ph-status" id="fxpStatus">&mdash;</span>
+                        <button class="refresh-icon-btn" onclick="fxpLoad()">&#8634;</button>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:420px 1fr;gap:15px;align-items:stretch;">
+                    <div class="fxp-bars-card" style="display:flex;flex-direction:column;">
+                        <div class="fxp-bars-title">Currency Performance</div>
+                        <div id="fxpBarsContainer" style="flex:1;"><div class="fxp-loading">Loading...</div></div>
+                    </div>
+                    <div class="fxp-heatmap-card" style="display:flex;flex-direction:column;">
+                        <div class="fxp-heatmap-title">Pair Performance Heatmap</div>
+                        <div id="fxpHeatmapContainer" style="flex:1;overflow-x:auto;"><div class="fxp-loading">Loading...</div></div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="mob-fxp-tf-row">
-            <button class="mob-fxp-tf-btn active" onclick="mobFxpSetTF('D',this)">Today</button>
-            <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('W',this)">1W</button>
-            <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('M',this)">1M</button>
-            <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('M3',this)">3M</button>
-            <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('Y',this)">1Y</button>
-        </div>
-        <div class="mob-chart-card">
-            <div class="mob-chart-title">CURRENCY PERFORMANCE</div>
-            <div id="mob-fxpBarsContainer"><div style="text-align:center;color:#aaa;padding:14px;">Loading...</div></div>
-        </div>
-        <div class="mob-chart-card" style="overflow-x:auto;">
-            <div class="mob-chart-title">PAIR PERFORMANCE HEATMAP</div>
-            <div id="mob-fxpHeatmapContainer" style="overflow-x:auto;"><div style="text-align:center;color:#aaa;padding:14px;">Loading...</div></div>
         </div>
     </div>
 
     <!-- MACRO PAGE -->
-    <div class="mob-page" id="mob-page-macro">
-        <div class="mob-section-header">
-            <span class="msh-title">Central Bank Rates</span>
-            <div class="msh-right">
-                <span class="msh-status" id="mob-irStatus">Apr 6, 2026</span>
-                <button class="refresh-icon-btn" onclick="mobRenderRates()" style="font-size:18px">&#8634;</button>
+    <div class="tab-page" id="page-macropage">
+        <div class="macro-page-section">
+            <div class="macro-page-section-title">
+                <div class="section-left"></div>
+                <span class="section-title-text">Central Bank Interest Rates</span>
+                <div class="section-right">
+                    <span class="source-badge">Static + verified</span>
+                    <span style="color:#aaa;font-size:10px" id="irStatus">&mdash;</span>
+                    <button class="refresh-icon-btn" onclick="renderRates()">&#8634;</button>
+                </div>
+            </div>
+            <div class="ir-layout">
+                <div class="ir-cards-grid" id="irCardsGrid"></div>
+                <div class="ir-comparison-card">
+                    <div class="ir-comp-title">Rate Comparison &mdash; Central Banks</div>
+                    <div id="irBarsContainer"></div>
+                </div>
+                <div>
+                    <div class="page-header" style="justify-content:center;">Interest Rate History</div>
+                    <div class="ir-hist-grid" id="irHistGrid"></div>
+                </div>
             </div>
         </div>
-        <div class="mob-ir-cards-grid" id="mob-irCardsGrid"></div>
-        <div class="mob-chart-card">
-            <div class="mob-chart-title">RATE COMPARISON</div>
-            <div id="mob-irBarsContainer"></div>
-        </div>
-        <div style="background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px;text-align:center;font-size:12px;font-weight:bold;margin-bottom:10px;">Interest Rate History</div>
-        <div class="mob-ir-hist-grid" id="mob-irHistGrid"></div>
     </div>
 
-    <!-- CALENDAR PAGE -->
-    <div class="mob-page" id="mob-page-calendar">
-        <div class="mob-section-header">
-            <span class="msh-title">Economic Calendar</span>
-        </div>
-        <div class="mob-calendar-wrap">
-            <div class="tradingview-widget-container" style="height:100%;">
+    <!-- CALENDAR -->
+    <div class="tab-page" id="page-calendar">
+        <div class="page-header" style="justify-content:center;">Economic Calendar</div>
+        <div class="calendar-section">
+            <div class="tradingview-widget-container" style="flex:1;min-height:0;">
                 <div class="tradingview-widget-container__widget" style="height:100%;"></div>
                 <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
                 {"colorTheme":"dark","isTransparent":true,"locale":"en","countryFilter":"us,ca,eu,fr,de,es,ch,it,gb,au,nz,jp","importanceFilter":"-1,0,1","width":"100%","height":"100%"}
@@ -789,49 +593,236 @@
             </div>
         </div>
     </div>
+</div><!-- end pc-layout -->
+</div><!-- end pc-only -->
 
-</div><!-- end mob-content -->
 
-<!-- Bottom navigation -->
-<nav class="mob-nav" id="mobNav">
-    <div class="mob-nav-indicator" id="mobNavIndicator"></div>
-    <button class="mob-nav-btn active" onclick="mobShowPage('sentiment',0,this)" id="mobnav-sentiment">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-        Sentiment
-    </button>
-    <button class="mob-nav-btn" onclick="mobShowPage('strength',1,this)" id="mobnav-strength">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-        </svg>
-        Strength
-    </button>
-    <button class="mob-nav-btn" onclick="mobShowPage('macro',2,this)" id="mobnav-macro">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="2" y1="12" x2="22" y2="12"/>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-        </svg>
-        Macro
-    </button>
-    <button class="mob-nav-btn" onclick="mobShowPage('calendar',3,this)" id="mobnav-calendar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8" y1="2" x2="8" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        Calendar
-    </button>
-</nav>
-```
+<!-- ================================================
+     MOBILE LAYOUT
+     ================================================ -->
+<div class="mobile-only">
+<div class="mobile-layout">
+
+    <!-- Ticker always visible at top -->
+    <div class="mob-ticker">
+        <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js" id="mobTickerScript"></script>
+        <tv-ticker-tape id="mobTickerTape" symbols="FX:AUDUSD,FX:EURUSD,OANDA:GBPUSD,FX:NZDUSD,FX:USDCAD,FX:USDCHF,FX:USDJPY,FX:AUDCAD,FX:AUDCHF,FX:AUDJPY,FX:AUDNZD,FX:CADCHF,FX:CADJPY,FX:CHFJPY,FX:EURAUD,FX:EURCAD,FX:EURCHF,FX:EURGBP,FX:EURJPY,FX:EURNZD,FX:GBPAUD,FX:GBPCAD,FX:GBPCHF,FX:GBPJPY,FX:GBPNZD,FX:NZDCAD,FX:NZDCHF,FX:NZDJPY" theme="dark" transparent></tv-ticker-tape>
+    </div>
+
+    <!-- Scrollable content -->
+    <div class="mob-content" id="mobContent">
+
+        <!-- SENTIMENT PAGE -->
+        <div class="mob-page active" id="mob-page-sentiment">
+            <div class="mob-section-header">
+                <button class="mob-edit-pairs-btn" onclick="openPairsModal()">&#9881; Pairs</button>
+                <span class="msh-title">Traders Sentiment</span>
+                <div class="msh-right">
+                    <span class="msh-status" id="mob-lastUpdate">...</span>
+                    <button class="refresh-icon-btn" onclick="actualiserDonnees()" style="font-size:18px">&#8634;</button>
+                </div>
+            </div>
+
+            <!-- Tabs: Table / Chart / COT -->
+            <div style="display:flex;gap:0;margin-bottom:10px;border:1px solid #1e2230;border-radius:8px;overflow:hidden;">
+                <button class="mob-subtab-btn active" onclick="mobShowSub('table',this)" style="flex:1;padding:10px;background:#1e2230;color:#fff;border:none;font-size:12px;font-weight:bold;cursor:pointer;">Table</button>
+                <button class="mob-subtab-btn" onclick="mobShowSub('chart',this)" style="flex:1;padding:10px;background:#161616;color:#888;border:none;border-left:1px solid #1e2230;font-size:12px;font-weight:bold;cursor:pointer;">Chart</button>
+                <button class="mob-subtab-btn" onclick="mobShowSub('cot',this)" style="flex:1;padding:10px;background:#161616;color:#888;border:none;border-left:1px solid #1e2230;font-size:12px;font-weight:bold;cursor:pointer;">COT</button>
+            </div>
+
+            <!-- Sub: Table -->
+            <div id="mob-sub-table" class="mob-sub-content">
+                <div class="mob-sentiment-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;padding-left:10px;">Pair</th>
+                                <th>% Short</th>
+                                <th>% Long</th>
+                                <th>Short Pos</th>
+                                <th>Long Pos</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mob-sentimentBody"><tr><td colspan="6" style="padding:20px;text-align:center;color:#aaa;">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sub: Chart (bars) -->
+            <div id="mob-sub-chart" class="mob-sub-content" style="display:none;">
+                <div class="mob-chart-card">
+                    <div class="mob-chart-title">LONG / SHORT — ALL PAIRS</div>
+                    <div id="mob-sentBarsContainer">
+                        <div style="text-align:center;color:#aaa;padding:20px;">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub: COT -->
+            <div id="mob-sub-cot" class="mob-sub-content" style="display:none;">
+                <div style="text-align:center;color:#aaa;font-size:11px;margin-bottom:8px;" id="mob-cotDate">Loading...</div>
+
+                <div class="mob-cot-section">
+                    <div class="mob-cot-header">Leveraged Funds (Hedge Funds)</div>
+                    <div class="mob-cot-table"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916;</th><th>Bias</th></tr></thead><tbody id="mob-cotBodyLev"><tr><td colspan="6" style="padding:14px;text-align:center;color:#aaa;">Loading...</td></tr></tbody></table></div>
+                    <div class="mob-pies" id="mob-cotPiesLev"></div>
+                </div>
+
+                <div class="mob-cot-section" style="margin-top:12px;">
+                    <div class="mob-cot-header">Commercials (Dealer/Intermediary)</div>
+                    <div class="mob-cot-table"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916;</th><th>Bias</th></tr></thead><tbody id="mob-cotBodyCom"><tr><td colspan="6" style="padding:14px;text-align:center;color:#aaa;">Loading...</td></tr></tbody></table></div>
+                    <div class="mob-pies" id="mob-cotPiesCom"></div>
+                </div>
+
+                <div class="mob-cot-section" style="margin-top:12px;">
+                    <div class="mob-cot-header">Large Speculators (Asset Manager)</div>
+                    <div class="mob-cot-table"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916;</th><th>Bias</th></tr></thead><tbody id="mob-cotBodyLS"><tr><td colspan="6" style="padding:14px;text-align:center;color:#aaa;">Loading...</td></tr></tbody></table></div>
+                    <div class="mob-pies" id="mob-cotPiesLS"></div>
+                </div>
+
+                <div style="margin-top:12px;">
+                    <div style="background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px;text-align:center;font-size:12px;font-weight:bold;margin-bottom:10px;">Net Positions</div>
+                    <div id="mob-histGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STRENGTH PAGE -->
+        <div class="mob-page" id="mob-page-strength">
+            <div class="mob-section-header">
+                <span class="msh-title">Currency Strength</span>
+                <div class="msh-right">
+                    <span class="msh-status" id="mob-csStatus">...</span>
+                    <button class="refresh-icon-btn" onclick="mobCsRefresh()" style="font-size:18px">&#8634;</button>
+                </div>
+            </div>
+
+            <!-- TF buttons -->
+            <div class="mob-cs-tf-row">
+                <button class="mob-cs-tf-btn" onclick="mobCsSetTF('M5',this)">5M</button>
+                <button class="mob-cs-tf-btn" onclick="mobCsSetTF('M15',this)">15M</button>
+                <button class="mob-cs-tf-btn active" onclick="mobCsSetTF('H1',this)">1H</button>
+                <button class="mob-cs-tf-btn" onclick="mobCsSetTF('H4',this)">4H</button>
+                <button class="mob-cs-tf-btn" onclick="mobCsSetTF('D',this)">D</button>
+            </div>
+
+            <!-- Legend -->
+            <div class="mob-cs-legend" id="mob-csLegend"></div>
+
+            <!-- Chart -->
+            <div class="mob-cs-chart-wrap">
+                <div class="mob-cs-chart-inner" id="mobCsChartInner">
+                    <canvas id="mob-csChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Rank list -->
+            <div class="mob-cs-rank-list">
+                <div style="font-size:12px;font-weight:bold;margin-bottom:8px;color:#aaa;text-align:center;">STRENGTH RANKING</div>
+                <div id="mob-csRankBody"><div style="text-align:center;color:#aaa;padding:10px;">Loading...</div></div>
+            </div>
+
+            <!-- FX Performance -->
+            <div class="mob-section-header" style="margin-top:4px;">
+                <span class="msh-title">FX Performance</span>
+                <div class="msh-right">
+                    <span class="msh-status" id="mob-fxpStatus">...</span>
+                    <button class="refresh-icon-btn" onclick="mobFxpLoad()" style="font-size:18px">&#8634;</button>
+                </div>
+            </div>
+            <div class="mob-fxp-tf-row">
+                <button class="mob-fxp-tf-btn active" onclick="mobFxpSetTF('D',this)">Today</button>
+                <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('W',this)">1W</button>
+                <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('M',this)">1M</button>
+                <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('M3',this)">3M</button>
+                <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('Y',this)">1Y</button>
+            </div>
+            <div class="mob-chart-card">
+                <div class="mob-chart-title">CURRENCY PERFORMANCE</div>
+                <div id="mob-fxpBarsContainer"><div style="text-align:center;color:#aaa;padding:14px;">Loading...</div></div>
+            </div>
+            <div class="mob-chart-card" style="overflow-x:auto;">
+                <div class="mob-chart-title">PAIR PERFORMANCE HEATMAP</div>
+                <div id="mob-fxpHeatmapContainer" style="overflow-x:auto;"><div style="text-align:center;color:#aaa;padding:14px;">Loading...</div></div>
+            </div>
+        </div>
+
+        <!-- MACRO PAGE -->
+        <div class="mob-page" id="mob-page-macro">
+            <div class="mob-section-header">
+                <span class="msh-title">Central Bank Rates</span>
+                <div class="msh-right">
+                    <span class="msh-status" id="mob-irStatus">Apr 6, 2026</span>
+                    <button class="refresh-icon-btn" onclick="mobRenderRates()" style="font-size:18px">&#8634;</button>
+                </div>
+            </div>
+            <div class="mob-ir-cards-grid" id="mob-irCardsGrid"></div>
+            <div class="mob-chart-card">
+                <div class="mob-chart-title">RATE COMPARISON</div>
+                <div id="mob-irBarsContainer"></div>
+            </div>
+            <div style="background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px;text-align:center;font-size:12px;font-weight:bold;margin-bottom:10px;">Interest Rate History</div>
+            <div class="mob-ir-hist-grid" id="mob-irHistGrid"></div>
+        </div>
+
+        <!-- CALENDAR PAGE -->
+        <div class="mob-page" id="mob-page-calendar">
+            <div class="mob-section-header">
+                <span class="msh-title">Economic Calendar</span>
+            </div>
+            <div class="mob-calendar-wrap">
+                <div class="tradingview-widget-container" style="height:100%;">
+                    <div class="tradingview-widget-container__widget" style="height:100%;"></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+                    {"colorTheme":"dark","isTransparent":true,"locale":"en","countryFilter":"us,ca,eu,fr,de,es,ch,it,gb,au,nz,jp","importanceFilter":"-1,0,1","width":"100%","height":"100%"}
+                    </script>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- end mob-content -->
+
+    <!-- Bottom navigation -->
+    <nav class="mob-nav" id="mobNav">
+        <div class="mob-nav-indicator" id="mobNavIndicator"></div>
+        <button class="mob-nav-btn active" onclick="mobShowPage('sentiment',0,this)" id="mobnav-sentiment">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Sentiment
+        </button>
+        <button class="mob-nav-btn" onclick="mobShowPage('strength',1,this)" id="mobnav-strength">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            Strength
+        </button>
+        <button class="mob-nav-btn" onclick="mobShowPage('macro',2,this)" id="mobnav-macro">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            Macro
+        </button>
+        <button class="mob-nav-btn" onclick="mobShowPage('calendar',3,this)" id="mobnav-calendar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Calendar
+        </button>
+    </nav>
 
 </div><!-- end mobile-layout -->
 </div><!-- end mobile-only -->
+
 
 <script>
 /* =========================================================
@@ -1399,6 +1390,7 @@ function mobFxpRenderBars(curPerf){
     var html='';
     entries.forEach(function(e){
         var isPos=e.val>=0,color=isPos?'#C03939':'#2F995F',barWidth=(Math.abs(e.val)/maxAbs*50).toFixed(1);
+        /* FIX: added position:relative to mob-bar-track so absolute children stay contained */
         html+='<div class="mob-bar-row">'+
             '<div style="font-size:13px;width:20px;flex-shrink:0">'+FXP_FLAGS[e.cur]+'</div>'+
             '<div class="mob-bar-label" style="text-align:left;width:36px;color:'+FXP_COLORS[e.cur]+'">'+e.cur+'</div>'+
@@ -1502,7 +1494,7 @@ function mobRenderRates(){
     IR_BANKS.forEach(function(b){
         var wrap=document.createElement('div');
         wrap.className='mob-ir-hist-card';
-        wrap.innerHTML='<div class="mob-ir-hist-title">'+b.flag+' '+b.short+' — '+b.name+'</div><div class="mob-ir-hist-wrap"><canvas id="mob-irHist_'+b.short+'"></canvas></div>';
+        wrap.innerHTML='<div class="mob-ir-hist-title">'+b.flag+' '+b.short+'</div><div class="mob-ir-hist-wrap"><canvas id="mob-irHist_'+b.short+'"></canvas></div>';
         hg.appendChild(wrap);
     });
     setTimeout(function(){
@@ -1554,6 +1546,5 @@ function showTab(name){
     if(name==='sentiment')actualiserDonnees();
 }
 </script>
-
 </body>
 </html>
