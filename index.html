@@ -959,37 +959,37 @@ function ciRecompute() {
     });
 }
 
-// Compute card values from a long-history raw dataset (separate from chart data)
+// Compute card values AND full index series from a long-history raw dataset
 function ciComputeCardVals(longRawData) {
     var allPairs = Object.keys(longRawData);
     if (!allPairs.length) return;
-    var lengths = allPairs.map(function(p){ return longRawData[p].length; });
+    var lengths = allPairs.map(function(p){ return longRawData[p].closes.length; });
     var minLen = Math.min.apply(null, lengths);
     _ciCardVals = {};
     CS_CURRENCIES.forEach(function(cur) {
         var basket = CI_PAIRS[cur];
         var sum = 0, cnt = 0;
         basket.forEach(function(item) {
-            var closes = longRawData[item.pair];
-            if (!closes || closes.length < 2) return;
-            var startIdx = closes.length - minLen;
-            var close0 = closes[startIdx];
-            var closeI = closes[closes.length - 1];
+            var pd = longRawData[item.pair];
+            if (!pd || !pd.closes || pd.closes.length < 2) return;
+            var startIdx = pd.closes.length - minLen;
+            var close0 = pd.closes[startIdx];
+            var closeI = pd.closes[pd.closes.length - 1];
             if (!close0 || !closeI) return;
             var variation = item.inv ? (close0 - closeI) / close0 : (closeI - close0) / close0;
             sum += variation;
             cnt++;
         });
-        _ciCardVals[cur] = cnt > 0 ? parseFloat((100 * (1 + sum/cnt)).toFixed(3)) : null;
+        // Store as % value (e.g. +2.22 meaning +2.22%)
+        _ciCardVals[cur] = cnt > 0 ? parseFloat((sum / cnt * 100).toFixed(4)) : null;
     });
 }
 
-// Build OHLC index series for candlestick mini-charts
-// Uses the chart's aligned _ciTimes window; fetches OHLC candles for each pair
-function ciComputeOhlcSeries(ohlcRawData) {
-    var allPairs = Object.keys(ohlcRawData);
+// Build OHLC index series for candlestick mini-charts using long data
+function ciComputeOhlcSeries(longRawData) {
+    var allPairs = Object.keys(longRawData);
     if (!allPairs.length) return;
-    var lengths = allPairs.map(function(p){ return ohlcRawData[p].closes.length; });
+    var lengths = allPairs.map(function(p){ return longRawData[p].closes.length; });
     var minLen = Math.min.apply(null, lengths);
 
     _ciOhlcSeries = {};
@@ -999,29 +999,27 @@ function ciComputeOhlcSeries(ohlcRawData) {
         for (var i = 0; i < minLen; i++) {
             var sumO=0, sumH=0, sumL=0, sumC=0, cnt=0;
             basket.forEach(function(item) {
-                var pd = ohlcRawData[item.pair];
-                if (!pd) return;
+                var pd = longRawData[item.pair];
+                if (!pd || !pd.opens) return;
                 var startIdx = pd.closes.length - minLen;
-                var close0 = pd.closes[startIdx]; // reference = first close
+                var close0 = pd.closes[startIdx];
                 if (!close0) return;
                 var si = startIdx + i;
                 var o = pd.opens[si], h = pd.highs[si], l = pd.lows[si], c2 = pd.closes[si];
                 if (!o||!h||!l||!c2) return;
                 var varO = item.inv ? (close0-o)/close0 : (o-close0)/close0;
-                var varH = item.inv ? (close0-l)/close0 : (h-close0)/close0; // inv: high price = low variation
+                var varH = item.inv ? (close0-l)/close0 : (h-close0)/close0;
                 var varL = item.inv ? (close0-h)/close0 : (l-close0)/close0;
                 var varC = item.inv ? (close0-c2)/close0 : (c2-close0)/close0;
                 sumO+=varO; sumH+=varH; sumL+=varL; sumC+=varC; cnt++;
             });
             if (cnt > 0) {
-                var t = ohlcRawData[allPairs[0]].times[ohlcRawData[allPairs[0]].times.length - minLen + i];
                 ohlcArr.push({
                     x: i,
-                    t: t,
-                    o: parseFloat((100*(1+sumO/cnt)).toFixed(4)),
-                    h: parseFloat((100*(1+sumH/cnt)).toFixed(4)),
-                    l: parseFloat((100*(1+sumL/cnt)).toFixed(4)),
-                    c: parseFloat((100*(1+sumC/cnt)).toFixed(4))
+                    o: parseFloat((sumO/cnt*100).toFixed(5)),
+                    h: parseFloat((sumH/cnt*100).toFixed(5)),
+                    l: parseFloat((sumL/cnt*100).toFixed(5)),
+                    c: parseFloat((sumC/cnt*100).toFixed(5))
                 });
             }
         }
@@ -1040,7 +1038,6 @@ async function ciLoad() {
     _ciNoMoreData = false;
 
     var cfg = CI_TF_CONFIG[ciTF];
-    var initialCount = cfg.view + 5; // chart window
 
     var pairSet = new Set();
     CS_CURRENCIES.forEach(function(cur) {
@@ -1048,42 +1045,28 @@ async function ciLoad() {
     });
     var allPairs = Array.from(pairSet);
 
-    // Fetch (A) short OHLC window for chart + mini-charts, and (B) long closes for card values — in parallel
-    var longRawData = {}; // pair → array of closes (full history)
-    var ohlcRawData = {}; // pair → {opens, highs, lows, closes, times}
+    // Fetch full OHLC history (used for chart, cards, and mini-charts)
+    var longRawData = {};
 
     await Promise.all(allPairs.map(async function(pair) {
-        // (A) Short OHLC for chart
-        var urlA = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + initialCount + '&price=M';
-        // (B) Long closes for card values
-        var urlB = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + cfg.count + '&price=M';
+        var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + cfg.count + '&price=M';
         try {
-            var [rA, rB] = await Promise.all([
-                fetch(urlA, {headers:{'Authorization':'Bearer '+OANDA_KEY}}),
-                fetch(urlB, {headers:{'Authorization':'Bearer '+OANDA_KEY}})
-            ]);
-            if (rA.ok) {
-                var dA = await rA.json();
-                if (dA.candles && dA.candles.length > 1) {
-                    ohlcRawData[pair] = {
-                        opens:  dA.candles.map(function(c){ return parseFloat(c.mid.o); }),
-                        highs:  dA.candles.map(function(c){ return parseFloat(c.mid.h); }),
-                        lows:   dA.candles.map(function(c){ return parseFloat(c.mid.l); }),
-                        closes: dA.candles.map(function(c){ return parseFloat(c.mid.c); }),
-                        times:  dA.candles.map(function(c){ return c.time; })
-                    };
-                    // Also use short data for chart lazy-load base
-                    _ciRawData[pair] = {
-                        closes: ohlcRawData[pair].closes,
-                        times:  ohlcRawData[pair].times
-                    };
-                }
-            }
-            if (rB.ok) {
-                var dB = await rB.json();
-                if (dB.candles && dB.candles.length > 1) {
-                    longRawData[pair] = dB.candles.map(function(c){ return parseFloat(c.mid.c); });
-                }
+            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
+            if (!r.ok) return;
+            var d = await r.json();
+            if (d.candles && d.candles.length > 1) {
+                longRawData[pair] = {
+                    opens:  d.candles.map(function(c){ return parseFloat(c.mid.o); }),
+                    highs:  d.candles.map(function(c){ return parseFloat(c.mid.h); }),
+                    lows:   d.candles.map(function(c){ return parseFloat(c.mid.l); }),
+                    closes: d.candles.map(function(c){ return parseFloat(c.mid.c); }),
+                    times:  d.candles.map(function(c){ return c.time; })
+                };
+                // Use same data for chart lazy-load base
+                _ciRawData[pair] = {
+                    closes: longRawData[pair].closes,
+                    times:  longRawData[pair].times
+                };
             }
         } catch(e) {}
     }));
@@ -1091,9 +1074,12 @@ async function ciLoad() {
     var loaded = Object.keys(_ciRawData);
     if (!loaded.length) { if(el) el.textContent='Error'; return; }
 
+    // Recompute index from full data — series values are decimal (e.g. 0.0222 = +2.22%)
     ciRecompute();
+    // Card values use full history, displayed as % (e.g. +2.22)
     ciComputeCardVals(longRawData);
-    ciComputeOhlcSeries(ohlcRawData);
+    // OHLC mini-chart series also from full data, values in %
+    ciComputeOhlcSeries(longRawData);
 
     var labels = ciMakeLabels();
 
@@ -1242,7 +1228,8 @@ function renderCICombinedChart(labels) {
                         callbacks: {
                             label: function(c2) {
                                 var v = c2.parsed.y;
-                                return ' ' + c2.dataset.label + ': ' + (v !== null ? (v>=0?'+':'') + (v*100).toFixed(4) + '%' : '—');
+                                if (v === null || v === undefined) return '';
+                                return ' ' + c2.dataset.label + ': ' + (v>=0?'+':'') + (v*100).toFixed(4) + '%';
                             }
                         }
                     }
@@ -1255,7 +1242,7 @@ function renderCICombinedChart(labels) {
                     y: {
                         position: 'right',
                         grid: { color: '#1a1a2a' },
-                        ticks: { color:'#555', font:{size:9},
+                        ticks: { color:'#666', font:{size:9},
                             callback: function(v){ return (v>=0?'+':'') + (v*100).toFixed(2) + '%'; }
                         }
                     }
@@ -1266,13 +1253,37 @@ function renderCICombinedChart(labels) {
                 afterDraw: function(chart) {
                     var y = chart.scales.y, ca = chart.chartArea;
                     if (!y || !ca) return;
-                    var yp = y.getPixelForValue(0);
-                    if (yp < ca.top || yp > ca.bottom) return;
                     var c2 = chart.ctx;
-                    c2.save();
-                    c2.beginPath(); c2.moveTo(ca.left, yp); c2.lineTo(ca.right, yp);
-                    c2.strokeStyle = '#4a4a6a'; c2.lineWidth = 1.5; c2.setLineDash([4,4]);
-                    c2.stroke(); c2.restore();
+                    // Zero reference line
+                    var yp = y.getPixelForValue(0);
+                    if (yp >= ca.top && yp <= ca.bottom) {
+                        c2.save();
+                        c2.beginPath(); c2.moveTo(ca.left, yp); c2.lineTo(ca.right, yp);
+                        c2.strokeStyle = '#4a4a6a'; c2.lineWidth = 1.5; c2.setLineDash([4,4]);
+                        c2.stroke(); c2.restore();
+                    }
+                    // Right-side last-value labels (like Mataf)
+                    chart.data.datasets.forEach(function(ds) {
+                        if (ds.hidden) return;
+                        var data = ds.data;
+                        if (!data || !data.length) return;
+                        var lastV = null;
+                        for (var i = data.length-1; i >= 0; i--) { if (data[i] !== null && data[i] !== undefined) { lastV = data[i]; break; } }
+                        if (lastV === null) return;
+                        var yPos = y.getPixelForValue(lastV);
+                        if (yPos < ca.top || yPos > ca.bottom) return;
+                        var label = (lastV>=0?'+':'') + (lastV*100).toFixed(2) + '%';
+                        var boxW = 52, boxH = 14;
+                        c2.save();
+                        c2.fillStyle = ds.borderColor;
+                        c2.fillRect(ca.right + 2, yPos - boxH/2, boxW, boxH);
+                        c2.fillStyle = '#fff';
+                        c2.font = 'bold 9px Arial';
+                        c2.textAlign = 'center';
+                        c2.textBaseline = 'middle';
+                        c2.fillText(label, ca.right + 2 + boxW/2, yPos);
+                        c2.restore();
+                    });
                 }
             }]
         });
@@ -1369,9 +1380,9 @@ function mobSetupChartTouchCI(canvas, chart) {
     chart.options.scales.x.min=Math.max(0,total-view);chart.options.scales.x.max=total-1;chart.update('none');
 }
 
-/* --- 8 mini-charts (Mataf style: candlestick + last-price box) --- */
+/* --- 8 mini-charts (line charts, old card style restored) --- */
 function renderCIMiniCharts(labels) {
-    Object.values(_ciCharts).forEach(function(ch){ if(ch)ch.destroy(); });
+    Object.values(_ciCharts).forEach(function(ch){ if(ch && ch.destroy && !ch.isCanvas) ch.destroy(); });
     _ciCharts = {};
 
     var grid = document.getElementById('ciGrid');
@@ -1380,54 +1391,48 @@ function renderCIMiniCharts(labels) {
     if (mobGrid) mobGrid.innerHTML = '';
 
     CS_CURRENCIES.forEach(function(cur) {
-        var ohlc = _ciOhlcSeries[cur] || [];
-        var cardVal = _ciCardVals[cur];          // full-history absolute index value
-        var lastVal = _ciCurrentLastVals[cur];   // chart-window variation (for change badge)
         var series = _ciIndexSeries[cur] || [];
+        var lastVal = _ciCurrentLastVals[cur];          // decimal variation from chart window start
+        var cardVal = _ciCardVals[cur];                 // % variation from full history start (e.g. +2.22)
         var prevVal = series.length > 1 ? series[series.length-2] : null;
         var chg = (lastVal !== null && prevVal !== null) ? (lastVal - prevVal) : null;
-        var isUp = ohlc.length > 1 ? ohlc[ohlc.length-1].c >= ohlc[ohlc.length-1].o : (chg !== null ? chg >= 0 : true);
+        var isUp = cardVal !== null ? cardVal >= 0 : (chg !== null ? chg >= 0 : true);
         var color = CS_COLORS[cur];
         var chgColor = isUp ? '#2F995F' : '#C03939';
         var chgBg = isUp ? 'rgba(47,153,95,0.15)' : 'rgba(192,57,57,0.15)';
 
-        var absDisplay = cardVal !== null ? cardVal.toFixed(3) : '—';
+        // Card main value = full-history % variation (like Mataf: "+2.22%")
+        var valDisplay = cardVal !== null ? (cardVal>=0?'+':'') + cardVal.toFixed(4) + '%' : '—';
+        // Change badge = candle-to-candle delta
         var chgDisplay = chg !== null ? (isUp ? '▲ +' : '▼ ') + (chg*100).toFixed(4) + '%' : '—';
 
-        // PC card — Mataf style: currency + TF top-left, last-value box right, chart fills card
+        // PC card — original style
         var cardHTML =
-            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">' +
-                '<div style="display:flex;align-items:center;gap:6px">' +
-                    '<span style="font-size:16px">' + CI_FLAGS[cur] + '</span>' +
-                    '<span style="font-size:13px;font-weight:bold;color:'+color+'">' + cur + '</span>' +
-                    '<span style="font-size:10px;color:#555">' + (CI_TF_CONFIG[ciTF]||{}).label + '</span>' +
+            '<div class="ci-card-header">' +
+                '<div class="ci-card-cur">' +
+                    '<span class="ci-card-flag">' + CI_FLAGS[cur] + '</span>' +
+                    '<span class="ci-card-name" style="color:'+color+'">' + cur + '</span>' +
                 '</div>' +
-                '<div style="background:' + chgColor + ';color:#fff;font-size:12px;font-weight:bold;padding:2px 8px;border-radius:3px;min-width:60px;text-align:center">' + absDisplay + '</div>' +
+                '<div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px">' +
+                    '<div class="ci-card-val" style="color:'+color+'">' + valDisplay + '</div>' +
+                    '<div class="ci-card-change" style="background:'+chgBg+';color:'+chgColor+'">' + chgDisplay + '</div>' +
+                '</div>' +
             '</div>' +
             '<div class="ci-chart-wrap"><canvas id="ci-mini-'+cur+'"></canvas></div>';
 
-        // Mobile IR-style card (1 per row) — accent bar, name, big value, change badge, mini chart
+        // Mobile IR-style card (1 per row)
         var mobCardHTML =
             '<div class="mob-ir-accent-bar" style="background:'+color+'"></div>' +
-            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">' +
-                '<div style="display:flex;align-items:center;gap:8px">' +
-                    '<span style="font-size:18px">'+CI_FLAGS[cur]+'</span>' +
-                    '<span style="font-size:14px;font-weight:bold;color:'+color+'">'+cur+'</span>' +
-                    '<span style="font-size:10px;color:#555">'+((CI_TF_CONFIG[ciTF]||{}).label||'')+'</span>' +
-                '</div>' +
-                '<div style="text-align:right">' +
-                    '<div style="background:'+chgColor+';color:#fff;font-size:13px;font-weight:bold;padding:2px 10px;border-radius:3px;display:inline-block">'+absDisplay+'</div>' +
-                    '<div style="font-size:10px;color:'+chgColor+';margin-top:2px">'+chgDisplay+'</div>' +
-                '</div>' +
-            '</div>' +
-            '<div style="position:relative;height:90px;background:#0d0d0d;border-radius:5px;overflow:hidden"><canvas id="mob-ci-mini-'+cur+'" style="position:absolute;top:0;left:0;width:100%!important;height:100%!important"></canvas></div>';
+            '<div class="mob-ir-top"><span class="mob-ir-bank" style="color:'+color+'">'+cur+'</span><span class="mob-ir-flag">'+CI_FLAGS[cur]+'</span></div>' +
+            '<div class="mob-ir-rate" style="color:'+color+';font-size:20px">'+valDisplay+'</div>' +
+            '<div class="mob-ir-badge" style="background:'+chgBg+';color:'+chgColor+'">'+chgDisplay+'</div>' +
+            '<div style="position:relative;height:80px;margin-top:6px;background:#0d0d0d;border-radius:5px;overflow:hidden"><canvas id="mob-ci-mini-'+cur+'" style="position:absolute;top:0;left:0;width:100%!important;height:100%!important"></canvas></div>';
 
         if (grid) {
             var card = document.createElement('div');
             card.className = 'ci-chart-card';
             card.innerHTML = cardHTML;
             card.style.cursor = 'pointer';
-            card.setAttribute('data-cur', cur);
             (function(c){ card.onclick = function(){ openCiModal(c, labels); }; })(cur);
             grid.appendChild(card);
         }
@@ -1443,122 +1448,53 @@ function renderCIMiniCharts(labels) {
 
     setTimeout(function() {
         CS_CURRENCIES.forEach(function(cur) {
-            var ohlc = _ciOhlcSeries[cur] || [];
+            var series = _ciIndexSeries[cur] || [];
+            // Display series as % for mini-charts (multiply by 100)
+            var pctSeries = series.map(function(v){ return v !== null ? v * 100 : null; });
+            var isUp = series.length > 1 && series[series.length-1] >= 0;
             var color = CS_COLORS[cur];
+            var gradColor = isUp ? 'rgba(47,153,95,' : 'rgba(192,57,57,';
 
             ['ci-mini-'+cur, 'mob-ci-mini-'+cur].forEach(function(id) {
                 var c = document.getElementById(id); if (!c) return;
-
-                // Draw custom candlestick chart on canvas
-                drawCandlestickMini(c, ohlc, color, id.indexOf('mob-') === 0);
+                var miniChart = new Chart(c, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: pctSeries,
+                            borderColor: color,
+                            backgroundColor: function(ctx2) {
+                                var gc = ctx2.chart.ctx.createLinearGradient(0,0,0,110);
+                                gc.addColorStop(0, gradColor+'0.35)');
+                                gc.addColorStop(1, gradColor+'0.02)');
+                                return gc;
+                            },
+                            borderWidth: 1.5, pointRadius: 0, tension: 0.2, fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, animation: false,
+                        plugins: { legend:{display:false}, tooltip:{enabled:false} },
+                        scales: { x:{display:false}, y:{display:false} }
+                    },
+                    plugins: [{
+                        id:'base0line',
+                        afterDraw: function(ch) {
+                            var y=ch.scales.y, ca=ch.chartArea; if(!y||!ca)return;
+                            var yp=y.getPixelForValue(0);
+                            if(yp<ca.top||yp>ca.bottom)return;
+                            var c2=ch.ctx;
+                            c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);
+                            c2.strokeStyle='rgba(255,255,255,0.18)';c2.lineWidth=1;c2.setLineDash([2,3]);
+                            c2.stroke();c2.restore();
+                        }
+                    }]
+                });
+                _ciCharts[id] = miniChart;
             });
         });
     }, 50);
-}
-
-// Custom candlestick renderer — draws directly on canvas (no Chart.js needed for mini-charts)
-function drawCandlestickMini(canvas, ohlcData, color, isMob) {
-    var ctx = canvas.getContext('2d');
-    // Size canvas to its container
-    var wrap = canvas.parentElement;
-    var W = wrap.offsetWidth || 200;
-    var H = wrap.offsetHeight || (isMob ? 90 : 110);
-    canvas.width = W;
-    canvas.height = H;
-
-    if (!ohlcData || !ohlcData.length) return;
-
-    var pad = {top: 6, bottom: 6, left: 0, right: 36};
-    var chartW = W - pad.left - pad.right;
-    var chartH = H - pad.top - pad.bottom;
-
-    // Compute Y range
-    var allVals = [];
-    ohlcData.forEach(function(d){ allVals.push(d.h, d.l); });
-    var minY = Math.min.apply(null, allVals);
-    var maxY = Math.max.apply(null, allVals);
-    var yRange = maxY - minY || 0.001;
-    // Add 10% padding
-    minY -= yRange * 0.1;
-    maxY += yRange * 0.1;
-    yRange = maxY - minY;
-
-    function toY(v){ return pad.top + chartH - ((v - minY) / yRange) * chartH; }
-    function toX(i){ return pad.left + (i + 0.5) * chartW / ohlcData.length; }
-
-    var candleW = Math.max(1, Math.floor(chartW / ohlcData.length * 0.6));
-
-    ctx.clearRect(0, 0, W, H);
-
-    // Opening reference line (dotted, like Mataf)
-    var openRef = ohlcData[0] ? ohlcData[0].o : null;
-    if (openRef !== null) {
-        var yRef = toY(openRef);
-        ctx.save();
-        ctx.strokeStyle = 'rgba(100,180,180,0.5)';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]);
-        ctx.beginPath(); ctx.moveTo(pad.left, yRef); ctx.lineTo(W - pad.right, yRef);
-        ctx.stroke();
-        ctx.restore();
-    }
-
-    // Draw candles
-    ohlcData.forEach(function(d, i) {
-        var bullish = d.c >= d.o;
-        var upColor   = '#26A69A';
-        var downColor = '#EF5350';
-        var cColor = bullish ? upColor : downColor;
-
-        var x = toX(i);
-        var yO = toY(d.o), yC = toY(d.c), yH = toY(d.h), yL = toY(d.l);
-        var top = Math.min(yO, yC), bot = Math.max(yO, yC);
-        var bodyH = Math.max(1, bot - top);
-
-        ctx.fillStyle = cColor;
-        ctx.strokeStyle = cColor;
-        ctx.lineWidth = 1;
-
-        // Wick
-        ctx.beginPath();
-        ctx.moveTo(x, yH); ctx.lineTo(x, yL);
-        ctx.stroke();
-
-        // Body
-        ctx.fillRect(x - candleW/2, top, candleW, bodyH);
-    });
-
-    // Last price label on right
-    var last = ohlcData[ohlcData.length - 1];
-    if (last) {
-        var yLast = toY(last.c);
-        var bullish = last.c >= last.o;
-        var boxColor = bullish ? '#26A69A' : '#EF5350';
-        var labelText = last.c.toFixed(3);
-
-        // Dashed line to right edge
-        ctx.save();
-        ctx.strokeStyle = boxColor;
-        ctx.lineWidth = 1;
-        ctx.setLineDash([2, 2]);
-        ctx.beginPath(); ctx.moveTo(pad.left, yLast); ctx.lineTo(W - pad.right, yLast);
-        ctx.stroke();
-
-        // Label box
-        ctx.setLineDash([]);
-        ctx.fillStyle = boxColor;
-        var boxW = pad.right - 1, boxH = 14;
-        ctx.fillRect(W - pad.right, yLast - boxH/2, boxW, boxH);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 8px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(labelText, W - pad.right + boxW/2, yLast);
-        ctx.restore();
-    }
-
-    // Store canvas in _ciCharts so we can identify it
-    _ciCharts[canvas.id] = { destroy: function(){ var c2=document.getElementById(canvas.id); if(c2){ var ct=c2.getContext('2d'); ct.clearRect(0,0,c2.width,c2.height); } }, isCanvas: true };
 }
 
 /* --- Modal for full-size individual chart --- */
@@ -1571,13 +1507,15 @@ function openCiModal(cur, labels) {
         var c = document.getElementById('ciModalChart');
         if (ciModalChartInst) ciModalChartInst.destroy();
         var color = CS_COLORS[cur];
+        // Convert decimal series to % for display
+        var pctSeries = series.map(function(v){ return v !== null ? v * 100 : null; });
         ciModalChartInst = new Chart(c, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
                     label: cur + ' Index',
-                    data: series,
+                    data: pctSeries,
                     borderColor: color,
                     backgroundColor: function(ctx2) {
                         var gc = ctx2.chart.ctx.createLinearGradient(0,0,0,300);
@@ -1597,14 +1535,14 @@ function openCiModal(cur, labels) {
                         callbacks: {
                             label: function(c2){
                                 var v = c2.parsed.y;
-                                return ' Variation: ' + (v>=0?'+':'') + (v*100).toFixed(4) + '%';
+                                return ' Variation: ' + (v>=0?'+':'') + v.toFixed(4) + '%';
                             }
                         }
                     }
                 },
                 scales: {
                     x: { grid:{color:'#1a1a2a'}, ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12,color:'#444',font:{size:9}} },
-                    y: { position:'right', grid:{color:'#1a1a2a'}, ticks:{color:'#555',font:{size:9},callback:function(v){return (v>=0?'+':'')+(v*100).toFixed(2)+'%';}} }
+                    y: { position:'right', grid:{color:'#1a1a2a'}, ticks:{color:'#555',font:{size:9},callback:function(v){return (v>=0?'+':'')+v.toFixed(2)+'%';}} }
                 }
             },
             plugins: [{
@@ -1614,7 +1552,6 @@ function openCiModal(cur, labels) {
                     var yp=y.getPixelForValue(0);if(yp<ca.top||yp>ca.bottom)return;
                     var c2=ch.ctx;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);
                     c2.strokeStyle='#4a4a6a';c2.lineWidth=1.5;c2.setLineDash([4,4]);c2.stroke();c2.restore();
-                    // Label "0%"
                     c2.save();c2.fillStyle='rgba(56,56,80,0.8)';c2.fillRect(ca.right+2,yp-9,28,16);
                     c2.fillStyle='#888';c2.font='bold 10px Arial';c2.textAlign='center';c2.textBaseline='middle';
                     c2.fillText('0%',ca.right+16,yp);c2.restore();
@@ -1637,31 +1574,33 @@ function renderCIRankTable() {
         var prev = s.length > 1 ? s[s.length-2] : null;
         var chg = (last !== null && prev !== null) ? last - prev : null;
         var chgPct = (chg !== null && prev !== 0) ? chg/Math.abs(prev)*100 : null;
-        return { cur:cur, val:last, chg:chg, chgPct:chgPct };
+        var cardVal = _ciCardVals[cur]; // full-history % (e.g. +2.22)
+        return { cur:cur, val:last, cardVal:cardVal, chg:chg, chgPct:chgPct };
     }).filter(function(e){ return e.val !== null; })
-      .sort(function(a,b){ return b.val - a.val; });
+      .sort(function(a,b){ return (b.cardVal||0) - (a.cardVal||0); });
 
-    var maxVal = entries.length ? entries[0].val : 0;
-    var minVal = entries.length ? entries[entries.length-1].val : 0;
+    var maxVal = entries.length ? (entries[0].cardVal||0) : 0;
+    var minVal = entries.length ? (entries[entries.length-1].cardVal||0) : 0;
     var range = maxVal - minVal || 1;
 
     tbody.innerHTML = '';
     entries.forEach(function(e, i) {
         var color = CS_COLORS[e.cur];
-        var isUp = e.chg !== null ? e.chg >= 0 : true;
+        var isUp = e.cardVal !== null ? e.cardVal >= 0 : (e.chg !== null ? e.chg >= 0 : true);
         var chgColor = isUp ? '#2F995F' : '#C03939';
-        var barPct = ((e.val - minVal) / range * 100).toFixed(1);
-        var trendLabel = e.val > 0.0001
+        var barPct = e.cardVal !== null ? ((e.cardVal - minVal) / range * 100).toFixed(1) : '50';
+        var displayVal = e.cardVal !== null ? (e.cardVal>=0?'+':'') + e.cardVal.toFixed(4) + '%' : '—';
+        var trendLabel = (e.cardVal||0) > 0.05
             ? '<span style="color:#2F995F;font-weight:bold">▲ Strong</span>'
-            : e.val < -0.0001
+            : (e.cardVal||0) < -0.05
                 ? '<span style="color:#C03939;font-weight:bold">▼ Weak</span>'
                 : '<span style="color:#888">― Neutral</span>';
         var row = document.createElement('tr');
         row.innerHTML =
             '<td style="font-size:13px;color:#555;">' + (i+1) + '</td>' +
             '<td><span style="margin-right:6px">' + CI_FLAGS[e.cur] + '</span><b style="color:'+color+'">' + e.cur + '</b></td>' +
-            '<td style="font-size:14px;font-weight:bold;color:'+color+'">' + (e.val>=0?'+':'') + (e.val*100).toFixed(4) + '%</td>' +
-            '<td style="color:'+chgColor+';font-weight:bold">' + (e.chg !== null ? (isUp?'▲ +':'▼ ') + (e.chg*100).toFixed(5) + '%' : '—') + '</td>' +
+            '<td style="font-size:14px;font-weight:bold;color:'+color+'">' + displayVal + '</td>' +
+            '<td style="color:'+chgColor+';font-weight:bold">' + (e.chg !== null ? (isUp?'▲ +':'▼ ') + (e.chg*100).toFixed(4) + '%' : '—') + '</td>' +
             '<td style="color:'+chgColor+';font-weight:bold">' + (e.chgPct !== null ? (isUp?'+':'') + e.chgPct.toFixed(3) + '%' : '—') + '</td>' +
             '<td>' + trendLabel + '</td>' +
             '<td class="ci-rank-bar-cell"><div class="ci-rank-bar-outer"><div class="ci-rank-bar-inner" style="width:'+barPct+'%;background:'+color+'"></div></div></td>';
