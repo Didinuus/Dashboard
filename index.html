@@ -1388,30 +1388,6 @@ function renderCICombinedChart(labels) {
                         c2.stroke(); c2.restore();
                     }
 
-                    /* Right-side last-value labels (permanent) */
-                    chart.data.datasets.forEach(function(ds) {
-                        if (ds.hidden) return;
-                        var data = ds.data;
-                        if (!data || !data.length) return;
-                        var lastV = null;
-                        for (var i = data.length-1; i >= 0; i--) { if (data[i] !== null && data[i] !== undefined) { lastV = data[i]; break; } }
-                        if (lastV === null) return;
-                        var yPos = y.getPixelForValue(lastV);
-                        if (yPos < ca.top || yPos > ca.bottom) return;
-                        var sign = lastV >= 0 ? '+' : '';
-                        var label = ds.label + ' ' + sign + (lastV*100).toFixed(2) + '%';
-                        var boxW = 82, boxH = 14;
-                        c2.save();
-                        c2.fillStyle = ds.borderColor;
-                        c2.fillRect(ca.right + 2, yPos - boxH/2, boxW, boxH);
-                        c2.fillStyle = '#fff';
-                        c2.font = 'bold 9px Arial';
-                        c2.textAlign = 'center';
-                        c2.textBaseline = 'middle';
-                        c2.fillText(label, ca.right + 2 + boxW/2, yPos);
-                        c2.restore();
-                    });
-
                     /* Floating hover labels */
                     var hIdx = (chart.canvas.id === 'ciCombinedChart') ? _ciHoverIdx : _mobCiHoverIdx;
                     ciDrawFloatingLabels(chart, hIdx, _ciTimes, ciTF);
