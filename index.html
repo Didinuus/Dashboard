@@ -940,10 +940,13 @@ function ciRecompute() {
                 var pd = _ciRawData[item.pair];
                 if (!pd) return;
                 var startIdx = pd.closes.length - minLen;
-                var close0 = pd.closes[startIdx];
-                var closeI = pd.closes[startIdx + i];
-                if (!close0 || !closeI) return;
-                var variation = item.inv ? (close0 - closeI) / close0 : (closeI - close0) / close0;
+                var rawClose0 = pd.closes[startIdx];
+                var rawCloseI = pd.closes[startIdx + i];
+                if (!rawClose0 || !rawCloseI) return;
+                // Convert to target-as-numerator (same as Mataf)
+                var close0 = item.inv ? 1 / rawClose0 : rawClose0;
+                var closeI = item.inv ? 1 / rawCloseI : rawCloseI;
+                var variation = (closeI - close0) / close0;
                 sum += variation;
                 cnt++;
             });
@@ -1017,7 +1020,8 @@ async function fkrFetch(dateOrLatest) {
 }
 
 // Compute card values using Frankfurter Jan-2000 base (matches Mataf formula exactly)
-// cardVal = 100 * (1 + mean_variation_since_jan2000)
+// Mataf: express each pair with TARGET currency as numerator, then variation = (now - base2000) / base2000
+// index = 100 * (1 + mean_variation)
 async function ciComputeCardValsMataf() {
     var el = document.getElementById('ciStatus');
     if (el) el.textContent = 'Loading base rates...';
@@ -1028,7 +1032,7 @@ async function ciComputeCardValsMataf() {
     ]);
 
     if (!rates2000 || !ratesNow) {
-        console.warn('Frankfurter fetch failed, falling back to OANDA-based card vals');
+        console.warn('Frankfurter fetch failed');
         return false;
     }
 
@@ -1040,13 +1044,14 @@ async function ciComputeCardValsMataf() {
         var basket = CI_PAIRS[cur];
         var sum = 0, cnt = 0;
         basket.forEach(function(item) {
-            var p0 = prices2000[item.pair];
-            var pN = pricesNow[item.pair];
-            if (!p0 || !pN) return;
-            // Mataf formula: target-currency always as numerator
-            // inv:false → pair is BASE/QUOTE where target=BASE → up = good for target
-            // inv:true  → pair is BASE/QUOTE where target=QUOTE → invert
-            var variation = item.inv ? (p0 - pN) / p0 : (pN - p0) / p0;
+            var raw0 = prices2000[item.pair];
+            var rawN = pricesNow[item.pair];
+            if (!raw0 || !rawN) return;
+            // Convert to "target-as-numerator": if inv, flip the price
+            var p0 = item.inv ? 1 / raw0 : raw0;
+            var pN = item.inv ? 1 / rawN : rawN;
+            // Mataf variation: (now - base) / base
+            var variation = (pN - p0) / p0;
             sum += variation;
             cnt++;
         });
@@ -1073,15 +1078,21 @@ function ciComputeOhlcSeries(longRawData) {
                 var pd = longRawData[item.pair];
                 if (!pd || !pd.opens) return;
                 var startIdx = pd.closes.length - minLen;
-                var close0 = pd.closes[startIdx];
-                if (!close0) return;
+                var rawClose0 = pd.closes[startIdx];
+                if (!rawClose0) return;
                 var si = startIdx + i;
-                var o = pd.opens[si], h = pd.highs[si], l = pd.lows[si], c2 = pd.closes[si];
-                if (!o||!h||!l||!c2) return;
-                var varO = item.inv ? (close0-o)/close0 : (o-close0)/close0;
-                var varH = item.inv ? (close0-l)/close0 : (h-close0)/close0;
-                var varL = item.inv ? (close0-h)/close0 : (l-close0)/close0;
-                var varC = item.inv ? (close0-c2)/close0 : (c2-close0)/close0;
+                var rO = pd.opens[si], rH = pd.highs[si], rL = pd.lows[si], rC = pd.closes[si];
+                if (!rO||!rH||!rL||!rC) return;
+                // Convert to target-as-numerator
+                var close0 = item.inv ? 1/rawClose0 : rawClose0;
+                var o = item.inv ? 1/rO : rO;
+                var h = item.inv ? 1/rL : rH; // inv: high price = high target value (low raw high → high target)
+                var l = item.inv ? 1/rH : rL;
+                var c2 = item.inv ? 1/rC : rC;
+                var varO = (o  - close0) / close0;
+                var varH = (h  - close0) / close0;
+                var varL = (l  - close0) / close0;
+                var varC = (c2 - close0) / close0;
                 sumO+=varO; sumH+=varH; sumL+=varL; sumC+=varC; cnt++;
             });
             if (cnt > 0) {
