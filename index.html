@@ -959,30 +959,101 @@ function ciRecompute() {
     });
 }
 
-// Compute card values AND full index series from a long-history raw dataset
-function ciComputeCardVals(longRawData) {
-    var allPairs = Object.keys(longRawData);
-    if (!allPairs.length) return;
-    var lengths = allPairs.map(function(p){ return longRawData[p].closes.length; });
-    var minLen = Math.min.apply(null, lengths);
+// ---- Frankfurter (ECB) helper ----
+// Frankfurter gives rates with EUR as base by default.
+// We fetch base=EUR on 2000-01-03 and today, then derive all cross prices.
+// Returns a map: { 'EUR_USD': price, 'GBP_USD': price, ... } for given rates object
+function fkrBuildPriceMap(ratesEUR) {
+    // ratesEUR: { USD: X, GBP: X, JPY: X, CHF: X, CAD: X, AUD: X, NZD: X }
+    // EUR = 1 implicitly
+    var r = ratesEUR;
+    var p = {};
+    // All direct EUR pairs
+    p['EUR_USD'] = r.USD;
+    p['EUR_GBP'] = r.GBP;
+    p['EUR_JPY'] = r.JPY;
+    p['EUR_CHF'] = r.CHF;
+    p['EUR_CAD'] = r.CAD;
+    p['EUR_AUD'] = r.AUD;
+    p['EUR_NZD'] = r.NZD;
+    // USD cross: divide EUR/X by EUR/USD
+    p['GBP_USD'] = r.USD / r.GBP;
+    p['USD_JPY'] = r.JPY / r.USD;
+    p['USD_CHF'] = r.CHF / r.USD;
+    p['USD_CAD'] = r.CAD / r.USD;
+    p['AUD_USD'] = r.USD / r.AUD;
+    p['NZD_USD'] = r.USD / r.NZD;
+    // GBP crosses
+    p['GBP_JPY'] = r.JPY / r.GBP;
+    p['GBP_CHF'] = r.CHF / r.GBP;
+    p['GBP_CAD'] = r.CAD / r.GBP;
+    p['GBP_AUD'] = r.AUD / r.GBP;
+    p['GBP_NZD'] = r.NZD / r.GBP;
+    // AUD crosses
+    p['AUD_JPY'] = r.JPY / r.AUD;
+    p['AUD_CHF'] = r.CHF / r.AUD;
+    p['AUD_CAD'] = r.CAD / r.AUD;
+    p['AUD_NZD'] = r.NZD / r.AUD;
+    // CHF crosses
+    p['CHF_JPY'] = r.JPY / r.CHF;
+    p['CAD_CHF'] = r.CHF / r.CAD;
+    p['NZD_CHF'] = r.CHF / r.NZD;
+    // CAD crosses
+    p['CAD_JPY'] = r.JPY / r.CAD;
+    p['NZD_CAD'] = r.CAD / r.NZD;
+    return p;
+}
+
+// Fetch Frankfurter rates for a given date (or 'latest') with base=EUR
+async function fkrFetch(dateOrLatest) {
+    var url = 'https://api.frankfurter.dev/v1/' + dateOrLatest +
+              '?base=EUR&symbols=USD,GBP,JPY,CHF,CAD,AUD,NZD';
+    try {
+        var r = await fetch(url);
+        if (!r.ok) return null;
+        var d = await r.json();
+        return d.rates || null;
+    } catch(e) { return null; }
+}
+
+// Compute card values using Frankfurter Jan-2000 base (matches Mataf formula exactly)
+// cardVal = 100 * (1 + mean_variation_since_jan2000)
+async function ciComputeCardValsMataf() {
+    var el = document.getElementById('ciStatus');
+    if (el) el.textContent = 'Loading base rates...';
+
+    var [rates2000, ratesNow] = await Promise.all([
+        fkrFetch('2000-01-03'),
+        fkrFetch('latest')
+    ]);
+
+    if (!rates2000 || !ratesNow) {
+        console.warn('Frankfurter fetch failed, falling back to OANDA-based card vals');
+        return false;
+    }
+
+    var prices2000 = fkrBuildPriceMap(rates2000);
+    var pricesNow  = fkrBuildPriceMap(ratesNow);
+
     _ciCardVals = {};
     CS_CURRENCIES.forEach(function(cur) {
         var basket = CI_PAIRS[cur];
         var sum = 0, cnt = 0;
         basket.forEach(function(item) {
-            var pd = longRawData[item.pair];
-            if (!pd || !pd.closes || pd.closes.length < 2) return;
-            var startIdx = pd.closes.length - minLen;
-            var close0 = pd.closes[startIdx];
-            var closeI = pd.closes[pd.closes.length - 1];
-            if (!close0 || !closeI) return;
-            var variation = item.inv ? (close0 - closeI) / close0 : (closeI - close0) / close0;
+            var p0 = prices2000[item.pair];
+            var pN = pricesNow[item.pair];
+            if (!p0 || !pN) return;
+            // Mataf formula: target-currency always as numerator
+            // inv:false → pair is BASE/QUOTE where target=BASE → up = good for target
+            // inv:true  → pair is BASE/QUOTE where target=QUOTE → invert
+            var variation = item.inv ? (p0 - pN) / p0 : (pN - p0) / p0;
             sum += variation;
             cnt++;
         });
-        // Store as % value (e.g. +2.22 meaning +2.22%)
-        _ciCardVals[cur] = cnt > 0 ? parseFloat((sum / cnt * 100).toFixed(4)) : null;
+        // Mataf: index = 100 * (1 + mean_variation)
+        _ciCardVals[cur] = cnt > 0 ? parseFloat((100 * (1 + sum / cnt)).toFixed(3)) : null;
     });
+    return true;
 }
 
 // Build OHLC index series for candlestick mini-charts using long data
@@ -1074,12 +1145,12 @@ async function ciLoad() {
     var loaded = Object.keys(_ciRawData);
     if (!loaded.length) { if(el) el.textContent='Error'; return; }
 
-    // Recompute index from full data — series values are decimal (e.g. 0.0222 = +2.22%)
+    // Recompute index from OANDA data — series values are decimal (e.g. 0.0222 = +2.22%)
     ciRecompute();
-    // Card values use full history, displayed as % (e.g. +2.22)
-    ciComputeCardVals(longRawData);
-    // OHLC mini-chart series also from full data, values in %
+    // OHLC mini-chart series from OANDA data
     ciComputeOhlcSeries(longRawData);
+    // Card values from Frankfurter (ECB) with Jan 2000 base — matches Mataf exactly
+    await ciComputeCardValsMataf();
 
     var labels = ciMakeLabels();
 
@@ -1396,14 +1467,14 @@ function renderCIMiniCharts(labels) {
         var cardVal = _ciCardVals[cur];                 // % variation from full history start (e.g. +2.22)
         var prevVal = series.length > 1 ? series[series.length-2] : null;
         var chg = (lastVal !== null && prevVal !== null) ? (lastVal - prevVal) : null;
-        var isUp = cardVal !== null ? cardVal >= 0 : (chg !== null ? chg >= 0 : true);
+        var isUp = cardVal !== null ? cardVal >= 100 : (chg !== null ? chg >= 0 : true);
         var color = CS_COLORS[cur];
         var chgColor = isUp ? '#2F995F' : '#C03939';
         var chgBg = isUp ? 'rgba(47,153,95,0.15)' : 'rgba(192,57,57,0.15)';
 
-        // Card main value = full-history % variation (like Mataf: "+2.22%")
-        var valDisplay = cardVal !== null ? (cardVal>=0?'+':'') + cardVal.toFixed(4) + '%' : '—';
-        // Change badge = candle-to-candle delta
+        // Card main value = Mataf-style base-100 index (e.g. 117.011)
+        var valDisplay = cardVal !== null ? cardVal.toFixed(3) : '—';
+        // Change badge = candle-to-candle delta from OANDA data
         var chgDisplay = chg !== null ? (isUp ? '▲ +' : '▼ ') + (chg*100).toFixed(4) + '%' : '—';
 
         // PC card — original style
@@ -1586,13 +1657,13 @@ function renderCIRankTable() {
     tbody.innerHTML = '';
     entries.forEach(function(e, i) {
         var color = CS_COLORS[e.cur];
-        var isUp = e.cardVal !== null ? e.cardVal >= 0 : (e.chg !== null ? e.chg >= 0 : true);
+        var isUp = e.cardVal !== null ? e.cardVal >= 100 : (e.chg !== null ? e.chg >= 0 : true);
         var chgColor = isUp ? '#2F995F' : '#C03939';
         var barPct = e.cardVal !== null ? ((e.cardVal - minVal) / range * 100).toFixed(1) : '50';
-        var displayVal = e.cardVal !== null ? (e.cardVal>=0?'+':'') + e.cardVal.toFixed(4) + '%' : '—';
-        var trendLabel = (e.cardVal||0) > 0.05
+        var displayVal = e.cardVal !== null ? e.cardVal.toFixed(3) : '—';
+        var trendLabel = (e.cardVal||100) > 100.05
             ? '<span style="color:#2F995F;font-weight:bold">▲ Strong</span>'
-            : (e.cardVal||0) < -0.05
+            : (e.cardVal||100) < 99.95
                 ? '<span style="color:#C03939;font-weight:bold">▼ Weak</span>'
                 : '<span style="color:#888">― Neutral</span>';
         var row = document.createElement('tr');
