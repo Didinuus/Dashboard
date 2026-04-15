@@ -336,7 +336,7 @@
             .ci-chart-wrap { height:80px; }
             .ci-combined-chart { height:260px; }
             .mob-ci-tf-row { display:flex; gap:5px; margin-bottom:10px; }
-            .mob-ci-tf-btn { flex:1; padding:7px 4px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; font-size:11px; font-weight:bold; text-align:center; }
+            .mob-ci-tf-btn { flex:1; padding:7px 4px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; font-size:11px; font-weight:bold; text-align:center; cursor:pointer; -webkit-tap-highlight-color:transparent; }
             .mob-ci-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
         }
     </style>
@@ -513,9 +513,9 @@
         <div class="page-header">
             <div class="ph-left">
                 <div style="display:flex;gap:6px;">
-                    <button class="cs-tf-btn active" onclick="ciSetTF('M5',this)">5M</button>
+                    <button class="cs-tf-btn" onclick="ciSetTF('M5',this)">5M</button>
                     <button class="cs-tf-btn" onclick="ciSetTF('M15',this)">15M</button>
-                    <button class="cs-tf-btn" onclick="ciSetTF('H1',this)">1H</button>
+                    <button class="cs-tf-btn active" onclick="ciSetTF('H1',this)">1H</button>
                     <button class="cs-tf-btn" onclick="ciSetTF('H4',this)">4H</button>
                     <button class="cs-tf-btn" onclick="ciSetTF('D',this)">Daily</button>
                     <button class="cs-tf-btn" onclick="ciSetTF('W',this)">Weekly</button>
@@ -654,7 +654,7 @@
                 </div>
                 <div style="margin-top:12px;">
                     <div style="background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px;text-align:center;font-size:12px;font-weight:bold;margin-bottom:10px;">Net Positions</div>
-                    <div id="mob-histGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+                    <div id="mob-histGrid" style="display:grid;grid-template-columns:1fr;gap:8px;"></div>
                 </div>
             </div>
         </div>
@@ -717,12 +717,12 @@
                 </div>
             </div>
             <div class="mob-ci-tf-row">
-                <button class="mob-ci-tf-btn active" onclick="ciSetTF('M5',this)">5M</button>
-                <button class="mob-ci-tf-btn" onclick="ciSetTF('M15',this)">15M</button>
-                <button class="mob-ci-tf-btn" onclick="ciSetTF('H1',this)">1H</button>
-                <button class="mob-ci-tf-btn" onclick="ciSetTF('H4',this)">4H</button>
-                <button class="mob-ci-tf-btn" onclick="ciSetTF('D',this)">D</button>
-                <button class="mob-ci-tf-btn" onclick="ciSetTF('W',this)">W</button>
+                <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('M5',this)">5M</button>
+                <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('M15',this)">15M</button>
+                <button class="mob-ci-tf-btn active" style="cursor:pointer" onclick="ciSetTF('H1',this)">1H</button>
+                <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('H4',this)">4H</button>
+                <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('D',this)">D</button>
+                <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('W',this)">W</button>
             </div>
             <!-- Combined chart mobile -->
             <div class="mob-chart-card" style="padding:10px;">
@@ -893,7 +893,7 @@ var CI_TF_CONFIG = {
     W:   {gran:'W',   count:200,  view:200,  label:'Weekly'}
 };
 
-var ciTF = 'M5';
+var ciTF = 'H1';
 var _ciIndexSeries = {};
 var _ciTimes = [];
 var _ciCharts = {};
