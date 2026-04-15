@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FX Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.1/dist/chartjs-chart-financial.min.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:Arial,sans-serif; background:#111111; color:#fff; }
@@ -330,7 +331,7 @@
             .mob-edit-pairs-btn { padding:6px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px; color:#aaa; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; }
 
             /* Mobile CI */
-            #mob-ciGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+            #mob-ciGrid { display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:12px; }
             .ci-grid { grid-template-columns:1fr 1fr; }
             .ci-chart-wrap { height:80px; }
             .ci-combined-chart { height:260px; }
@@ -884,12 +885,12 @@ var CI_PAIRS = {
 };
 
 var CI_TF_CONFIG = {
-    M5:  {gran:'M5',  count:1000, view:200, label:'5 Min'},
-    M15: {gran:'M15', count:800,  view:200, label:'15 Min'},
-    H1:  {gran:'H1',  count:720,  view:168, label:'Hourly'},
-    H4:  {gran:'H4',  count:500,  view:120, label:'4H'},
-    D:   {gran:'D',   count:365,  view:90,  label:'Daily'},
-    W:   {gran:'W',   count:200,  view:52,  label:'Weekly'}
+    M5:  {gran:'M5',  count:1000, view:80,  label:'5 Min'},
+    M15: {gran:'M15', count:800,  view:80,  label:'15 Min'},
+    H1:  {gran:'H1',  count:720,  view:72,  label:'Hourly'},
+    H4:  {gran:'H4',  count:500,  view:48,  label:'4H'},
+    D:   {gran:'D',   count:365,  view:30,  label:'Daily'},
+    W:   {gran:'W',   count:200,  view:26,  label:'Weekly'}
 };
 
 var ciTF = 'M5';
@@ -905,6 +906,10 @@ var _ciLoadingMore = false; // prevents concurrent fetches
 var _ciNoMoreData = false;  // set true when API returns no older candles
 
 var CI_FLAGS = {EUR:'🇪🇺',USD:'🇺🇸',GBP:'🇬🇧',AUD:'🇦🇺',CHF:'🇨🇭',JPY:'🇯🇵',CAD:'🇨🇦',NZD:'🇳🇿'};
+
+// Separate store for full-history card values
+var _ciCardVals = {};    // {EUR: 117.011, USD: 97.899, ...}
+var _ciOhlcSeries = {};  // {EUR: [{x, o, h, l, c}, ...]} for candlestick mini-charts
 
 // Build labels from _ciTimes
 function ciMakeLabels() {
@@ -954,6 +959,76 @@ function ciRecompute() {
     });
 }
 
+// Compute card values from a long-history raw dataset (separate from chart data)
+function ciComputeCardVals(longRawData) {
+    var allPairs = Object.keys(longRawData);
+    if (!allPairs.length) return;
+    var lengths = allPairs.map(function(p){ return longRawData[p].length; });
+    var minLen = Math.min.apply(null, lengths);
+    _ciCardVals = {};
+    CS_CURRENCIES.forEach(function(cur) {
+        var basket = CI_PAIRS[cur];
+        var sum = 0, cnt = 0;
+        basket.forEach(function(item) {
+            var closes = longRawData[item.pair];
+            if (!closes || closes.length < 2) return;
+            var startIdx = closes.length - minLen;
+            var close0 = closes[startIdx];
+            var closeI = closes[closes.length - 1];
+            if (!close0 || !closeI) return;
+            var variation = item.inv ? (close0 - closeI) / close0 : (closeI - close0) / close0;
+            sum += variation;
+            cnt++;
+        });
+        _ciCardVals[cur] = cnt > 0 ? parseFloat((100 * (1 + sum/cnt)).toFixed(3)) : null;
+    });
+}
+
+// Build OHLC index series for candlestick mini-charts
+// Uses the chart's aligned _ciTimes window; fetches OHLC candles for each pair
+function ciComputeOhlcSeries(ohlcRawData) {
+    var allPairs = Object.keys(ohlcRawData);
+    if (!allPairs.length) return;
+    var lengths = allPairs.map(function(p){ return ohlcRawData[p].closes.length; });
+    var minLen = Math.min.apply(null, lengths);
+
+    _ciOhlcSeries = {};
+    CS_CURRENCIES.forEach(function(cur) {
+        var basket = CI_PAIRS[cur];
+        var ohlcArr = [];
+        for (var i = 0; i < minLen; i++) {
+            var sumO=0, sumH=0, sumL=0, sumC=0, cnt=0;
+            basket.forEach(function(item) {
+                var pd = ohlcRawData[item.pair];
+                if (!pd) return;
+                var startIdx = pd.closes.length - minLen;
+                var close0 = pd.closes[startIdx]; // reference = first close
+                if (!close0) return;
+                var si = startIdx + i;
+                var o = pd.opens[si], h = pd.highs[si], l = pd.lows[si], c2 = pd.closes[si];
+                if (!o||!h||!l||!c2) return;
+                var varO = item.inv ? (close0-o)/close0 : (o-close0)/close0;
+                var varH = item.inv ? (close0-l)/close0 : (h-close0)/close0; // inv: high price = low variation
+                var varL = item.inv ? (close0-h)/close0 : (l-close0)/close0;
+                var varC = item.inv ? (close0-c2)/close0 : (c2-close0)/close0;
+                sumO+=varO; sumH+=varH; sumL+=varL; sumC+=varC; cnt++;
+            });
+            if (cnt > 0) {
+                var t = ohlcRawData[allPairs[0]].times[ohlcRawData[allPairs[0]].times.length - minLen + i];
+                ohlcArr.push({
+                    x: i,
+                    t: t,
+                    o: parseFloat((100*(1+sumO/cnt)).toFixed(4)),
+                    h: parseFloat((100*(1+sumH/cnt)).toFixed(4)),
+                    l: parseFloat((100*(1+sumL/cnt)).toFixed(4)),
+                    c: parseFloat((100*(1+sumC/cnt)).toFixed(4))
+                });
+            }
+        }
+        _ciOhlcSeries[cur] = ohlcArr;
+    });
+}
+
 async function ciLoad() {
     var el = document.getElementById('ciStatus');
     var el2 = document.getElementById('mob-ciStatus');
@@ -965,7 +1040,7 @@ async function ciLoad() {
     _ciNoMoreData = false;
 
     var cfg = CI_TF_CONFIG[ciTF];
-    var initialCount = cfg.view || 100; // load only what we'll display initially
+    var initialCount = cfg.view + 5; // chart window
 
     var pairSet = new Set();
     CS_CURRENCIES.forEach(function(cur) {
@@ -973,17 +1048,42 @@ async function ciLoad() {
     });
     var allPairs = Array.from(pairSet);
 
+    // Fetch (A) short OHLC window for chart + mini-charts, and (B) long closes for card values — in parallel
+    var longRawData = {}; // pair → array of closes (full history)
+    var ohlcRawData = {}; // pair → {opens, highs, lows, closes, times}
+
     await Promise.all(allPairs.map(async function(pair) {
-        var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + initialCount + '&price=M';
+        // (A) Short OHLC for chart
+        var urlA = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + initialCount + '&price=M';
+        // (B) Long closes for card values
+        var urlB = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + cfg.count + '&price=M';
         try {
-            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
-            if (!r.ok) return;
-            var d = await r.json();
-            if (d.candles && d.candles.length > 1) {
-                _ciRawData[pair] = {
-                    closes: d.candles.map(function(c){ return parseFloat(c.mid.c); }),
-                    times:  d.candles.map(function(c){ return c.time; })
-                };
+            var [rA, rB] = await Promise.all([
+                fetch(urlA, {headers:{'Authorization':'Bearer '+OANDA_KEY}}),
+                fetch(urlB, {headers:{'Authorization':'Bearer '+OANDA_KEY}})
+            ]);
+            if (rA.ok) {
+                var dA = await rA.json();
+                if (dA.candles && dA.candles.length > 1) {
+                    ohlcRawData[pair] = {
+                        opens:  dA.candles.map(function(c){ return parseFloat(c.mid.o); }),
+                        highs:  dA.candles.map(function(c){ return parseFloat(c.mid.h); }),
+                        lows:   dA.candles.map(function(c){ return parseFloat(c.mid.l); }),
+                        closes: dA.candles.map(function(c){ return parseFloat(c.mid.c); }),
+                        times:  dA.candles.map(function(c){ return c.time; })
+                    };
+                    // Also use short data for chart lazy-load base
+                    _ciRawData[pair] = {
+                        closes: ohlcRawData[pair].closes,
+                        times:  ohlcRawData[pair].times
+                    };
+                }
+            }
+            if (rB.ok) {
+                var dB = await rB.json();
+                if (dB.candles && dB.candles.length > 1) {
+                    longRawData[pair] = dB.candles.map(function(c){ return parseFloat(c.mid.c); });
+                }
             }
         } catch(e) {}
     }));
@@ -992,6 +1092,9 @@ async function ciLoad() {
     if (!loaded.length) { if(el) el.textContent='Error'; return; }
 
     ciRecompute();
+    ciComputeCardVals(longRawData);
+    ciComputeOhlcSeries(ohlcRawData);
+
     var labels = ciMakeLabels();
 
     renderCICombinedChart(labels);
@@ -1063,9 +1166,11 @@ async function ciLoadMoreHistory() {
     var viewRange = prevMax - prevMin;
 
     ciRecompute();
+    // Recompute OHLC series from extended _ciRawData (use as ohlcRawData proxy)
+    // We need to rebuild ohlcRawData from _ciRawData (which only has closes — no OHLC for old batches)
+    // For the chart only use _ciIndexSeries (line), OHLC mini-charts stay as initial render
     var labels = ciMakeLabels();
     var newTotal = _ciTimes.length;
-    var addedLeft = newTotal - prevTotal;
 
     // Shift viewport to keep the same right-edge position
     var newMax = newTotal - 1 - offsetFromRight;
@@ -1082,17 +1187,6 @@ async function ciLoadMoreHistory() {
         ciCombinedChart.options.scales.x.max = Math.min(newTotal - 1, newMax);
         ciCombinedChart.update('none');
     }
-
-    // Update mini-charts in-place
-    CS_CURRENCIES.forEach(function(cur) {
-        ['ci-mini-'+cur, 'mob-ci-mini-'+cur].forEach(function(id) {
-            var ch = _ciCharts[id];
-            if (!ch) return;
-            ch.data.labels = labels;
-            ch.data.datasets[0].data = _ciIndexSeries[cur] || [];
-            ch.update('none');
-        });
-    });
 
     renderCIRankTable();
     _ciLoadingMore = false;
@@ -1275,7 +1369,7 @@ function mobSetupChartTouchCI(canvas, chart) {
     chart.options.scales.x.min=Math.max(0,total-view);chart.options.scales.x.max=total-1;chart.update('none');
 }
 
-/* --- 8 mini-charts --- */
+/* --- 8 mini-charts (Mataf style: candlestick + last-price box) --- */
 function renderCIMiniCharts(labels) {
     Object.values(_ciCharts).forEach(function(ch){ if(ch)ch.destroy(); });
     _ciCharts = {};
@@ -1286,36 +1380,47 @@ function renderCIMiniCharts(labels) {
     if (mobGrid) mobGrid.innerHTML = '';
 
     CS_CURRENCIES.forEach(function(cur) {
+        var ohlc = _ciOhlcSeries[cur] || [];
+        var cardVal = _ciCardVals[cur];          // full-history absolute index value
+        var lastVal = _ciCurrentLastVals[cur];   // chart-window variation (for change badge)
         var series = _ciIndexSeries[cur] || [];
-        var lastVal = _ciCurrentLastVals[cur];
         var prevVal = series.length > 1 ? series[series.length-2] : null;
         var chg = (lastVal !== null && prevVal !== null) ? (lastVal - prevVal) : null;
-        var chgPct = (chg !== null && prevVal) ? (chg/Math.abs(prevVal)*100) : null;
-        var isUp = chg !== null ? chg >= 0 : true;
+        var isUp = ohlc.length > 1 ? ohlc[ohlc.length-1].c >= ohlc[ohlc.length-1].o : (chg !== null ? chg >= 0 : true);
         var color = CS_COLORS[cur];
         var chgColor = isUp ? '#2F995F' : '#C03939';
-
-        var absVal = lastVal !== null ? (100 * (1 + lastVal)).toFixed(3) : '—';
-        var chgDisplay = chg !== null ? (isUp ? '▲ +' : '▼ ') + (chg*100).toFixed(4) + '%' : '—';
         var chgBg = isUp ? 'rgba(47,153,95,0.15)' : 'rgba(192,57,57,0.15)';
 
-        // PC card
-        var cardHTML = '<div class="ci-card-header">' +
-            '<div class="ci-card-cur"><span class="ci-card-flag">' + CI_FLAGS[cur] + '</span><span class="ci-card-name" style="color:'+color+'">' + cur + '</span></div>' +
-            '<div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px">' +
-                '<div class="ci-card-val" style="color:'+color+'">' + absVal + '</div>' +
-                '<div class="ci-card-change" style="background:' + chgBg + ';color:' + chgColor + '">' + chgDisplay + '</div>' +
-            '</div>' +
-        '</div>' +
-        '<div class="ci-chart-wrap"><canvas id="ci-mini-'+cur+'"></canvas></div>';
+        var absDisplay = cardVal !== null ? cardVal.toFixed(3) : '—';
+        var chgDisplay = chg !== null ? (isUp ? '▲ +' : '▼ ') + (chg*100).toFixed(4) + '%' : '—';
 
-        // Mobile IR-style card
+        // PC card — Mataf style: currency + TF top-left, last-value box right, chart fills card
+        var cardHTML =
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">' +
+                '<div style="display:flex;align-items:center;gap:6px">' +
+                    '<span style="font-size:16px">' + CI_FLAGS[cur] + '</span>' +
+                    '<span style="font-size:13px;font-weight:bold;color:'+color+'">' + cur + '</span>' +
+                    '<span style="font-size:10px;color:#555">' + (CI_TF_CONFIG[ciTF]||{}).label + '</span>' +
+                '</div>' +
+                '<div style="background:' + chgColor + ';color:#fff;font-size:12px;font-weight:bold;padding:2px 8px;border-radius:3px;min-width:60px;text-align:center">' + absDisplay + '</div>' +
+            '</div>' +
+            '<div class="ci-chart-wrap"><canvas id="ci-mini-'+cur+'"></canvas></div>';
+
+        // Mobile IR-style card (1 per row) — accent bar, name, big value, change badge, mini chart
         var mobCardHTML =
             '<div class="mob-ir-accent-bar" style="background:'+color+'"></div>' +
-            '<div class="mob-ir-top"><span class="mob-ir-bank" style="color:'+color+'">'+cur+'</span><span class="mob-ir-flag">'+CI_FLAGS[cur]+'</span></div>' +
-            '<div class="mob-ir-rate" style="color:'+color+';font-size:20px">'+absVal+'</div>' +
-            '<div class="mob-ir-badge" style="background:'+chgBg+';color:'+chgColor+'">'+chgDisplay+'</div>' +
-            '<div style="position:relative;height:70px;margin-top:6px;background:#0d0d0d;border-radius:5px;overflow:hidden"><canvas id="mob-ci-mini-'+cur+'" style="position:absolute;top:0;left:0;width:100%!important;height:100%!important"></canvas></div>';
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">' +
+                '<div style="display:flex;align-items:center;gap:8px">' +
+                    '<span style="font-size:18px">'+CI_FLAGS[cur]+'</span>' +
+                    '<span style="font-size:14px;font-weight:bold;color:'+color+'">'+cur+'</span>' +
+                    '<span style="font-size:10px;color:#555">'+((CI_TF_CONFIG[ciTF]||{}).label||'')+'</span>' +
+                '</div>' +
+                '<div style="text-align:right">' +
+                    '<div style="background:'+chgColor+';color:#fff;font-size:13px;font-weight:bold;padding:2px 10px;border-radius:3px;display:inline-block">'+absDisplay+'</div>' +
+                    '<div style="font-size:10px;color:'+chgColor+';margin-top:2px">'+chgDisplay+'</div>' +
+                '</div>' +
+            '</div>' +
+            '<div style="position:relative;height:90px;background:#0d0d0d;border-radius:5px;overflow:hidden"><canvas id="mob-ci-mini-'+cur+'" style="position:absolute;top:0;left:0;width:100%!important;height:100%!important"></canvas></div>';
 
         if (grid) {
             var card = document.createElement('div');
@@ -1323,7 +1428,7 @@ function renderCIMiniCharts(labels) {
             card.innerHTML = cardHTML;
             card.style.cursor = 'pointer';
             card.setAttribute('data-cur', cur);
-            card.onclick = function(){ openCiModal(cur, labels); };
+            (function(c){ card.onclick = function(){ openCiModal(c, labels); }; })(cur);
             grid.appendChild(card);
         }
         if (mobGrid) {
@@ -1338,54 +1443,122 @@ function renderCIMiniCharts(labels) {
 
     setTimeout(function() {
         CS_CURRENCIES.forEach(function(cur) {
-            var series = _ciIndexSeries[cur] || [];
-            var isUp = series.length > 1 && series[series.length-1] >= series[0];
+            var ohlc = _ciOhlcSeries[cur] || [];
             var color = CS_COLORS[cur];
-            var gradColor = isUp ? 'rgba(47,153,95,' : 'rgba(192,57,57,';
 
             ['ci-mini-'+cur, 'mob-ci-mini-'+cur].forEach(function(id) {
                 var c = document.getElementById(id); if (!c) return;
-                var miniChart = new Chart(c, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: series,
-                            borderColor: color,
-                            backgroundColor: function(ctx2) {
-                                var gc = ctx2.chart.ctx.createLinearGradient(0,0,0,110);
-                                gc.addColorStop(0, gradColor+'0.3)');
-                                gc.addColorStop(1, gradColor+'0.0)');
-                                return gc;
-                            },
-                            borderWidth: 1.5, pointRadius: 0, tension: 0.2, fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false, animation: false,
-                        plugins: { legend:{display:false}, tooltip:{enabled:false} },
-                        scales: {
-                            x: { display:false },
-                            y: { display:false }
-                        }
-                    },
-                    plugins: [{
-                        id:'base0line',
-                        afterDraw: function(ch) {
-                            var y=ch.scales.y, ca=ch.chartArea; if(!y||!ca)return;
-                            var yp=y.getPixelForValue(0);
-                            if(yp<ca.top||yp>ca.bottom)return;
-                            var c2=ch.ctx;
-                            c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);
-                            c2.strokeStyle='rgba(255,255,255,0.20)';c2.lineWidth=1;c2.setLineDash([2,2]);
-                            c2.stroke();c2.restore();
-                        }
-                    }]
-                });
-                _ciCharts[id] = miniChart;
+
+                // Draw custom candlestick chart on canvas
+                drawCandlestickMini(c, ohlc, color, id.indexOf('mob-') === 0);
             });
         });
     }, 50);
+}
+
+// Custom candlestick renderer — draws directly on canvas (no Chart.js needed for mini-charts)
+function drawCandlestickMini(canvas, ohlcData, color, isMob) {
+    var ctx = canvas.getContext('2d');
+    // Size canvas to its container
+    var wrap = canvas.parentElement;
+    var W = wrap.offsetWidth || 200;
+    var H = wrap.offsetHeight || (isMob ? 90 : 110);
+    canvas.width = W;
+    canvas.height = H;
+
+    if (!ohlcData || !ohlcData.length) return;
+
+    var pad = {top: 6, bottom: 6, left: 0, right: 36};
+    var chartW = W - pad.left - pad.right;
+    var chartH = H - pad.top - pad.bottom;
+
+    // Compute Y range
+    var allVals = [];
+    ohlcData.forEach(function(d){ allVals.push(d.h, d.l); });
+    var minY = Math.min.apply(null, allVals);
+    var maxY = Math.max.apply(null, allVals);
+    var yRange = maxY - minY || 0.001;
+    // Add 10% padding
+    minY -= yRange * 0.1;
+    maxY += yRange * 0.1;
+    yRange = maxY - minY;
+
+    function toY(v){ return pad.top + chartH - ((v - minY) / yRange) * chartH; }
+    function toX(i){ return pad.left + (i + 0.5) * chartW / ohlcData.length; }
+
+    var candleW = Math.max(1, Math.floor(chartW / ohlcData.length * 0.6));
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Opening reference line (dotted, like Mataf)
+    var openRef = ohlcData[0] ? ohlcData[0].o : null;
+    if (openRef !== null) {
+        var yRef = toY(openRef);
+        ctx.save();
+        ctx.strokeStyle = 'rgba(100,180,180,0.5)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.moveTo(pad.left, yRef); ctx.lineTo(W - pad.right, yRef);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // Draw candles
+    ohlcData.forEach(function(d, i) {
+        var bullish = d.c >= d.o;
+        var upColor   = '#26A69A';
+        var downColor = '#EF5350';
+        var cColor = bullish ? upColor : downColor;
+
+        var x = toX(i);
+        var yO = toY(d.o), yC = toY(d.c), yH = toY(d.h), yL = toY(d.l);
+        var top = Math.min(yO, yC), bot = Math.max(yO, yC);
+        var bodyH = Math.max(1, bot - top);
+
+        ctx.fillStyle = cColor;
+        ctx.strokeStyle = cColor;
+        ctx.lineWidth = 1;
+
+        // Wick
+        ctx.beginPath();
+        ctx.moveTo(x, yH); ctx.lineTo(x, yL);
+        ctx.stroke();
+
+        // Body
+        ctx.fillRect(x - candleW/2, top, candleW, bodyH);
+    });
+
+    // Last price label on right
+    var last = ohlcData[ohlcData.length - 1];
+    if (last) {
+        var yLast = toY(last.c);
+        var bullish = last.c >= last.o;
+        var boxColor = bullish ? '#26A69A' : '#EF5350';
+        var labelText = last.c.toFixed(3);
+
+        // Dashed line to right edge
+        ctx.save();
+        ctx.strokeStyle = boxColor;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 2]);
+        ctx.beginPath(); ctx.moveTo(pad.left, yLast); ctx.lineTo(W - pad.right, yLast);
+        ctx.stroke();
+
+        // Label box
+        ctx.setLineDash([]);
+        ctx.fillStyle = boxColor;
+        var boxW = pad.right - 1, boxH = 14;
+        ctx.fillRect(W - pad.right, yLast - boxH/2, boxW, boxH);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 8px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(labelText, W - pad.right + boxW/2, yLast);
+        ctx.restore();
+    }
+
+    // Store canvas in _ciCharts so we can identify it
+    _ciCharts[canvas.id] = { destroy: function(){ var c2=document.getElementById(canvas.id); if(c2){ var ct=c2.getContext('2d'); ct.clearRect(0,0,c2.width,c2.height); } }, isCanvas: true };
 }
 
 /* --- Modal for full-size individual chart --- */
