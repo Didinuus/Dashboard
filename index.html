@@ -519,7 +519,7 @@
                     <button class="cs-tf-btn" onclick="ciSetTF('W',this)">Weekly</button>
                 </div>
             </div>
-            <div class="ph-center">Currency Index &mdash; Mataf Method (Non-Weighted, Base 100)</div>
+            <div class="ph-center">Currency Index &mdash; Mataf Method (% Variation from Base)</div>
             <div class="ph-right">
                 <span class="ph-status" id="ciStatus">Loading...</span>
                 <button class="refresh-icon-btn" onclick="ciLoad()">&#8634;</button>
@@ -545,7 +545,7 @@
             <div class="page-header" style="justify-content:center;">Current Index Values &amp; Ranking</div>
             <div class="ci-rank-table-wrap">
                 <table class="ci-rank-table">
-                    <thead><tr><th>#</th><th>Currency</th><th>Index Value</th><th>Change (candle)</th><th>Change %</th><th>Trend</th><th style="width:200px;">Relative Strength</th></tr></thead>
+                    <thead><tr><th>#</th><th>Currency</th><th>Variation</th><th>Change (candle)</th><th>Change %</th><th>Trend</th><th style="width:200px;">Relative Strength</th></tr></thead>
                     <tbody id="ciRankBody"></tbody>
                 </table>
             </div>
@@ -822,15 +822,15 @@ var IS_MOBILE = window.innerWidth <= 768;
 /* =========================================================
    CURRENCY INDEX — MATAF METHOD
    =========================================================
-   Formula:
+   Formula (exact Mataf method):
    - For each currency, take all 7 pairs vs the other currencies
-   - Always express the target currency as BASE (invert if it's quote)
-   - For each candle i: ratio_pair_i = close_i / close_0   (close_0 = first candle loaded)
-   - index_i = 100 × (1/7) × Σ ratio_pair_j_i
+   - Always express as: how does the target currency move?
+     * If target is BASE: variation = (close_i - close_0) / close_0
+     * If target is QUOTE (inv:true): variation = (close_0 - close_i) / close_0
+   - index_i = (1/7) × Σ variation_j_i
+   - Y-axis is centered on 0 (values like -0.05 to +0.05)
    ========================================================= */
 
-/* The 7 pairs for each currency, expressed WITH that currency as base.
-   If the market pair has it as quote, we flag invert:true */
 var CI_PAIRS = {
     EUR: [
         {pair:'EUR_USD', inv:false}, {pair:'EUR_GBP', inv:false},
@@ -892,13 +892,13 @@ var CI_TF_CONFIG = {
 };
 
 var ciTF = 'M5';
-var _ciIndexSeries = {};   // {EUR:[100, 100.12, ...], USD:[...], ...}
+var _ciIndexSeries = {};
 var _ciTimes = [];
-var _ciCharts = {};        // mini-chart instances
+var _ciCharts = {};
 var ciCombinedChart = null;
 var ciCombinedHidden = new Set();
 var ciModalChartInst = null;
-var _ciCurrentLastVals = {}; // last index value per currency
+var _ciCurrentLastVals = {};
 
 var CI_FLAGS = {EUR:'🇪🇺',USD:'🇺🇸',GBP:'🇬🇧',AUD:'🇦🇺',CHF:'🇨🇭',JPY:'🇯🇵',CAD:'🇨🇦',NZD:'🇳🇿'};
 
@@ -943,9 +943,11 @@ async function ciLoad() {
     var timesSource = rawData[allPairs.find(function(p){ return rawData[p]; })].times;
     _ciTimes = timesSource.slice(timesSource.length - minLen);
 
-    // Compute index for each currency
-    // Mataf formula: index_i = 100 × mean( price_i/price_0 ) for each pair in basket
-    // where price = close (inverted if currency is in quote position)
+    // Compute index for each currency — MATAF METHOD
+    // index_i = (1/7) * SUM( variation of each pair at candle i )
+    // variation = (close_i - close_0) / close_0  if currency is BASE
+    // variation = (close_0 - close_i) / close_0  if currency is QUOTE (inv:true)
+    // close_0 = first candle of the loaded period (reference point)
     _ciIndexSeries = {};
     CS_CURRENCIES.forEach(function(cur) {
         var basket = CI_PAIRS[cur];
@@ -956,23 +958,22 @@ async function ciLoad() {
                 var pd = rawData[item.pair];
                 if (!pd) return;
                 var startIdx = pd.closes.length - minLen;
-                var close0 = pd.closes[startIdx];       // base candle (first)
+                var close0 = pd.closes[startIdx];       // reference: first candle
                 var closeI = pd.closes[startIdx + i];    // current candle
                 if (!close0 || !closeI) return;
-                // expressed as "this currency / other"
-                var ratio0, ratioI;
+                // Mataf formula: % variation from base candle (t=0)
+                // BASE pair: up = currency appreciates (positive)
+                // QUOTE pair (inv:true): up in pair = currency depreciates (invert)
+                var variation;
                 if (item.inv) {
-                    ratio0 = 1 / close0;
-                    ratioI = 1 / closeI;
+                    variation = (close0 - closeI) / close0;
                 } else {
-                    ratio0 = close0;
-                    ratioI = closeI;
+                    variation = (closeI - close0) / close0;
                 }
-                // normalize: how much has this pair moved vs base
-                sum += ratioI / ratio0;
+                sum += variation;
                 cnt++;
             });
-            series.push(cnt > 0 ? parseFloat((100 * sum / cnt).toFixed(4)) : null);
+            series.push(cnt > 0 ? parseFloat((sum / cnt).toFixed(6)) : null);
         }
         _ciIndexSeries[cur] = series;
     });
@@ -1004,9 +1005,7 @@ async function ciLoad() {
 
 function ciSetTF(tf, btn) {
     ciTF = tf;
-    // PC buttons
     document.querySelectorAll('#page-ci .cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
-    // Mobile buttons
     document.querySelectorAll('.mob-ci-tf-btn').forEach(function(b){ b.classList.remove('active'); });
     if (btn) btn.classList.add('active');
     ciLoad();
@@ -1052,7 +1051,8 @@ function renderCICombinedChart(labels) {
                         titleColor: '#888', bodyColor: '#fff',
                         callbacks: {
                             label: function(c2) {
-                                return ' ' + c2.dataset.label + ': ' + (c2.parsed.y !== null ? c2.parsed.y.toFixed(3) : '—');
+                                var v = c2.parsed.y;
+                                return ' ' + c2.dataset.label + ': ' + (v !== null ? (v>=0?'+':'') + (v*100).toFixed(4) + '%' : '—');
                             }
                         }
                     }
@@ -1066,22 +1066,22 @@ function renderCICombinedChart(labels) {
                         position: 'right',
                         grid: { color: '#1a1a2a' },
                         ticks: { color:'#555', font:{size:9},
-                            callback: function(v){ return v.toFixed(2); }
+                            callback: function(v){ return (v>=0?'+':'') + (v*100).toFixed(2) + '%'; }
                         }
                     }
                 }
             },
             plugins: [{
-                id: 'refLine100',
+                id: 'refLine0',
                 afterDraw: function(chart) {
                     var y = chart.scales.y, ca = chart.chartArea;
                     if (!y || !ca) return;
-                    var yp = y.getPixelForValue(100);
+                    var yp = y.getPixelForValue(0);
                     if (yp < ca.top || yp > ca.bottom) return;
                     var c2 = chart.ctx;
                     c2.save();
                     c2.beginPath(); c2.moveTo(ca.left, yp); c2.lineTo(ca.right, yp);
-                    c2.strokeStyle = '#383850'; c2.lineWidth = 1.5; c2.setLineDash([4,4]);
+                    c2.strokeStyle = '#4a4a6a'; c2.lineWidth = 1.5; c2.setLineDash([4,4]);
                     c2.stroke(); c2.restore();
                 }
             }]
@@ -1090,10 +1090,8 @@ function renderCICombinedChart(labels) {
         if (id === 'ciCombinedChart') {
             ciCombinedChart = newChart;
             buildCICombinedLegend();
-            // Setup scroll/drag on combined chart
             ciSetupMouseInteraction(c, newChart);
         } else {
-            // mobile combined
             mobSetupChartTouchCI(c, newChart);
         }
     });
@@ -1111,7 +1109,6 @@ function buildCICombinedLegend() {
                 if (ciCombinedHidden.has(cur)) ciCombinedHidden.delete(cur);
                 else ciCombinedHidden.add(cur);
                 item.classList.toggle('ci-hidden');
-                // update both charts
                 [ciCombinedChart].forEach(function(ch) {
                     if (!ch) return;
                     var ds = ch.data.datasets.find(function(d){ return d.label===cur; });
@@ -1161,7 +1158,6 @@ function ciSetupMouseInteraction(canvas, chart) {
         chart.options.scales.x.max = total-1;
         chart.update('none');
     };
-    // Set initial view
     var total = chart.data.labels.length, view = CI_TF_CONFIG[ciTF].view||100;
     chart.options.scales.x.min = Math.max(0, total-view);
     chart.options.scales.x.max = total-1;
@@ -1182,11 +1178,9 @@ function mobSetupChartTouchCI(canvas, chart) {
 
 /* --- 8 mini-charts --- */
 function renderCIMiniCharts(labels) {
-    // Destroy old mini charts
     Object.values(_ciCharts).forEach(function(ch){ if(ch)ch.destroy(); });
     _ciCharts = {};
 
-    // PC grid
     var grid = document.getElementById('ciGrid');
     var mobGrid = document.getElementById('mob-ciGrid');
     if (grid) grid.innerHTML = '';
@@ -1197,23 +1191,23 @@ function renderCIMiniCharts(labels) {
         var lastVal = _ciCurrentLastVals[cur];
         var prevVal = series.length > 1 ? series[series.length-2] : null;
         var chg = (lastVal !== null && prevVal !== null) ? (lastVal - prevVal) : null;
-        var chgPct = (chg !== null && prevVal) ? (chg/prevVal*100) : null;
+        var chgPct = (chg !== null && prevVal) ? (chg/Math.abs(prevVal)*100) : null;
         var isUp = chg !== null ? chg >= 0 : true;
         var color = CS_COLORS[cur];
         var chgColor = isUp ? '#2F995F' : '#C03939';
 
-        // Build card HTML
+        var valDisplay = lastVal !== null ? (lastVal>=0?'+':'') + (lastVal*100).toFixed(4) + '%' : '—';
+        var chgDisplay = chg !== null ? (isUp ? '▲ +' : '▼ ') + (chg*100).toFixed(5) + '%' : '—';
+
         var cardHTML = '<div class="ci-card-header">' +
             '<div class="ci-card-cur"><span class="ci-card-flag">' + CI_FLAGS[cur] + '</span><span class="ci-card-name" style="color:'+color+'">' + cur + '</span></div>' +
             '<div style="text-align:right">' +
-                '<div class="ci-card-val" style="color:'+color+'">' + (lastVal !== null ? lastVal.toFixed(4) : '—') + '</div>' +
-                '<div class="ci-card-change" style="background:' + chgColor + '22;color:' + chgColor + '">' +
-                    (chg !== null ? (isUp ? '▲ +' : '▼ ') + chg.toFixed(4) : '—') + '</div>' +
+                '<div class="ci-card-val" style="color:'+color+'">' + valDisplay + '</div>' +
+                '<div class="ci-card-change" style="background:' + chgColor + '22;color:' + chgColor + '">' + chgDisplay + '</div>' +
             '</div>' +
         '</div>' +
         '<div class="ci-chart-wrap"><canvas id="ci-mini-'+cur+'"></canvas></div>';
 
-        // PC
         if (grid) {
             var card = document.createElement('div');
             card.className = 'ci-chart-card';
@@ -1223,7 +1217,6 @@ function renderCIMiniCharts(labels) {
             card.onclick = function(){ openCiModal(cur, labels); };
             grid.appendChild(card);
         }
-        // Mobile
         if (mobGrid) {
             var mobCard = document.createElement('div');
             mobCard.className = 'ci-chart-card';
@@ -1232,7 +1225,6 @@ function renderCIMiniCharts(labels) {
         }
     });
 
-    // Draw mini charts after DOM update
     setTimeout(function() {
         CS_CURRENCIES.forEach(function(cur) {
             var series = _ciIndexSeries[cur] || [];
@@ -1267,14 +1259,14 @@ function renderCIMiniCharts(labels) {
                         }
                     },
                     plugins: [{
-                        id:'base100line',
+                        id:'base0line',
                         afterDraw: function(ch) {
                             var y=ch.scales.y, ca=ch.chartArea; if(!y||!ca)return;
-                            var yp=y.getPixelForValue(100);
+                            var yp=y.getPixelForValue(0);
                             if(yp<ca.top||yp>ca.bottom)return;
                             var c2=ch.ctx;
                             c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);
-                            c2.strokeStyle='rgba(255,255,255,0.12)';c2.lineWidth=1;c2.setLineDash([2,2]);
+                            c2.strokeStyle='rgba(255,255,255,0.20)';c2.lineWidth=1;c2.setLineDash([2,2]);
                             c2.stroke();c2.restore();
                         }
                     }]
@@ -1318,25 +1310,30 @@ function openCiModal(cur, labels) {
                     legend: { display:false },
                     tooltip: {
                         backgroundColor:'rgba(16,16,24,0.97)', borderColor:'#1e2230', borderWidth:1,
-                        callbacks: { label: function(c2){ return ' Index: ' + c2.parsed.y.toFixed(4); } }
+                        callbacks: {
+                            label: function(c2){
+                                var v = c2.parsed.y;
+                                return ' Variation: ' + (v>=0?'+':'') + (v*100).toFixed(4) + '%';
+                            }
+                        }
                     }
                 },
                 scales: {
                     x: { grid:{color:'#1a1a2a'}, ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12,color:'#444',font:{size:9}} },
-                    y: { position:'right', grid:{color:'#1a1a2a'}, ticks:{color:'#555',font:{size:9},callback:function(v){return v.toFixed(2);}} }
+                    y: { position:'right', grid:{color:'#1a1a2a'}, ticks:{color:'#555',font:{size:9},callback:function(v){return (v>=0?'+':'')+(v*100).toFixed(2)+'%';}} }
                 }
             },
             plugins: [{
-                id:'ref100',
+                id:'ref0',
                 afterDraw: function(ch){
                     var y=ch.scales.y,ca=ch.chartArea;if(!y||!ca)return;
-                    var yp=y.getPixelForValue(100);if(yp<ca.top||yp>ca.bottom)return;
+                    var yp=y.getPixelForValue(0);if(yp<ca.top||yp>ca.bottom)return;
                     var c2=ch.ctx;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);
-                    c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([4,4]);c2.stroke();c2.restore();
-                    // Label "100"
-                    c2.save();c2.fillStyle='rgba(56,56,80,0.8)';c2.fillRect(ca.right+2,yp-9,32,16);
+                    c2.strokeStyle='#4a4a6a';c2.lineWidth=1.5;c2.setLineDash([4,4]);c2.stroke();c2.restore();
+                    // Label "0%"
+                    c2.save();c2.fillStyle='rgba(56,56,80,0.8)';c2.fillRect(ca.right+2,yp-9,28,16);
                     c2.fillStyle='#888';c2.font='bold 10px Arial';c2.textAlign='center';c2.textBaseline='middle';
-                    c2.fillText('100',ca.right+18,yp);c2.restore();
+                    c2.fillText('0%',ca.right+16,yp);c2.restore();
                 }
             }]
         });
@@ -1355,13 +1352,13 @@ function renderCIRankTable() {
         var last = s.length ? s[s.length-1] : null;
         var prev = s.length > 1 ? s[s.length-2] : null;
         var chg = (last !== null && prev !== null) ? last - prev : null;
-        var chgPct = (chg !== null && prev) ? chg/prev*100 : null;
+        var chgPct = (chg !== null && prev !== 0) ? chg/Math.abs(prev)*100 : null;
         return { cur:cur, val:last, chg:chg, chgPct:chgPct };
     }).filter(function(e){ return e.val !== null; })
       .sort(function(a,b){ return b.val - a.val; });
 
-    var maxVal = entries.length ? entries[0].val : 100;
-    var minVal = entries.length ? entries[entries.length-1].val : 100;
+    var maxVal = entries.length ? entries[0].val : 0;
+    var minVal = entries.length ? entries[entries.length-1].val : 0;
     var range = maxVal - minVal || 1;
 
     tbody.innerHTML = '';
@@ -1370,21 +1367,26 @@ function renderCIRankTable() {
         var isUp = e.chg !== null ? e.chg >= 0 : true;
         var chgColor = isUp ? '#2F995F' : '#C03939';
         var barPct = ((e.val - minVal) / range * 100).toFixed(1);
+        var trendLabel = e.val > 0.0001
+            ? '<span style="color:#2F995F;font-weight:bold">▲ Strong</span>'
+            : e.val < -0.0001
+                ? '<span style="color:#C03939;font-weight:bold">▼ Weak</span>'
+                : '<span style="color:#888">― Neutral</span>';
         var row = document.createElement('tr');
         row.innerHTML =
             '<td style="font-size:13px;color:#555;">' + (i+1) + '</td>' +
             '<td><span style="margin-right:6px">' + CI_FLAGS[e.cur] + '</span><b style="color:'+color+'">' + e.cur + '</b></td>' +
-            '<td style="font-size:14px;font-weight:bold;color:'+color+'">' + e.val.toFixed(4) + '</td>' +
-            '<td style="color:'+chgColor+';font-weight:bold">' + (e.chg !== null ? (isUp?'▲ +':'▼ ') + e.chg.toFixed(4) : '—') + '</td>' +
+            '<td style="font-size:14px;font-weight:bold;color:'+color+'">' + (e.val>=0?'+':'') + (e.val*100).toFixed(4) + '%</td>' +
+            '<td style="color:'+chgColor+';font-weight:bold">' + (e.chg !== null ? (isUp?'▲ +':'▼ ') + (e.chg*100).toFixed(5) + '%' : '—') + '</td>' +
             '<td style="color:'+chgColor+';font-weight:bold">' + (e.chgPct !== null ? (isUp?'+':'') + e.chgPct.toFixed(3) + '%' : '—') + '</td>' +
-            '<td>' + (e.val > 100.001 ? '<span style="color:#2F995F;font-weight:bold">▲ Above Base</span>' : e.val < 99.999 ? '<span style="color:#C03939;font-weight:bold">▼ Below Base</span>' : '<span style="color:#888">― At Base</span>') + '</td>' +
+            '<td>' + trendLabel + '</td>' +
             '<td class="ci-rank-bar-cell"><div class="ci-rank-bar-outer"><div class="ci-rank-bar-inner" style="width:'+barPct+'%;background:'+color+'"></div></div></td>';
         tbody.appendChild(row);
     });
 }
 
 /* =========================================================
-   MOBILE NAV — updated for 5 tabs
+   MOBILE NAV
    ========================================================= */
 function mobShowPage(name, idx, btn) {
     document.querySelectorAll('.mob-page').forEach(function(p){ p.classList.remove('active'); });
