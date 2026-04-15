@@ -205,8 +205,8 @@
         .ci-card-cur { display:flex; align-items:center; gap:8px; }
         .ci-card-flag { font-size:18px; }
         .ci-card-name { font-size:14px; font-weight:bold; }
-        .ci-card-val { font-size:13px; font-weight:bold; }
-        .ci-card-change { font-size:11px; font-weight:bold; padding:2px 7px; border-radius:10px; }
+        .ci-card-val { font-size:15px; font-weight:bold; letter-spacing:0.3px; }
+        .ci-card-change { font-size:10px; font-weight:bold; padding:2px 7px; border-radius:10px; margin-top:2px; }
         .ci-chart-wrap { position:relative; height:110px; }
         .ci-chart-wrap canvas { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
 
@@ -812,7 +812,7 @@ var CS_COLORS = {EUR:'#1C79B3',USD:'#AD4055',GBP:'#2E832B',AUD:'#6C2835',CHF:'#8
 var CS_PAIRS = {EUR:{base:['EUR_USD','EUR_GBP','EUR_AUD','EUR_JPY','EUR_CAD','EUR_CHF'],quote:[]},USD:{base:['USD_JPY','USD_CAD','USD_CHF'],quote:['EUR_USD','GBP_USD','AUD_USD','NZD_USD']},GBP:{base:['GBP_USD','GBP_AUD','GBP_JPY','GBP_CAD','GBP_CHF'],quote:['EUR_GBP']},AUD:{base:['AUD_USD','AUD_JPY','AUD_CAD','AUD_CHF','AUD_NZD'],quote:['EUR_AUD','GBP_AUD']},CHF:{base:['CHF_JPY'],quote:['EUR_CHF','GBP_CHF','AUD_CHF','USD_CHF','CAD_CHF']},JPY:{base:[],quote:['EUR_JPY','GBP_JPY','AUD_JPY','USD_JPY','CAD_JPY','CHF_JPY','NZD_JPY']},CAD:{base:['CAD_JPY','CAD_CHF'],quote:['EUR_CAD','GBP_CAD','AUD_CAD','USD_CAD']},NZD:{base:['NZD_USD','NZD_CAD','NZD_CHF','NZD_JPY'],quote:['AUD_NZD','EUR_NZD','GBP_NZD']}};
 var CS_TF = {M5:'M5',M15:'M15',H1:'H1',H4:'H4',D:'D'};
 var CS_COUNT = {M5:1000,M15:800,H1:500,H4:300,D:200};
-var CS_VIEW = {M5:100,M15:100,H1:100,H4:80,D:60};
+var CS_VIEW = {M5:200,M15:200,H1:168,H4:120,D:90};
 var csTF = 'H1', csChart = null, csHidden = new Set(), _csRawTimes = [];
 var mobCsTF = 'H1', mobCsChart = null, mobCsHidden = new Set(), _mobCsRawTimes = [], _mobCsStrengthSeries = {};
 
@@ -883,12 +883,12 @@ var CI_PAIRS = {
 };
 
 var CI_TF_CONFIG = {
-    M5:  {gran:'M5',  count:300, view:100, label:'5 Min'},
-    M15: {gran:'M15', count:300, view:100, label:'15 Min'},
-    H1:  {gran:'H1',  count:300, view:100, label:'Hourly'},
-    H4:  {gran:'H4',  count:250, view:80,  label:'4H'},
-    D:   {gran:'D',   count:200, view:60,  label:'Daily'},
-    W:   {gran:'W',   count:100, view:40,  label:'Weekly'}
+    M5:  {gran:'M5',  count:1000, view:200, label:'5 Min'},
+    M15: {gran:'M15', count:800,  view:200, label:'15 Min'},
+    H1:  {gran:'H1',  count:720,  view:168, label:'Hourly'},
+    H4:  {gran:'H4',  count:500,  view:120, label:'4H'},
+    D:   {gran:'D',   count:365,  view:90,  label:'Daily'},
+    W:   {gran:'W',   count:200,  view:52,  label:'Weekly'}
 };
 
 var ciTF = 'M5';
@@ -1201,7 +1201,7 @@ function renderCIMiniCharts(labels) {
 
         var cardHTML = '<div class="ci-card-header">' +
             '<div class="ci-card-cur"><span class="ci-card-flag">' + CI_FLAGS[cur] + '</span><span class="ci-card-name" style="color:'+color+'">' + cur + '</span></div>' +
-            '<div style="text-align:right">' +
+            '<div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px">' +
                 '<div class="ci-card-val" style="color:'+color+'">' + valDisplay + '</div>' +
                 '<div class="ci-card-change" style="background:' + chgColor + '22;color:' + chgColor + '">' + chgDisplay + '</div>' +
             '</div>' +
@@ -1663,7 +1663,7 @@ function mobRenderCSChart(labels,series){
     var ctx=document.getElementById('mob-csChart');if(!ctx)return;
     if(mobCsChart)mobCsChart.destroy();
     var datasets=CS_CURRENCIES.map(function(cur){return{label:cur,data:series[cur]||[],borderColor:CS_COLORS[cur],backgroundColor:'transparent',borderWidth:1.8,pointRadius:0,pointHoverRadius:0,tension:0.3,hidden:mobCsHidden.has(cur)};});
-    mobCsChart=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{enabled:true,mode:'index',intersect:false,backgroundColor:'rgba(16,16,24,0.95)',borderColor:'#1e2230',borderWidth:1,titleColor:'#888',bodyColor:'#fff',callbacks:{label:function(c){return' '+c.dataset.label+': '+c.parsed.y.toFixed(1);}}}},scales:{x:{grid:{color:'#161616'},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:6,color:'#444',font:{size:8}}},y:{position:'right',min:15,max:85,grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:8},stepSize:10}}}},plugins:[{id:'refLine',afterDraw:function(ch){var c2=ch.ctx,ca=ch.chartArea,y=ch.scales.y,yp=y.getPixelForValue(50);if(yp<ca.top||yp>ca.bottom)return;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([]);c2.stroke();c2.restore();}}]});
+    mobCsChart=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{enabled:true,mode:'index',intersect:false,backgroundColor:'rgba(16,16,24,0.95)',borderColor:'#1e2230',borderWidth:1,titleColor:'#888',bodyColor:'#fff',callbacks:{label:function(c){return' '+c.dataset.label+': '+c.parsed.y.toFixed(1);}}}},scales:{x:{grid:{color:'#161616'},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:6,color:'#444',font:{size:8}},min:Math.max(0,labels.length-(CS_VIEW[mobCsTF]||100)),max:labels.length-1},y:{position:'right',min:15,max:85,grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:8},stepSize:10}}}},plugins:[{id:'refLine',afterDraw:function(ch){var c2=ch.ctx,ca=ch.chartArea,y=ch.scales.y,yp=y.getPixelForValue(50);if(yp<ca.top||yp>ca.bottom)return;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([]);c2.stroke();c2.restore();}}]});
     mobSetupChartTouch(ctx,mobCsChart);
 }
 
