@@ -823,14 +823,6 @@ var IS_MOBILE = window.innerWidth <= 768;
 
 /* =========================================================
    CURRENCY INDEX — MATAF METHOD
-   =========================================================
-   Formula (exact Mataf method):
-   - For each currency, take all 7 pairs vs the other currencies
-   - Always express as: how does the target currency move?
-     * If target is BASE: variation = (close_i - close_0) / close_0
-     * If target is QUOTE (inv:true): variation = (close_0 - close_i) / close_0
-   - index_i = (1/7) × Σ variation_j_i
-   - Y-axis is centered on 0 (values like -0.05 to +0.05)
    ========================================================= */
 
 var CI_PAIRS = {
@@ -901,17 +893,21 @@ var ciCombinedChart = null;
 var ciCombinedHidden = new Set();
 var ciModalChartInst = null;
 var _ciCurrentLastVals = {};
-var _ciRawData = {};        // stores raw candle data per pair (grows as we lazy-load)
-var _ciLoadingMore = false; // prevents concurrent fetches
-var _ciNoMoreData = false;  // set true when API returns no older candles
+var _ciRawData = {};
+var _ciLoadingMore = false;
+var _ciNoMoreData = false;
+
+/* =====================================================
+   NEW: Hover state for CI combined chart floating labels
+   ===================================================== */
+var _ciHoverIdx = -1;
+var _mobCiHoverIdx = -1;
 
 var CI_FLAGS = {EUR:'🇪🇺',USD:'🇺🇸',GBP:'🇬🇧',AUD:'🇦🇺',CHF:'🇨🇭',JPY:'🇯🇵',CAD:'🇨🇦',NZD:'🇳🇿'};
 
-// Separate store for full-history card values
-var _ciCardVals = {};    // {EUR: 117.011, USD: 97.899, ...}
-var _ciOhlcSeries = {};  // {EUR: [{x, o, h, l, c}, ...]} for candlestick mini-charts
+var _ciCardVals = {};
+var _ciOhlcSeries = {};
 
-// Build labels from _ciTimes
 function ciMakeLabels() {
     return _ciTimes.map(function(t) {
         if (!t) return '';
@@ -921,7 +917,6 @@ function ciMakeLabels() {
     });
 }
 
-// Recompute index series from _ciRawData (uses first candle as base reference)
 function ciRecompute() {
     var allPairs = Object.keys(_ciRawData);
     var lengths = allPairs.map(function(p){ return _ciRawData[p].closes.length; });
@@ -943,7 +938,6 @@ function ciRecompute() {
                 var rawClose0 = pd.closes[startIdx];
                 var rawCloseI = pd.closes[startIdx + i];
                 if (!rawClose0 || !rawCloseI) return;
-                // Convert to target-as-numerator (same as Mataf)
                 var close0 = item.inv ? 1 / rawClose0 : rawClose0;
                 var closeI = item.inv ? 1 / rawCloseI : rawCloseI;
                 var variation = (closeI - close0) / close0;
@@ -962,52 +956,6 @@ function ciRecompute() {
     });
 }
 
-// ---- Frankfurter (ECB) helper ----
-// Frankfurter gives rates with EUR as base by default.
-// We fetch base=EUR on 2000-01-03 and today, then derive all cross prices.
-// Returns a map: { 'EUR_USD': price, 'GBP_USD': price, ... } for given rates object
-function fkrBuildPriceMap(ratesEUR) {
-    // ratesEUR: { USD: X, GBP: X, JPY: X, CHF: X, CAD: X, AUD: X, NZD: X }
-    // EUR = 1 implicitly
-    var r = ratesEUR;
-    var p = {};
-    // All direct EUR pairs
-    p['EUR_USD'] = r.USD;
-    p['EUR_GBP'] = r.GBP;
-    p['EUR_JPY'] = r.JPY;
-    p['EUR_CHF'] = r.CHF;
-    p['EUR_CAD'] = r.CAD;
-    p['EUR_AUD'] = r.AUD;
-    p['EUR_NZD'] = r.NZD;
-    // USD cross: divide EUR/X by EUR/USD
-    p['GBP_USD'] = r.USD / r.GBP;
-    p['USD_JPY'] = r.JPY / r.USD;
-    p['USD_CHF'] = r.CHF / r.USD;
-    p['USD_CAD'] = r.CAD / r.USD;
-    p['AUD_USD'] = r.USD / r.AUD;
-    p['NZD_USD'] = r.USD / r.NZD;
-    // GBP crosses
-    p['GBP_JPY'] = r.JPY / r.GBP;
-    p['GBP_CHF'] = r.CHF / r.GBP;
-    p['GBP_CAD'] = r.CAD / r.GBP;
-    p['GBP_AUD'] = r.AUD / r.GBP;
-    p['GBP_NZD'] = r.NZD / r.GBP;
-    // AUD crosses
-    p['AUD_JPY'] = r.JPY / r.AUD;
-    p['AUD_CHF'] = r.CHF / r.AUD;
-    p['AUD_CAD'] = r.CAD / r.AUD;
-    p['AUD_NZD'] = r.NZD / r.AUD;
-    // CHF crosses
-    p['CHF_JPY'] = r.JPY / r.CHF;
-    p['CAD_CHF'] = r.CHF / r.CAD;
-    p['NZD_CHF'] = r.CHF / r.NZD;
-    // CAD crosses
-    p['CAD_JPY'] = r.JPY / r.CAD;
-    p['NZD_CAD'] = r.CAD / r.NZD;
-    return p;
-}
-
-// Fetch Frankfurter rates for a given date (or 'latest') with base=EUR
 async function fkrFetch(dateOrLatest) {
     var url = 'https://api.frankfurter.dev/v1/' + dateOrLatest +
               '?base=EUR&symbols=USD,GBP,JPY,CHF,CAD,AUD,NZD';
@@ -1019,61 +967,54 @@ async function fkrFetch(dateOrLatest) {
     } catch(e) { return null; }
 }
 
-// Compute card values using Frankfurter Jan-2000 base (matches Mataf formula exactly)
-// Mataf: express each pair with TARGET currency as numerator, then variation = (now - base2000) / base2000
-// index = 100 * (1 + mean_variation)
+function fkrBuildPriceMap(ratesEUR) {
+    var r = ratesEUR;
+    var p = {};
+    p['EUR_USD'] = r.USD; p['EUR_GBP'] = r.GBP; p['EUR_JPY'] = r.JPY;
+    p['EUR_CHF'] = r.CHF; p['EUR_CAD'] = r.CAD; p['EUR_AUD'] = r.AUD; p['EUR_NZD'] = r.NZD;
+    p['GBP_USD'] = r.USD / r.GBP; p['USD_JPY'] = r.JPY / r.USD;
+    p['USD_CHF'] = r.CHF / r.USD; p['USD_CAD'] = r.CAD / r.USD;
+    p['AUD_USD'] = r.USD / r.AUD; p['NZD_USD'] = r.USD / r.NZD;
+    p['GBP_JPY'] = r.JPY / r.GBP; p['GBP_CHF'] = r.CHF / r.GBP;
+    p['GBP_CAD'] = r.CAD / r.GBP; p['GBP_AUD'] = r.AUD / r.GBP; p['GBP_NZD'] = r.NZD / r.GBP;
+    p['AUD_JPY'] = r.JPY / r.AUD; p['AUD_CHF'] = r.CHF / r.AUD;
+    p['AUD_CAD'] = r.CAD / r.AUD; p['AUD_NZD'] = r.NZD / r.AUD;
+    p['CHF_JPY'] = r.JPY / r.CHF; p['CAD_CHF'] = r.CHF / r.CAD; p['NZD_CHF'] = r.CHF / r.NZD;
+    p['CAD_JPY'] = r.JPY / r.CAD; p['NZD_CAD'] = r.CAD / r.NZD;
+    return p;
+}
+
 async function ciComputeCardValsMataf() {
     var el = document.getElementById('ciStatus');
     if (el) el.textContent = 'Loading base rates...';
-
-    var [rates2000, ratesNow] = await Promise.all([
-        fkrFetch('2000-01-03'),
-        fkrFetch('latest')
-    ]);
-
-    if (!rates2000 || !ratesNow) {
-        console.warn('Frankfurter fetch failed');
-        return false;
-    }
-
+    var [rates2000, ratesNow] = await Promise.all([fkrFetch('2000-01-03'), fkrFetch('latest')]);
+    if (!rates2000 || !ratesNow) { console.warn('Frankfurter fetch failed'); return false; }
     var prices2000 = fkrBuildPriceMap(rates2000);
     var pricesNow  = fkrBuildPriceMap(ratesNow);
-
     _ciCardVals = {};
     CS_CURRENCIES.forEach(function(cur) {
-        var basket = CI_PAIRS[cur];
-        var sum = 0, cnt = 0;
+        var basket = CI_PAIRS[cur], sum = 0, cnt = 0;
         basket.forEach(function(item) {
-            var raw0 = prices2000[item.pair];
-            var rawN = pricesNow[item.pair];
+            var raw0 = prices2000[item.pair], rawN = pricesNow[item.pair];
             if (!raw0 || !rawN) return;
-            // Convert to "target-as-numerator": if inv, flip the price
-            var p0 = item.inv ? 1 / raw0 : raw0;
-            var pN = item.inv ? 1 / rawN : rawN;
-            // Mataf variation: (now - base) / base
-            var variation = (pN - p0) / p0;
-            sum += variation;
-            cnt++;
+            var p0 = item.inv ? 1/raw0 : raw0, pN = item.inv ? 1/rawN : rawN;
+            sum += (pN - p0) / p0; cnt++;
         });
-        // Mataf: index = 100 * (1 + mean_variation)
-        _ciCardVals[cur] = cnt > 0 ? parseFloat((100 * (1 + sum / cnt)).toFixed(3)) : null;
+        _ciCardVals[cur] = cnt > 0 ? parseFloat((100 * (1 + sum/cnt)).toFixed(3)) : null;
     });
     return true;
 }
 
-// Build OHLC index series for candlestick mini-charts using long data
 function ciComputeOhlcSeries(longRawData) {
     var allPairs = Object.keys(longRawData);
     if (!allPairs.length) return;
     var lengths = allPairs.map(function(p){ return longRawData[p].closes.length; });
     var minLen = Math.min.apply(null, lengths);
-
     _ciOhlcSeries = {};
     CS_CURRENCIES.forEach(function(cur) {
-        var basket = CI_PAIRS[cur];
-        var ohlcArr = [];
+        var basket = CI_PAIRS[cur], ohlcArr = [];
         for (var i = 0; i < minLen; i++) {
-            var sumO=0, sumH=0, sumL=0, sumC=0, cnt=0;
+            var sumO=0,sumH=0,sumL=0,sumC=0,cnt=0;
             basket.forEach(function(item) {
                 var pd = longRawData[item.pair];
                 if (!pd || !pd.opens) return;
@@ -1081,28 +1022,15 @@ function ciComputeOhlcSeries(longRawData) {
                 var rawClose0 = pd.closes[startIdx];
                 if (!rawClose0) return;
                 var si = startIdx + i;
-                var rO = pd.opens[si], rH = pd.highs[si], rL = pd.lows[si], rC = pd.closes[si];
+                var rO=pd.opens[si],rH=pd.highs[si],rL=pd.lows[si],rC=pd.closes[si];
                 if (!rO||!rH||!rL||!rC) return;
-                // Convert to target-as-numerator
-                var close0 = item.inv ? 1/rawClose0 : rawClose0;
-                var o = item.inv ? 1/rO : rO;
-                var h = item.inv ? 1/rL : rH; // inv: high price = high target value (low raw high → high target)
-                var l = item.inv ? 1/rH : rL;
-                var c2 = item.inv ? 1/rC : rC;
-                var varO = (o  - close0) / close0;
-                var varH = (h  - close0) / close0;
-                var varL = (l  - close0) / close0;
-                var varC = (c2 - close0) / close0;
-                sumO+=varO; sumH+=varH; sumL+=varL; sumC+=varC; cnt++;
+                var close0=item.inv?1/rawClose0:rawClose0;
+                var o=item.inv?1/rO:rO,h=item.inv?1/rL:rH,l=item.inv?1/rH:rL,c2=item.inv?1/rC:rC;
+                sumO+=(o-close0)/close0; sumH+=(h-close0)/close0;
+                sumL+=(l-close0)/close0; sumC+=(c2-close0)/close0; cnt++;
             });
             if (cnt > 0) {
-                ohlcArr.push({
-                    x: i,
-                    o: parseFloat((sumO/cnt*100).toFixed(5)),
-                    h: parseFloat((sumH/cnt*100).toFixed(5)),
-                    l: parseFloat((sumL/cnt*100).toFixed(5)),
-                    c: parseFloat((sumC/cnt*100).toFixed(5))
-                });
+                ohlcArr.push({x:i,o:parseFloat((sumO/cnt*100).toFixed(5)),h:parseFloat((sumH/cnt*100).toFixed(5)),l:parseFloat((sumL/cnt*100).toFixed(5)),c:parseFloat((sumC/cnt*100).toFixed(5))});
             }
         }
         _ciOhlcSeries[cur] = ohlcArr;
@@ -1118,16 +1046,15 @@ async function ciLoad() {
     _ciRawData = {};
     _ciLoadingMore = false;
     _ciNoMoreData = false;
+    _ciHoverIdx = -1;
+    _mobCiHoverIdx = -1;
 
     var cfg = CI_TF_CONFIG[ciTF];
-
     var pairSet = new Set();
     CS_CURRENCIES.forEach(function(cur) {
         CI_PAIRS[cur].forEach(function(p) { pairSet.add(p.pair); });
     });
     var allPairs = Array.from(pairSet);
-
-    // Fetch full OHLC history (used for chart, cards, and mini-charts)
     var longRawData = {};
 
     await Promise.all(allPairs.map(async function(pair) {
@@ -1144,7 +1071,6 @@ async function ciLoad() {
                     closes: d.candles.map(function(c){ return parseFloat(c.mid.c); }),
                     times:  d.candles.map(function(c){ return c.time; })
                 };
-                // Use same data for chart lazy-load base
                 _ciRawData[pair] = {
                     closes: longRawData[pair].closes,
                     times:  longRawData[pair].times
@@ -1156,11 +1082,8 @@ async function ciLoad() {
     var loaded = Object.keys(_ciRawData);
     if (!loaded.length) { if(el) el.textContent='Error'; return; }
 
-    // Recompute index from OANDA data — series values are decimal (e.g. 0.0222 = +2.22%)
     ciRecompute();
-    // OHLC mini-chart series from OANDA data
     ciComputeOhlcSeries(longRawData);
-    // Card values from Frankfurter (ECB) with Jan 2000 base — matches Mataf exactly
     await ciComputeCardValsMataf();
 
     var labels = ciMakeLabels();
@@ -1174,7 +1097,6 @@ async function ciLoad() {
     if(el2) el2.textContent = t;
 }
 
-// Called when user scrolls near the left edge — fetches older candles and prepends
 async function ciLoadMoreHistory() {
     if (_ciLoadingMore || _ciNoMoreData) return;
     _ciLoadingMore = true;
@@ -1186,7 +1108,6 @@ async function ciLoadMoreHistory() {
     var batchCount = cfg.view || 100;
     var allPairs = Object.keys(_ciRawData);
 
-    // Find earliest timestamp across all loaded pairs
     var earliestTime = null;
     allPairs.forEach(function(p) {
         var t0 = _ciRawData[p].times[0];
@@ -1194,7 +1115,6 @@ async function ciLoadMoreHistory() {
     });
     if (!earliestTime) { _ciLoadingMore = false; return; }
 
-    // OANDA: fetch candles ending just before the earliest loaded time
     var toTime = new Date(earliestTime).toISOString();
     var fetchedAny = false;
 
@@ -1207,7 +1127,6 @@ async function ciLoadMoreHistory() {
             if (!d.candles || !d.candles.length) return;
             var newCloses = d.candles.map(function(c){ return parseFloat(c.mid.c); });
             var newTimes = d.candles.map(function(c){ return c.time; });
-            // Avoid duplicates — drop candles whose time >= our earliest
             var keep = [];
             for (var i = 0; i < newTimes.length; i++) {
                 if (newTimes[i] < earliestTime) keep.push(i);
@@ -1226,7 +1145,6 @@ async function ciLoadMoreHistory() {
         return;
     }
 
-    // Remember current viewport position relative to right edge
     var prevTotal = _ciTimes.length;
     var prevMin = ciCombinedChart ? ciCombinedChart.options.scales.x.min : 0;
     var prevMax = ciCombinedChart ? ciCombinedChart.options.scales.x.max : prevTotal - 1;
@@ -1234,17 +1152,11 @@ async function ciLoadMoreHistory() {
     var viewRange = prevMax - prevMin;
 
     ciRecompute();
-    // Recompute OHLC series from extended _ciRawData (use as ohlcRawData proxy)
-    // We need to rebuild ohlcRawData from _ciRawData (which only has closes — no OHLC for old batches)
-    // For the chart only use _ciIndexSeries (line), OHLC mini-charts stay as initial render
     var labels = ciMakeLabels();
     var newTotal = _ciTimes.length;
-
-    // Shift viewport to keep the same right-edge position
     var newMax = newTotal - 1 - offsetFromRight;
     var newMin = newMax - viewRange;
 
-    // Update the combined chart data in-place
     if (ciCombinedChart) {
         ciCombinedChart.data.labels = labels;
         CS_CURRENCIES.forEach(function(cur) {
@@ -1267,6 +1179,148 @@ function ciSetTF(tf, btn) {
     document.querySelectorAll('.mob-ci-tf-btn').forEach(function(b){ b.classList.remove('active'); });
     if (btn) btn.classList.add('active');
     ciLoad();
+}
+
+/* =========================================================
+   CI FLOATING LABELS PLUGIN — shared drawing function
+   Used by both PC and mobile charts
+   ========================================================= */
+function ciDrawFloatingLabels(chart, hoverIdx, rawTimes, tf) {
+    if (hoverIdx < 0) return;
+    var c2 = chart.ctx, ca = chart.chartArea, xScale = chart.scales.x, yScale = chart.scales.y;
+    if (!c2 || !ca || !xScale || !yScale) return;
+
+    var idx = hoverIdx;
+    var xp = xScale.getPixelForValue(idx);
+    if (xp < ca.left || xp > ca.right) return;
+
+    /* Vertical crosshair */
+    c2.save();
+    c2.beginPath();
+    c2.moveTo(xp, ca.top);
+    c2.lineTo(xp, ca.bottom);
+    c2.strokeStyle = 'rgba(200,200,200,0.25)';
+    c2.lineWidth = 1;
+    c2.setLineDash([3, 3]);
+    c2.stroke();
+    c2.setLineDash([]);
+    c2.restore();
+
+    /* Collect visible datasets at this index */
+    var items = [];
+    chart.data.datasets.forEach(function(ds) {
+        if (ds.hidden) return;
+        var val = ds.data[idx];
+        if (val === null || val === undefined) return;
+        var yp2 = yScale.getPixelForValue(val);
+        if (yp2 < ca.top || yp2 > ca.bottom) return;
+        var prev = idx > 0 ? ds.data[idx - 1] : null;
+        var delta = (prev !== null && prev !== undefined) ? (val - prev) : 0;
+        items.push({label: ds.label, color: ds.borderColor, val: val, delta: delta, yp: yp2});
+    });
+
+    /* Sort by y position and spread overlapping labels */
+    items.sort(function(a, b) { return a.yp - b.yp; });
+    var LH = 17;
+    for (var pass = 0; pass < 5; pass++) {
+        for (var ii = 1; ii < items.length; ii++) {
+            if (items[ii].yp - items[ii-1].yp < LH) {
+                var mid = (items[ii].yp + items[ii-1].yp) / 2;
+                items[ii-1].yp = mid - LH / 2;
+                items[ii].yp   = mid + LH / 2;
+            }
+        }
+    }
+
+    /* Draw each label */
+    var isRightSide = xp > ca.left + (ca.right - ca.left) * 0.65;
+    items.forEach(function(item) {
+        var pctVal = item.val * 100;
+        var sign = pctVal >= 0 ? '+' : '';
+        var text = item.label + ' ' + sign + pctVal.toFixed(3) + '%';
+        var boxW = 86, boxH = 15, pad = 5;
+        var bx = isRightSide ? xp - boxW - 6 : xp + 6;
+        var by = item.yp - boxH / 2;
+        by = Math.max(ca.top, Math.min(ca.bottom - boxH, by));
+
+        /* Label box */
+        c2.save();
+        c2.fillStyle = item.color;
+        c2.globalAlpha = 0.92;
+        var r2 = 4;
+        c2.beginPath();
+        c2.moveTo(bx + r2, by);
+        c2.lineTo(bx + boxW - r2, by);
+        c2.arcTo(bx + boxW, by, bx + boxW, by + boxH, r2);
+        c2.lineTo(bx + boxW, by + boxH - r2);
+        c2.arcTo(bx + boxW, by + boxH, bx + boxW - r2, by + boxH, r2);
+        c2.lineTo(bx + r2, by + boxH);
+        c2.arcTo(bx, by + boxH, bx, by + boxH - r2, r2);
+        c2.lineTo(bx, by + r2);
+        c2.arcTo(bx, by, bx + r2, by, r2);
+        c2.closePath();
+        c2.fill();
+        c2.globalAlpha = 1;
+
+        /* Label text */
+        c2.fillStyle = '#fff';
+        c2.font = 'bold 10px Arial';
+        c2.textAlign = 'left';
+        c2.textBaseline = 'middle';
+        c2.fillText(text, bx + pad, by + boxH / 2);
+        c2.restore();
+
+        /* Dot on line */
+        c2.save();
+        c2.beginPath();
+        c2.arc(xp, item.yp, 3.5, 0, Math.PI * 2);
+        c2.fillStyle = item.color;
+        c2.fill();
+        c2.strokeStyle = '#fff';
+        c2.lineWidth = 1.2;
+        c2.stroke();
+        c2.restore();
+    });
+
+    /* Timestamp box at bottom */
+    if (rawTimes && rawTimes[idx]) {
+        var dt = new Date(rawTimes[idx]);
+        var dateStr;
+        if (tf === 'D' || tf === 'W') {
+            dateStr = dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
+        } else {
+            dateStr = dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})
+                     + '  ' + dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        }
+        c2.save();
+        var dtBoxW = c2.measureText(dateStr).width + 20, dtBoxH = 18;
+        var dtX = xp - dtBoxW / 2;
+        dtX = Math.max(ca.left, Math.min(ca.right - dtBoxW, dtX));
+        var dtY = ca.bottom + 4;
+        var br = 4;
+        c2.fillStyle = 'rgba(30,34,48,0.95)';
+        c2.strokeStyle = 'rgba(140,160,220,0.5)';
+        c2.lineWidth = 1;
+        c2.beginPath();
+        c2.moveTo(dtX + br, dtY);
+        c2.lineTo(dtX + dtBoxW - br, dtY);
+        c2.arcTo(dtX + dtBoxW, dtY, dtX + dtBoxW, dtY + dtBoxH, br);
+        c2.lineTo(dtX + dtBoxW, dtY + dtBoxH - br);
+        c2.arcTo(dtX + dtBoxW, dtY + dtBoxH, dtX + dtBoxW - br, dtY + dtBoxH, br);
+        c2.lineTo(dtX + br, dtY + dtBoxH);
+        c2.arcTo(dtX, dtY + dtBoxH, dtX, dtY + dtBoxH - br, br);
+        c2.lineTo(dtX, dtY + br);
+        c2.arcTo(dtX, dtY, dtX + br, dtY, br);
+        c2.closePath();
+        c2.fill();
+        c2.stroke();
+        c2.fillStyle = '#c8d4f0';
+        c2.font = 'bold 10px Arial';
+        c2.textAlign = 'center';
+        c2.textBaseline = 'middle';
+        c2.fillText(dateStr, dtX + dtBoxW / 2, dtY + dtBoxH / 2);
+        c2.restore();
+    }
 }
 
 /* --- Combined chart --- */
@@ -1302,19 +1356,7 @@ function renderCICombinedChart(labels) {
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        enabled: true,
-                        backgroundColor: 'rgba(16,16,24,0.97)',
-                        borderColor: '#1e2230', borderWidth: 1,
-                        titleColor: '#888', bodyColor: '#fff',
-                        callbacks: {
-                            label: function(c2) {
-                                var v = c2.parsed.y;
-                                if (v === null || v === undefined) return '';
-                                return ' ' + c2.dataset.label + ': ' + (v>=0?'+':'') + (v*100).toFixed(4) + '%';
-                            }
-                        }
-                    }
+                    tooltip: { enabled: false }   /* disabled — we use floating labels instead */
                 },
                 scales: {
                     x: {
@@ -1331,12 +1373,13 @@ function renderCICombinedChart(labels) {
                 }
             },
             plugins: [{
-                id: 'refLine0',
+                id: 'ciCombinedPlugin',
                 afterDraw: function(chart) {
                     var y = chart.scales.y, ca = chart.chartArea;
                     if (!y || !ca) return;
                     var c2 = chart.ctx;
-                    // Zero reference line
+
+                    /* Zero reference line */
                     var yp = y.getPixelForValue(0);
                     if (yp >= ca.top && yp <= ca.bottom) {
                         c2.save();
@@ -1344,7 +1387,8 @@ function renderCICombinedChart(labels) {
                         c2.strokeStyle = '#4a4a6a'; c2.lineWidth = 1.5; c2.setLineDash([4,4]);
                         c2.stroke(); c2.restore();
                     }
-                    // Right-side last-value labels (like Mataf)
+
+                    /* Right-side last-value labels (permanent) */
                     chart.data.datasets.forEach(function(ds) {
                         if (ds.hidden) return;
                         var data = ds.data;
@@ -1354,8 +1398,9 @@ function renderCICombinedChart(labels) {
                         if (lastV === null) return;
                         var yPos = y.getPixelForValue(lastV);
                         if (yPos < ca.top || yPos > ca.bottom) return;
-                        var label = (lastV>=0?'+':'') + (lastV*100).toFixed(2) + '%';
-                        var boxW = 52, boxH = 14;
+                        var sign = lastV >= 0 ? '+' : '';
+                        var label = ds.label + ' ' + sign + (lastV*100).toFixed(2) + '%';
+                        var boxW = 82, boxH = 14;
                         c2.save();
                         c2.fillStyle = ds.borderColor;
                         c2.fillRect(ca.right + 2, yPos - boxH/2, boxW, boxH);
@@ -1366,6 +1411,10 @@ function renderCICombinedChart(labels) {
                         c2.fillText(label, ca.right + 2 + boxW/2, yPos);
                         c2.restore();
                     });
+
+                    /* Floating hover labels */
+                    var hIdx = (chart.canvas.id === 'ciCombinedChart') ? _ciHoverIdx : _mobCiHoverIdx;
+                    ciDrawFloatingLabels(chart, hIdx, _ciTimes, ciTF);
                 }
             }]
         });
@@ -1403,66 +1452,190 @@ function buildCICombinedLegend() {
     });
 }
 
+/* =========================================================
+   PC mouse interaction — now with hover tracking for labels
+   ========================================================= */
 function ciSetupMouseInteraction(canvas, chart) {
     var drag = null;
+
     canvas.onmousedown = function(e) {
         if (e.button !== 0) return;
         drag = { startX: e.clientX, startMin: chart.options.scales.x.min, startMax: chart.options.scales.x.max };
         canvas.style.cursor = 'grabbing'; e.preventDefault();
     };
-    window.addEventListener('mouseup', function(){ drag=null; canvas.style.cursor='crosshair'; });
+    window.addEventListener('mouseup', function(){ drag = null; canvas.style.cursor = 'crosshair'; });
+
     canvas.onmousemove = function(e) {
-        if (!drag) return;
+        if (!chart) return;
         var rect = canvas.getBoundingClientRect();
-        var ca = chart.chartArea; if (!ca) return;
-        var dx = e.clientX - drag.startX;
-        var range = drag.startMax - drag.startMin;
-        var shift = -(dx / (ca.right-ca.left)) * range;
-        var total = chart.data.labels.length;
-        var newMin = Math.max(0, drag.startMin + shift);
-        var newMax = Math.min(total-1, drag.startMax + shift);
-        chart.options.scales.x.min = newMin; chart.options.scales.x.max = newMax;
-        chart.update('none');
-        // Lazy-load: trigger when near left edge
-        if (newMin < (drag.startMax - drag.startMin) * 0.15) ciLoadMoreHistory();
+        var mx = e.clientX - rect.left;
+        var ca = chart.chartArea;
+        var xScale = chart.scales.x;
+
+        if (drag) {
+            var dx = e.clientX - drag.startX;
+            var range = drag.startMax - drag.startMin;
+            var shift = -(dx / (ca ? ca.right - ca.left : 1)) * range;
+            var total = chart.data.labels.length;
+            var newMin = Math.max(0, drag.startMin + shift);
+            var newMax = Math.min(total - 1, drag.startMax + shift);
+            chart.options.scales.x.min = newMin;
+            chart.options.scales.x.max = newMax;
+            chart.update('none');
+            if (newMin < (drag.startMax - drag.startMin) * 0.15) ciLoadMoreHistory();
+            return;
+        }
+
+        /* Hover: find closest data index to mouse X */
+        if (!ca || mx < ca.left || mx > ca.right) {
+            if (_ciHoverIdx !== -1) { _ciHoverIdx = -1; chart.draw(); }
+            return;
+        }
+        var minIdx = Math.round(xScale.min), maxIdx = Math.round(xScale.max);
+        var best = minIdx, bestDist = Infinity;
+        for (var i = minIdx; i <= maxIdx; i++) {
+            var xp2 = xScale.getPixelForValue(i);
+            var d2 = Math.abs(xp2 - mx);
+            if (d2 < bestDist) { bestDist = d2; best = i; }
+        }
+        if (best !== _ciHoverIdx) { _ciHoverIdx = best; chart.draw(); }
     };
+
+    canvas.onmouseleave = function() {
+        drag = null;
+        canvas.style.cursor = 'crosshair';
+        if (_ciHoverIdx !== -1) { _ciHoverIdx = -1; if (chart) chart.draw(); }
+    };
+
     canvas.onwheel = function(e) {
         if (!chart) return; e.preventDefault();
         var curMin = chart.options.scales.x.min, curMax = chart.options.scales.x.max;
         var range = curMax - curMin, factor = e.deltaY > 0 ? 1.12 : 0.88;
-        var newRange = Math.max(10, Math.min(chart.data.labels.length, range*factor));
+        var newRange = Math.max(10, Math.min(chart.data.labels.length, range * factor));
         var mid = (curMin + curMax) / 2;
         chart.options.scales.x.min = Math.max(0, mid - newRange/2);
         chart.options.scales.x.max = Math.min(chart.data.labels.length-1, mid + newRange/2);
         chart.update('none');
         if (chart.options.scales.x.min < newRange * 0.15) ciLoadMoreHistory();
     };
+
     canvas.style.cursor = 'crosshair';
     canvas.ondblclick = function() {
-        var total = chart.data.labels.length, view = CI_TF_CONFIG[ciTF].view||100;
-        chart.options.scales.x.min = Math.max(0, total-view);
-        chart.options.scales.x.max = total-1;
+        var total = chart.data.labels.length, view = CI_TF_CONFIG[ciTF].view || 100;
+        chart.options.scales.x.min = Math.max(0, total - view);
+        chart.options.scales.x.max = total - 1;
         chart.update('none');
     };
-    var total = chart.data.labels.length, view = CI_TF_CONFIG[ciTF].view||100;
-    chart.options.scales.x.min = Math.max(0, total-view);
-    chart.options.scales.x.max = total-1;
+
+    var total = chart.data.labels.length, view = CI_TF_CONFIG[ciTF].view || 100;
+    chart.options.scales.x.min = Math.max(0, total - view);
+    chart.options.scales.x.max = total - 1;
     chart.update('none');
 }
 
+/* =========================================================
+   Mobile touch interaction for CI chart — with hover labels
+   ========================================================= */
 function mobSetupChartTouchCI(canvas, chart) {
-    var touch0=null, dragStartMin=null, dragStartMax=null, pinchStartDist=null, pinchStartMin=null, pinchStartMax=null;
-    function setView(mn,mx){var t=chart.data.labels.length;chart.options.scales.x.min=Math.max(0,Math.round(mn));chart.options.scales.x.max=Math.min(t-1,Math.round(mx));chart.update('none');if(chart.options.scales.x.min<(mx-mn)*0.15)ciLoadMoreHistory();}
-    canvas.addEventListener('touchstart',function(e){e.preventDefault();if(e.touches.length===1){touch0=e.touches[0];var r=chart.options.scales.x;dragStartMin=r.min;dragStartMax=r.max;pinchStartDist=null;}else if(e.touches.length===2){touch0=e.touches[0];var t0=e.touches[0],t1=e.touches[1];var dx=t1.clientX-t0.clientX,dy=t1.clientY-t0.clientY;pinchStartDist=Math.sqrt(dx*dx+dy*dy);var r2=chart.options.scales.x;pinchStartMin=r2.min;pinchStartMax=r2.max;}},{passive:false});
-    canvas.addEventListener('touchmove',function(e){e.preventDefault();if(e.touches.length===1&&touch0&&dragStartMin!=null){var dx=e.touches[0].clientX-touch0.clientX;var ca=chart.chartArea;var range=dragStartMax-dragStartMin;var shift=-(dx/(ca?ca.right-ca.left:1))*range;setView(dragStartMin+shift,dragStartMax+shift);}else if(e.touches.length===2&&pinchStartDist!=null){var t0=e.touches[0],t1=e.touches[1];var dx2=t1.clientX-t0.clientX,dy2=t1.clientY-t0.clientY;var d=Math.sqrt(dx2*dx2+dy2*dy2);var scale=pinchStartDist/d;var origRange=pinchStartMax-pinchStartMin;var newRange=Math.max(10,Math.min(chart.data.labels.length,origRange*scale));var mid=(pinchStartMin+pinchStartMax)/2;setView(mid-newRange/2,mid+newRange/2);}},{passive:false});
-    canvas.addEventListener('touchend',function(){touch0=null;dragStartMin=null;pinchStartDist=null;},{passive:false});
-    var lastTap=0;
-    canvas.addEventListener('touchend',function(){var now=Date.now();if(now-lastTap<300){var t=chart.data.labels.length,v=CI_TF_CONFIG[ciTF].view||100;setView(Math.max(0,t-v),t-1);}lastTap=now;});
-    var total=chart.data.labels.length,view=CI_TF_CONFIG[ciTF].view||100;
-    chart.options.scales.x.min=Math.max(0,total-view);chart.options.scales.x.max=total-1;chart.update('none');
+    var touch0 = null, dragStartMin = null, dragStartMax = null;
+    var pinchStartDist = null, pinchStartMin = null, pinchStartMax = null;
+
+    function setView(mn, mx) {
+        var t = chart.data.labels.length;
+        chart.options.scales.x.min = Math.max(0, Math.round(mn));
+        chart.options.scales.x.max = Math.min(t - 1, Math.round(mx));
+        chart.update('none');
+        if (chart.options.scales.x.min < (mx - mn) * 0.15) ciLoadMoreHistory();
+    }
+
+    function updateHoverFromTouch(touchX) {
+        var rect = canvas.getBoundingClientRect();
+        var mx = touchX - rect.left;
+        var ca = chart.chartArea;
+        var xScale = chart.scales.x;
+        if (!ca || mx < ca.left || mx > ca.right) { _mobCiHoverIdx = -1; return; }
+        var minIdx = Math.round(xScale.min), maxIdx = Math.round(xScale.max);
+        var best = minIdx, bestDist = Infinity;
+        for (var i = minIdx; i <= maxIdx; i++) {
+            var xp = xScale.getPixelForValue(i);
+            var d = Math.abs(xp - mx);
+            if (d < bestDist) { bestDist = d; best = i; }
+        }
+        _mobCiHoverIdx = best;
+    }
+
+    canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (e.touches.length === 1) {
+            touch0 = e.touches[0];
+            var r = chart.options.scales.x;
+            dragStartMin = r.min; dragStartMax = r.max;
+            pinchStartDist = null;
+            updateHoverFromTouch(e.touches[0].clientX);
+            chart.draw();
+        } else if (e.touches.length === 2) {
+            touch0 = e.touches[0];
+            var t0 = e.touches[0], t1 = e.touches[1];
+            var dx = t1.clientX - t0.clientX, dy = t1.clientY - t0.clientY;
+            pinchStartDist = Math.sqrt(dx*dx + dy*dy);
+            var r2 = chart.options.scales.x;
+            pinchStartMin = r2.min; pinchStartMax = r2.max;
+            _mobCiHoverIdx = -1;
+        }
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        if (e.touches.length === 1 && touch0 && dragStartMin != null) {
+            var dx = e.touches[0].clientX - touch0.clientX;
+            var ca = chart.chartArea;
+            var range = dragStartMax - dragStartMin;
+            var shift = -(dx / (ca ? ca.right - ca.left : 1)) * range;
+            setView(dragStartMin + shift, dragStartMax + shift);
+            updateHoverFromTouch(e.touches[0].clientX);
+            chart.draw();
+        } else if (e.touches.length === 2 && pinchStartDist != null) {
+            var t0 = e.touches[0], t1 = e.touches[1];
+            var dx2 = t1.clientX - t0.clientX, dy2 = t1.clientY - t0.clientY;
+            var d = Math.sqrt(dx2*dx2 + dy2*dy2);
+            var scale = pinchStartDist / d;
+            var origRange = pinchStartMax - pinchStartMin;
+            var newRange = Math.max(10, Math.min(chart.data.labels.length, origRange * scale));
+            var mid = (pinchStartMin + pinchStartMax) / 2;
+            setView(mid - newRange/2, mid + newRange/2);
+        }
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', function(e) {
+        if (e.touches.length === 0) {
+            touch0 = null; dragStartMin = null; pinchStartDist = null;
+            /* Keep hover shown for 2s after lift */
+            setTimeout(function() { _mobCiHoverIdx = -1; if (chart) chart.draw(); }, 2000);
+        } else if (e.touches.length === 1) {
+            touch0 = e.touches[0];
+            var r = chart.options.scales.x;
+            dragStartMin = r.min; dragStartMax = r.max;
+            pinchStartDist = null;
+        }
+    }, { passive: false });
+
+    var lastTap = 0;
+    canvas.addEventListener('touchend', function() {
+        var now = Date.now();
+        if (now - lastTap < 300) {
+            var t = chart.data.labels.length, v = CI_TF_CONFIG[ciTF].view || 100;
+            setView(Math.max(0, t - v), t - 1);
+        }
+        lastTap = now;
+    });
+
+    var total = chart.data.labels.length, view = CI_TF_CONFIG[ciTF].view || 100;
+    chart.options.scales.x.min = Math.max(0, total - view);
+    chart.options.scales.x.max = total - 1;
+    chart.update('none');
 }
 
-/* --- 8 mini-charts (line charts, old card style restored) --- */
+/* --- 8 mini-charts --- */
 function renderCIMiniCharts(labels) {
     Object.values(_ciCharts).forEach(function(ch){ if(ch && ch.destroy && !ch.isCanvas) ch.destroy(); });
     _ciCharts = {};
@@ -1474,8 +1647,8 @@ function renderCIMiniCharts(labels) {
 
     CS_CURRENCIES.forEach(function(cur) {
         var series = _ciIndexSeries[cur] || [];
-        var lastVal = _ciCurrentLastVals[cur];          // decimal variation from chart window start
-        var cardVal = _ciCardVals[cur];                 // % variation from full history start (e.g. +2.22)
+        var lastVal = _ciCurrentLastVals[cur];
+        var cardVal = _ciCardVals[cur];
         var prevVal = series.length > 1 ? series[series.length-2] : null;
         var chg = (lastVal !== null && prevVal !== null) ? (lastVal - prevVal) : null;
         var isUp = cardVal !== null ? cardVal >= 100 : (chg !== null ? chg >= 0 : true);
@@ -1483,12 +1656,9 @@ function renderCIMiniCharts(labels) {
         var chgColor = isUp ? '#2F995F' : '#C03939';
         var chgBg = isUp ? 'rgba(47,153,95,0.15)' : 'rgba(192,57,57,0.15)';
 
-        // Card main value = Mataf-style base-100 index (e.g. 117.011)
         var valDisplay = cardVal !== null ? cardVal.toFixed(3) : '—';
-        // Change badge = candle-to-candle delta from OANDA data
         var chgDisplay = chg !== null ? (isUp ? '▲ +' : '▼ ') + (chg*100).toFixed(4) + '%' : '—';
 
-        // PC card — original style
         var cardHTML =
             '<div class="ci-card-header">' +
                 '<div class="ci-card-cur">' +
@@ -1502,7 +1672,6 @@ function renderCIMiniCharts(labels) {
             '</div>' +
             '<div class="ci-chart-wrap"><canvas id="ci-mini-'+cur+'"></canvas></div>';
 
-        // Mobile IR-style card (1 per row)
         var mobCardHTML =
             '<div class="mob-ir-accent-bar" style="background:'+color+'"></div>' +
             '<div class="mob-ir-top"><span class="mob-ir-bank" style="color:'+color+'">'+cur+'</span><span class="mob-ir-flag">'+CI_FLAGS[cur]+'</span></div>' +
@@ -1531,7 +1700,6 @@ function renderCIMiniCharts(labels) {
     setTimeout(function() {
         CS_CURRENCIES.forEach(function(cur) {
             var series = _ciIndexSeries[cur] || [];
-            // Display series as % for mini-charts (multiply by 100)
             var pctSeries = series.map(function(v){ return v !== null ? v * 100 : null; });
             var isUp = series.length > 1 && series[series.length-1] >= 0;
             var color = CS_COLORS[cur];
@@ -1589,7 +1757,6 @@ function openCiModal(cur, labels) {
         var c = document.getElementById('ciModalChart');
         if (ciModalChartInst) ciModalChartInst.destroy();
         var color = CS_COLORS[cur];
-        // Convert decimal series to % for display
         var pctSeries = series.map(function(v){ return v !== null ? v * 100 : null; });
         ciModalChartInst = new Chart(c, {
             type: 'line',
@@ -1656,7 +1823,7 @@ function renderCIRankTable() {
         var prev = s.length > 1 ? s[s.length-2] : null;
         var chg = (last !== null && prev !== null) ? last - prev : null;
         var chgPct = (chg !== null && prev !== 0) ? chg/Math.abs(prev)*100 : null;
-        var cardVal = _ciCardVals[cur]; // full-history % (e.g. +2.22)
+        var cardVal = _ciCardVals[cur];
         return { cur:cur, val:last, cardVal:cardVal, chg:chg, chgPct:chgPct };
     }).filter(function(e){ return e.val !== null; })
       .sort(function(a,b){ return (b.cardVal||0) - (a.cardVal||0); });
