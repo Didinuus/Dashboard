@@ -71,9 +71,9 @@
             border:1px solid #1e2230; border-radius:8px; margin-bottom:12px; display:flex;
             justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0;
         }
-        .page-header .ph-left { width:200px; display:flex; align-items:center; gap:6px; }
+        .page-header .ph-left { width:auto; min-width:200px; display:flex; align-items:center; gap:6px; flex-shrink:0; }
         .page-header .ph-center { flex:1; text-align:center; }
-        .page-header .ph-right { width:200px; display:flex; align-items:center; gap:6px; justify-content:flex-end; }
+        .page-header .ph-right { width:auto; min-width:160px; display:flex; align-items:center; gap:6px; justify-content:flex-end; flex-shrink:0; }
         .page-header .ph-status { color:#aaa; font-size:11px; font-weight:normal; }
 
         .cs-header-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
@@ -330,6 +330,7 @@
             .mob-edit-pairs-btn { padding:6px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px; color:#aaa; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; }
 
             /* Mobile CI */
+            #mob-ciGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
             .ci-grid { grid-template-columns:1fr 1fr; }
             .ci-chart-wrap { height:80px; }
             .ci-combined-chart { height:260px; }
@@ -812,7 +813,7 @@ var CS_COLORS = {EUR:'#1C79B3',USD:'#AD4055',GBP:'#2E832B',AUD:'#6C2835',CHF:'#8
 var CS_PAIRS = {EUR:{base:['EUR_USD','EUR_GBP','EUR_AUD','EUR_JPY','EUR_CAD','EUR_CHF'],quote:[]},USD:{base:['USD_JPY','USD_CAD','USD_CHF'],quote:['EUR_USD','GBP_USD','AUD_USD','NZD_USD']},GBP:{base:['GBP_USD','GBP_AUD','GBP_JPY','GBP_CAD','GBP_CHF'],quote:['EUR_GBP']},AUD:{base:['AUD_USD','AUD_JPY','AUD_CAD','AUD_CHF','AUD_NZD'],quote:['EUR_AUD','GBP_AUD']},CHF:{base:['CHF_JPY'],quote:['EUR_CHF','GBP_CHF','AUD_CHF','USD_CHF','CAD_CHF']},JPY:{base:[],quote:['EUR_JPY','GBP_JPY','AUD_JPY','USD_JPY','CAD_JPY','CHF_JPY','NZD_JPY']},CAD:{base:['CAD_JPY','CAD_CHF'],quote:['EUR_CAD','GBP_CAD','AUD_CAD','USD_CAD']},NZD:{base:['NZD_USD','NZD_CAD','NZD_CHF','NZD_JPY'],quote:['AUD_NZD','EUR_NZD','GBP_NZD']}};
 var CS_TF = {M5:'M5',M15:'M15',H1:'H1',H4:'H4',D:'D'};
 var CS_COUNT = {M5:1000,M15:800,H1:500,H4:300,D:200};
-var CS_VIEW = {M5:200,M15:200,H1:168,H4:120,D:90};
+var CS_VIEW = {M5:80,M15:80,H1:72,H4:48,D:30};
 var csTF = 'H1', csChart = null, csHidden = new Set(), _csRawTimes = [];
 var mobCsTF = 'H1', mobCsChart = null, mobCsHidden = new Set(), _mobCsRawTimes = [], _mobCsStrengthSeries = {};
 
@@ -899,55 +900,31 @@ var ciCombinedChart = null;
 var ciCombinedHidden = new Set();
 var ciModalChartInst = null;
 var _ciCurrentLastVals = {};
+var _ciRawData = {};        // stores raw candle data per pair (grows as we lazy-load)
+var _ciLoadingMore = false; // prevents concurrent fetches
+var _ciNoMoreData = false;  // set true when API returns no older candles
 
 var CI_FLAGS = {EUR:'🇪🇺',USD:'🇺🇸',GBP:'🇬🇧',AUD:'🇦🇺',CHF:'🇨🇭',JPY:'🇯🇵',CAD:'🇨🇦',NZD:'🇳🇿'};
 
-async function ciLoad() {
-    var el = document.getElementById('ciStatus');
-    var el2 = document.getElementById('mob-ciStatus');
-    if(el) el.textContent = 'Loading...';
-    if(el2) el2.textContent = '...';
-
-    var cfg = CI_TF_CONFIG[ciTF];
-
-    // Collect all unique pairs needed
-    var pairSet = new Set();
-    CS_CURRENCIES.forEach(function(cur) {
-        CI_PAIRS[cur].forEach(function(p) { pairSet.add(p.pair); });
+// Build labels from _ciTimes
+function ciMakeLabels() {
+    return _ciTimes.map(function(t) {
+        if (!t) return '';
+        var dt = new Date(t);
+        if (ciTF === 'D' || ciTF === 'W') return dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
+        return dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
     });
-    var allPairs = Array.from(pairSet);
+}
 
-    // Fetch all candles in parallel
-    var rawData = {};
-    await Promise.all(allPairs.map(async function(pair) {
-        var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + cfg.count + '&price=M';
-        try {
-            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
-            if (!r.ok) return;
-            var d = await r.json();
-            if (d.candles && d.candles.length > 1) {
-                rawData[pair] = {
-                    closes: d.candles.map(function(c){ return parseFloat(c.mid.c); }),
-                    times:  d.candles.map(function(c){ return c.time; })
-                };
-            }
-        } catch(e) {}
-    }));
-
-    // Find shortest candle array length for alignment
-    var lengths = allPairs.filter(function(p){ return rawData[p]; }).map(function(p){ return rawData[p].closes.length; });
-    if (!lengths.length) { if(el)el.textContent='Error'; return; }
+// Recompute index series from _ciRawData (uses first candle as base reference)
+function ciRecompute() {
+    var allPairs = Object.keys(_ciRawData);
+    var lengths = allPairs.map(function(p){ return _ciRawData[p].closes.length; });
     var minLen = Math.min.apply(null, lengths);
 
-    // Use the times from the first available pair
-    var timesSource = rawData[allPairs.find(function(p){ return rawData[p]; })].times;
+    var timesSource = _ciRawData[allPairs[0]].times;
     _ciTimes = timesSource.slice(timesSource.length - minLen);
 
-    // Compute index for each currency — MATAF METHOD
-    // index_i = (1/7) * SUM( variation of each pair at candle i )
-    // variation = (close_i - close_0) / close_0  if currency is BASE
-    // variation = (close_0 - close_i) / close_0  if currency is QUOTE (inv:true)
-    // close_0 = first candle of the loaded period (reference point)
     _ciIndexSeries = {};
     CS_CURRENCIES.forEach(function(cur) {
         var basket = CI_PAIRS[cur];
@@ -955,21 +932,13 @@ async function ciLoad() {
         for (var i = 0; i < minLen; i++) {
             var sum = 0, cnt = 0;
             basket.forEach(function(item) {
-                var pd = rawData[item.pair];
+                var pd = _ciRawData[item.pair];
                 if (!pd) return;
                 var startIdx = pd.closes.length - minLen;
-                var close0 = pd.closes[startIdx];       // reference: first candle
-                var closeI = pd.closes[startIdx + i];    // current candle
+                var close0 = pd.closes[startIdx];
+                var closeI = pd.closes[startIdx + i];
                 if (!close0 || !closeI) return;
-                // Mataf formula: % variation from base candle (t=0)
-                // BASE pair: up = currency appreciates (positive)
-                // QUOTE pair (inv:true): up in pair = currency depreciates (invert)
-                var variation;
-                if (item.inv) {
-                    variation = (close0 - closeI) / close0;
-                } else {
-                    variation = (closeI - close0) / close0;
-                }
+                var variation = item.inv ? (close0 - closeI) / close0 : (closeI - close0) / close0;
                 sum += variation;
                 cnt++;
             });
@@ -983,16 +952,47 @@ async function ciLoad() {
         var s = _ciIndexSeries[cur].filter(function(v){ return v !== null; });
         _ciCurrentLastVals[cur] = s.length ? s[s.length-1] : null;
     });
+}
 
-    // Build labels
-    var labels = _ciTimes.map(function(t) {
-        if (!t) return '';
-        var dt = new Date(t);
-        if (ciTF === 'D' || ciTF === 'W') {
-            return dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
-        }
-        return dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+async function ciLoad() {
+    var el = document.getElementById('ciStatus');
+    var el2 = document.getElementById('mob-ciStatus');
+    if(el) el.textContent = 'Loading...';
+    if(el2) el2.textContent = '...';
+
+    _ciRawData = {};
+    _ciLoadingMore = false;
+    _ciNoMoreData = false;
+
+    var cfg = CI_TF_CONFIG[ciTF];
+    var initialCount = cfg.view || 100; // load only what we'll display initially
+
+    var pairSet = new Set();
+    CS_CURRENCIES.forEach(function(cur) {
+        CI_PAIRS[cur].forEach(function(p) { pairSet.add(p.pair); });
     });
+    var allPairs = Array.from(pairSet);
+
+    await Promise.all(allPairs.map(async function(pair) {
+        var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + initialCount + '&price=M';
+        try {
+            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
+            if (!r.ok) return;
+            var d = await r.json();
+            if (d.candles && d.candles.length > 1) {
+                _ciRawData[pair] = {
+                    closes: d.candles.map(function(c){ return parseFloat(c.mid.c); }),
+                    times:  d.candles.map(function(c){ return c.time; })
+                };
+            }
+        } catch(e) {}
+    }));
+
+    var loaded = Object.keys(_ciRawData);
+    if (!loaded.length) { if(el) el.textContent='Error'; return; }
+
+    ciRecompute();
+    var labels = ciMakeLabels();
 
     renderCICombinedChart(labels);
     renderCIMiniCharts(labels);
@@ -1001,6 +1001,102 @@ async function ciLoad() {
     var t = fmtTime();
     if(el) el.textContent = t;
     if(el2) el2.textContent = t;
+}
+
+// Called when user scrolls near the left edge — fetches older candles and prepends
+async function ciLoadMoreHistory() {
+    if (_ciLoadingMore || _ciNoMoreData) return;
+    _ciLoadingMore = true;
+
+    var el = document.getElementById('ciStatus');
+    if (el) el.textContent = 'Loading history...';
+
+    var cfg = CI_TF_CONFIG[ciTF];
+    var batchCount = cfg.view || 100;
+    var allPairs = Object.keys(_ciRawData);
+
+    // Find earliest timestamp across all loaded pairs
+    var earliestTime = null;
+    allPairs.forEach(function(p) {
+        var t0 = _ciRawData[p].times[0];
+        if (!earliestTime || t0 < earliestTime) earliestTime = t0;
+    });
+    if (!earliestTime) { _ciLoadingMore = false; return; }
+
+    // OANDA: fetch candles ending just before the earliest loaded time
+    var toTime = new Date(earliestTime).toISOString();
+    var fetchedAny = false;
+
+    await Promise.all(allPairs.map(async function(pair) {
+        var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + batchCount + '&price=M&to=' + encodeURIComponent(toTime);
+        try {
+            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
+            if (!r.ok) return;
+            var d = await r.json();
+            if (!d.candles || !d.candles.length) return;
+            var newCloses = d.candles.map(function(c){ return parseFloat(c.mid.c); });
+            var newTimes = d.candles.map(function(c){ return c.time; });
+            // Avoid duplicates — drop candles whose time >= our earliest
+            var keep = [];
+            for (var i = 0; i < newTimes.length; i++) {
+                if (newTimes[i] < earliestTime) keep.push(i);
+            }
+            if (!keep.length) return;
+            fetchedAny = true;
+            _ciRawData[pair].closes = keep.map(function(i){ return newCloses[i]; }).concat(_ciRawData[pair].closes);
+            _ciRawData[pair].times  = keep.map(function(i){ return newTimes[i];  }).concat(_ciRawData[pair].times);
+        } catch(e) {}
+    }));
+
+    if (!fetchedAny) {
+        _ciNoMoreData = true;
+        _ciLoadingMore = false;
+        if (el) el.textContent = fmtTime();
+        return;
+    }
+
+    // Remember current viewport position relative to right edge
+    var prevTotal = _ciTimes.length;
+    var prevMin = ciCombinedChart ? ciCombinedChart.options.scales.x.min : 0;
+    var prevMax = ciCombinedChart ? ciCombinedChart.options.scales.x.max : prevTotal - 1;
+    var offsetFromRight = prevTotal - 1 - prevMax;
+    var viewRange = prevMax - prevMin;
+
+    ciRecompute();
+    var labels = ciMakeLabels();
+    var newTotal = _ciTimes.length;
+    var addedLeft = newTotal - prevTotal;
+
+    // Shift viewport to keep the same right-edge position
+    var newMax = newTotal - 1 - offsetFromRight;
+    var newMin = newMax - viewRange;
+
+    // Update the combined chart data in-place
+    if (ciCombinedChart) {
+        ciCombinedChart.data.labels = labels;
+        CS_CURRENCIES.forEach(function(cur) {
+            var ds = ciCombinedChart.data.datasets.find(function(d){ return d.label === cur; });
+            if (ds) ds.data = _ciIndexSeries[cur] || [];
+        });
+        ciCombinedChart.options.scales.x.min = Math.max(0, newMin);
+        ciCombinedChart.options.scales.x.max = Math.min(newTotal - 1, newMax);
+        ciCombinedChart.update('none');
+    }
+
+    // Update mini-charts in-place
+    CS_CURRENCIES.forEach(function(cur) {
+        ['ci-mini-'+cur, 'mob-ci-mini-'+cur].forEach(function(id) {
+            var ch = _ciCharts[id];
+            if (!ch) return;
+            ch.data.labels = labels;
+            ch.data.datasets[0].data = _ciIndexSeries[cur] || [];
+            ch.update('none');
+        });
+    });
+
+    renderCIRankTable();
+    _ciLoadingMore = false;
+    if (el) el.textContent = fmtTime();
 }
 
 function ciSetTF(tf, btn) {
@@ -1140,6 +1236,8 @@ function ciSetupMouseInteraction(canvas, chart) {
         var newMax = Math.min(total-1, drag.startMax + shift);
         chart.options.scales.x.min = newMin; chart.options.scales.x.max = newMax;
         chart.update('none');
+        // Lazy-load: trigger when near left edge
+        if (newMin < (drag.startMax - drag.startMin) * 0.15) ciLoadMoreHistory();
     };
     canvas.onwheel = function(e) {
         if (!chart) return; e.preventDefault();
@@ -1150,6 +1248,7 @@ function ciSetupMouseInteraction(canvas, chart) {
         chart.options.scales.x.min = Math.max(0, mid - newRange/2);
         chart.options.scales.x.max = Math.min(chart.data.labels.length-1, mid + newRange/2);
         chart.update('none');
+        if (chart.options.scales.x.min < newRange * 0.15) ciLoadMoreHistory();
     };
     canvas.style.cursor = 'crosshair';
     canvas.ondblclick = function() {
@@ -1166,7 +1265,7 @@ function ciSetupMouseInteraction(canvas, chart) {
 
 function mobSetupChartTouchCI(canvas, chart) {
     var touch0=null, dragStartMin=null, dragStartMax=null, pinchStartDist=null, pinchStartMin=null, pinchStartMax=null;
-    function setView(mn,mx){var t=chart.data.labels.length;chart.options.scales.x.min=Math.max(0,Math.round(mn));chart.options.scales.x.max=Math.min(t-1,Math.round(mx));chart.update('none');}
+    function setView(mn,mx){var t=chart.data.labels.length;chart.options.scales.x.min=Math.max(0,Math.round(mn));chart.options.scales.x.max=Math.min(t-1,Math.round(mx));chart.update('none');if(chart.options.scales.x.min<(mx-mn)*0.15)ciLoadMoreHistory();}
     canvas.addEventListener('touchstart',function(e){e.preventDefault();if(e.touches.length===1){touch0=e.touches[0];var r=chart.options.scales.x;dragStartMin=r.min;dragStartMax=r.max;pinchStartDist=null;}else if(e.touches.length===2){touch0=e.touches[0];var t0=e.touches[0],t1=e.touches[1];var dx=t1.clientX-t0.clientX,dy=t1.clientY-t0.clientY;pinchStartDist=Math.sqrt(dx*dx+dy*dy);var r2=chart.options.scales.x;pinchStartMin=r2.min;pinchStartMax=r2.max;}},{passive:false});
     canvas.addEventListener('touchmove',function(e){e.preventDefault();if(e.touches.length===1&&touch0&&dragStartMin!=null){var dx=e.touches[0].clientX-touch0.clientX;var ca=chart.chartArea;var range=dragStartMax-dragStartMin;var shift=-(dx/(ca?ca.right-ca.left:1))*range;setView(dragStartMin+shift,dragStartMax+shift);}else if(e.touches.length===2&&pinchStartDist!=null){var t0=e.touches[0],t1=e.touches[1];var dx2=t1.clientX-t0.clientX,dy2=t1.clientY-t0.clientY;var d=Math.sqrt(dx2*dx2+dy2*dy2);var scale=pinchStartDist/d;var origRange=pinchStartMax-pinchStartMin;var newRange=Math.max(10,Math.min(chart.data.labels.length,origRange*scale));var mid=(pinchStartMin+pinchStartMax)/2;setView(mid-newRange/2,mid+newRange/2);}},{passive:false});
     canvas.addEventListener('touchend',function(){touch0=null;dragStartMin=null;pinchStartDist=null;},{passive:false});
@@ -1196,17 +1295,27 @@ function renderCIMiniCharts(labels) {
         var color = CS_COLORS[cur];
         var chgColor = isUp ? '#2F995F' : '#C03939';
 
-        var valDisplay = lastVal !== null ? (lastVal>=0?'+':'') + (lastVal*100).toFixed(4) + '%' : '—';
-        var chgDisplay = chg !== null ? (isUp ? '▲ +' : '▼ ') + (chg*100).toFixed(5) + '%' : '—';
+        var absVal = lastVal !== null ? (100 * (1 + lastVal)).toFixed(3) : '—';
+        var chgDisplay = chg !== null ? (isUp ? '▲ +' : '▼ ') + (chg*100).toFixed(4) + '%' : '—';
+        var chgBg = isUp ? 'rgba(47,153,95,0.15)' : 'rgba(192,57,57,0.15)';
 
+        // PC card
         var cardHTML = '<div class="ci-card-header">' +
             '<div class="ci-card-cur"><span class="ci-card-flag">' + CI_FLAGS[cur] + '</span><span class="ci-card-name" style="color:'+color+'">' + cur + '</span></div>' +
             '<div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px">' +
-                '<div class="ci-card-val" style="color:'+color+'">' + valDisplay + '</div>' +
-                '<div class="ci-card-change" style="background:' + chgColor + '22;color:' + chgColor + '">' + chgDisplay + '</div>' +
+                '<div class="ci-card-val" style="color:'+color+'">' + absVal + '</div>' +
+                '<div class="ci-card-change" style="background:' + chgBg + ';color:' + chgColor + '">' + chgDisplay + '</div>' +
             '</div>' +
         '</div>' +
         '<div class="ci-chart-wrap"><canvas id="ci-mini-'+cur+'"></canvas></div>';
+
+        // Mobile IR-style card
+        var mobCardHTML =
+            '<div class="mob-ir-accent-bar" style="background:'+color+'"></div>' +
+            '<div class="mob-ir-top"><span class="mob-ir-bank" style="color:'+color+'">'+cur+'</span><span class="mob-ir-flag">'+CI_FLAGS[cur]+'</span></div>' +
+            '<div class="mob-ir-rate" style="color:'+color+';font-size:20px">'+absVal+'</div>' +
+            '<div class="mob-ir-badge" style="background:'+chgBg+';color:'+chgColor+'">'+chgDisplay+'</div>' +
+            '<div style="position:relative;height:70px;margin-top:6px;background:#0d0d0d;border-radius:5px;overflow:hidden"><canvas id="mob-ci-mini-'+cur+'" style="position:absolute;top:0;left:0;width:100%!important;height:100%!important"></canvas></div>';
 
         if (grid) {
             var card = document.createElement('div');
@@ -1219,8 +1328,10 @@ function renderCIMiniCharts(labels) {
         }
         if (mobGrid) {
             var mobCard = document.createElement('div');
-            mobCard.className = 'ci-chart-card';
-            mobCard.innerHTML = cardHTML.replace('ci-mini-'+cur, 'mob-ci-mini-'+cur);
+            mobCard.className = 'mob-ir-card';
+            mobCard.style.cursor = 'pointer';
+            mobCard.innerHTML = mobCardHTML;
+            (function(c){ mobCard.onclick = function(){ openCiModal(c, labels); }; })(cur);
             mobGrid.appendChild(mobCard);
         }
     });
