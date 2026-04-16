@@ -897,9 +897,6 @@ var _ciRawData = {};
 var _ciLoadingMore = false;
 var _ciNoMoreData = false;
 
-/* =====================================================
-   NEW: Hover state for CI combined chart floating labels
-   ===================================================== */
 var _ciHoverIdx = -1;
 var _mobCiHoverIdx = -1;
 
@@ -1356,7 +1353,7 @@ function renderCICombinedChart(labels) {
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: { display: false },
-                    tooltip: { enabled: false }   /* disabled — we use floating labels instead */
+                    tooltip: { enabled: false }
                 },
                 scales: {
                     x: {
@@ -1582,7 +1579,9 @@ function mobSetupChartTouchCI(canvas, chart) {
         }
     }, { passive: false });
 
+    var lastTap = 0;
     canvas.addEventListener('touchend', function(e) {
+        var now = Date.now();
         if (e.touches.length === 0) {
             touch0 = null; dragStartMin = null; pinchStartDist = null;
             /* Keep hover shown for 2s after lift */
@@ -1593,17 +1592,13 @@ function mobSetupChartTouchCI(canvas, chart) {
             dragStartMin = r.min; dragStartMax = r.max;
             pinchStartDist = null;
         }
-    }, { passive: false });
-
-    var lastTap = 0;
-    canvas.addEventListener('touchend', function() {
-        var now = Date.now();
+        /* Double-tap to reset zoom */
         if (now - lastTap < 300) {
             var t = chart.data.labels.length, v = CI_TF_CONFIG[ciTF].view || 100;
             setView(Math.max(0, t - v), t - 1);
         }
         lastTap = now;
-    });
+    }, { passive: false });
 
     var total = chart.data.labels.length, view = CI_TF_CONFIG[ciTF].view || 100;
     chart.options.scales.x.min = Math.max(0, total - view);
@@ -2011,30 +2006,241 @@ async function chargerCOT() {
     setTimeout(function(){buildHistGrid();updateHistCharts();mobBuildHistGrid(cotData);},100);
 }
 
-function renderCOTTable(tbodyId,data,key){var tbody=document.getElementById(tbodyId);if(!tbody)return;tbody.innerHTML='';data.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(d){var cat=d[key];var nc=cat.net>=0?'#2F995F':'#C03939';var dc=cat.dlt>=0?'#2F995F':'#C03939';var row=document.createElement('tr');row.innerHTML='<td style="font-weight:bold">'+d.name+'</td><td style="color:#2F995F">'+cat.lng.toLocaleString()+'</td><td style="color:#C03939">'+cat.sht.toLocaleString()+'</td><td style="color:'+nc+';font-weight:bold">'+(cat.net>=0?'+':'')+cat.net.toLocaleString()+'</td><td style="color:'+dc+'">'+(cat.dlt>=0?'+':'')+cat.dlt.toLocaleString()+'</td><td>'+(cat.net>=0?'&#128994; Bullish':'&#128308; Bearish')+'</td>';tbody.appendChild(row);});}
+var cotPieCharts = {};
 
-var cotPieCharts={};
-function renderCOTPies(containerId,data,key){var container=document.getElementById(containerId);if(!container)return;container.innerHTML='';Object.keys(cotPieCharts).filter(function(k){return k.startsWith(containerId);}).forEach(function(k){cotPieCharts[k].destroy();delete cotPieCharts[k];});data.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(d){var cat=d[key],total=cat.lng+cat.sht;if(!total)return;var pctL=Math.round(cat.lng/total*100),pctS=100-pctL;var item=document.createElement('div');item.className=(containerId.startsWith('mob-')?'mob-pie-item':'cot-pie-item');var cid=containerId+'_'+d.name;var canvasSize=containerId.startsWith('mob-')?'width="65" height="65"':'width="80" height="80"';item.innerHTML='<canvas id="'+cid+'" '+canvasSize+'></canvas><div class="'+(containerId.startsWith('mob-')?'mob-':'cot-')+'pie-label">'+d.name+'</div>';container.appendChild(item);cotPieCharts[cid]=new Chart(document.getElementById(cid),{type:'doughnut',data:{labels:['Long','Short'],datasets:[{data:[cat.lng,cat.sht],backgroundColor:['rgb(47,153,95)','rgb(192,57,57)'],borderColor:['#161616','#161616'],borderWidth:2}]},options:{responsive:false,cutout:'45%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+c.label+': '+(c.label==='Long'?pctL:pctS)+'%';}}}}}});})}
+function afficherCOT(cotData) {
+    renderCOTTable('cotBodyLev', cotData, 'lev'); renderCOTPies('cotPiesLev', cotData, 'lev');
+    renderCOTTable('cotBodyCom', cotData, 'com'); renderCOTPies('cotPiesCom', cotData, 'com');
+    renderCOTTable('cotBodyLS',  cotData, 'ls');  renderCOTPies('cotPiesLS',  cotData, 'ls');
+}
 
-function afficherCOT(cotData){renderCOTTable('cotBodyLev',cotData,'lev');renderCOTPies('cotPiesLev',cotData,'lev');renderCOTTable('cotBodyCom',cotData,'com');renderCOTPies('cotPiesCom',cotData,'com');renderCOTTable('cotBodyLS',cotData,'ls');renderCOTPies('cotPiesLS',cotData,'ls');}
-function mobSyncCOT(cotData){var d=cotData||window._mobLastCotData;if(!d)return;window._mobLastCotData=d;renderCOTTable('mob-cotBodyLev',d,'lev');renderCOTPies('mob-cotPiesLev',d,'lev');renderCOTTable('mob-cotBodyCom',d,'com');renderCOTPies('mob-cotPiesCom',d,'com');renderCOTTable('mob-cotBodyLS',d,'ls');renderCOTPies('mob-cotPiesLS',d,'ls');}
+function mobSyncCOT(cotData) {
+    var d = cotData || window._mobLastCotData;
+    if (!d) return;
+    window._mobLastCotData = d;
+    renderCOTTable('mob-cotBodyLev', d, 'lev'); renderCOTPies('mob-cotPiesLev', d, 'lev');
+    renderCOTTable('mob-cotBodyCom', d, 'com'); renderCOTPies('mob-cotPiesCom', d, 'com');
+    renderCOTTable('mob-cotBodyLS',  d, 'ls');  renderCOTPies('mob-cotPiesLS',  d, 'ls');
+}
+
+function renderCOTTable(tbodyId, data, key) {
+    var tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    data.slice().sort(function(a, b){ return a.name.localeCompare(b.name); }).forEach(function(d) {
+        var cat = d[key];
+        var nc = cat.net >= 0 ? '#2F995F' : '#C03939';
+        var dc = cat.dlt >= 0 ? '#2F995F' : '#C03939';
+        var row = document.createElement('tr');
+        row.innerHTML =
+            '<td style="font-weight:bold">' + d.name + '</td>' +
+            '<td style="color:#2F995F">' + cat.lng.toLocaleString() + '</td>' +
+            '<td style="color:#C03939">' + cat.sht.toLocaleString() + '</td>' +
+            '<td style="color:' + nc + ';font-weight:bold">' + (cat.net >= 0 ? '+' : '') + cat.net.toLocaleString() + '</td>' +
+            '<td style="color:' + dc + '">' + (cat.dlt >= 0 ? '+' : '') + cat.dlt.toLocaleString() + '</td>' +
+            '<td>' + (cat.net >= 0 ? '&#128994; Bullish' : '&#128308; Bearish') + '</td>';
+        tbody.appendChild(row);
+    });
+}
+
+function renderCOTPies(containerId, data, key) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    Object.keys(cotPieCharts).filter(function(k){ return k.startsWith(containerId); }).forEach(function(k){
+        cotPieCharts[k].destroy(); delete cotPieCharts[k];
+    });
+    data.slice().sort(function(a, b){ return a.name.localeCompare(b.name); }).forEach(function(d) {
+        var cat = d[key], total = cat.lng + cat.sht;
+        if (!total) return;
+        var pctL = Math.round(cat.lng / total * 100), pctS = 100 - pctL;
+        var isMob = containerId.startsWith('mob-');
+        var item = document.createElement('div');
+        item.className = isMob ? 'mob-pie-item' : 'cot-pie-item';
+        var cid = containerId + '_' + d.name;
+        var sz = isMob ? 'width="65" height="65"' : 'width="80" height="80"';
+        item.innerHTML = '<canvas id="' + cid + '" ' + sz + '></canvas>' +
+            '<div class="' + (isMob ? 'mob-' : 'cot-') + 'pie-label">' + d.name + '</div>';
+        container.appendChild(item);
+        cotPieCharts[cid] = new Chart(document.getElementById(cid), {
+            type: 'doughnut',
+            data: { labels: ['Long','Short'], datasets: [{ data: [cat.lng, cat.sht],
+                backgroundColor: ['rgb(47,153,95)','rgb(192,57,57)'],
+                borderColor: ['#161616','#161616'], borderWidth: 2 }] },
+            options: { responsive: false, cutout: '45%', plugins: { legend: { display: false },
+                tooltip: { callbacks: { label: function(c){
+                    return ' ' + c.label + ': ' + (c.label === 'Long' ? pctL : pctS) + '%';
+                }}}}}
+        });
+    });
+}
 
 var CURRENCIES_ORDER=['AUD','CAD','CHF','EUR','GBP','JPY','NZD','USD'];
 var HIST_FIELDS={lev:{color:'#1e90ff',label:'Leveraged Funds',fieldL:'lev_money_positions_long',fieldS:'lev_money_positions_short'},com:{color:'#ff8c00',label:'Commercials',fieldL:'dealer_positions_long_all',fieldS:'dealer_positions_short_all'},ls:{color:'#ffd700',label:'Large Spec.',fieldL:'asset_mgr_positions_long',fieldS:'asset_mgr_positions_short'}};
 var histCharts={},mobHistCharts={};
 
-function buildHistGrid(){var grid=document.getElementById('histGrid');if(!grid)return;grid.innerHTML='';CURRENCIES_ORDER.forEach(function(cur){var wrap=document.createElement('div');wrap.style.cssText='background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px';wrap.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:11px;font-weight:bold;color:#fff">'+cur+'</span><span style="display:flex;gap:8px;font-size:9px;color:#aaa"><span><span style="display:inline-block;width:12px;height:2px;background:#1e90ff;vertical-align:middle;margin-right:3px"></span>Lev. Funds</span><span><span style="display:inline-block;width:12px;height:2px;background:#ff8c00;vertical-align:middle;margin-right:3px"></span>Comm.</span><span><span style="display:inline-block;width:12px;height:2px;background:#ffd700;vertical-align:middle;margin-right:3px"></span>Lg. Spec.</span></span></div><div style="position:relative;height:140px"><canvas id="histChart_'+cur+'"></canvas></div>';grid.appendChild(wrap);});}
-function updateHistCharts(){var byCode=window._cotByCode,markets=window._cotMarkets;if(!byCode||!markets)return;CURRENCIES_ORDER.forEach(function(cur){var market=markets.find(function(m){return m.name===cur;});if(!market)return;var rows=byCode[market.code];if(!rows||!rows.length)return;var sorted=rows.slice().reverse();var labels=sorted.map(function(r){return(r.report_date_as_yyyy_mm_dd||'').split('T')[0];});var datasets=Object.entries(HIST_FIELDS).map(function(e){return{label:e[1].label,data:sorted.map(function(r){return(parseInt(r[e[1].fieldL]||0)||0)-(parseInt(r[e[1].fieldS]||0)||0);}),borderColor:e[1].color,backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,tension:0.2};});var ctx=document.getElementById('histChart_'+cur);if(!ctx)return;if(histCharts[cur])histCharts[cur].destroy();histCharts[cur]=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d0d0d',borderColor:'#1e2230',borderWidth:1,titleColor:'#888',bodyColor:'#fff',callbacks:{label:function(c){return' '+c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y.toLocaleString();}}}},scales:{x:{grid:{color:'#1a1a2a'},ticks:{color:'#444',font:{size:8},maxTicksLimit:8,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#444',font:{size:8},callback:function(v){return v>=0?'+'+v.toLocaleString():v.toLocaleString();}}}}}});});}
+function buildHistGrid() {
+    var grid = document.getElementById('histGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    CURRENCIES_ORDER.forEach(function(cur) {
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px';
+        wrap.innerHTML =
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+                '<span style="font-size:11px;font-weight:bold;color:#fff">' + cur + '</span>' +
+                '<span style="display:flex;gap:8px;font-size:9px;color:#aaa">' +
+                    '<span><span style="display:inline-block;width:12px;height:2px;background:#1e90ff;vertical-align:middle;margin-right:3px"></span>Lev. Funds</span>' +
+                    '<span><span style="display:inline-block;width:12px;height:2px;background:#ff8c00;vertical-align:middle;margin-right:3px"></span>Comm.</span>' +
+                    '<span><span style="display:inline-block;width:12px;height:2px;background:#ffd700;vertical-align:middle;margin-right:3px"></span>Lg. Spec.</span>' +
+                '</span>' +
+            '</div>' +
+            '<div style="position:relative;height:140px"><canvas id="histChart_' + cur + '"></canvas></div>';
+        grid.appendChild(wrap);
+    });
+}
 
-function mobBuildHistGrid(cotData){var grid=document.getElementById('mob-histGrid');if(!grid)return;grid.innerHTML='';var byCode=window._cotByCode,markets=window._cotMarkets;if(!byCode||!markets)return;CURRENCIES_ORDER.forEach(function(cur){var market=markets.find(function(m){return m.name===cur;});if(!market)return;var rows=byCode[market.code];if(!rows||!rows.length)return;var wrap=document.createElement('div');wrap.style.cssText='background:#161616;border:1px solid #1e2230;border-radius:8px;padding:8px';wrap.innerHTML='<div style="font-size:11px;font-weight:bold;color:#fff;margin-bottom:5px">'+cur+'</div><div style="position:relative;height:80px"><canvas id="mob-histChart_'+cur+'"></canvas></div>';grid.appendChild(wrap);});setTimeout(function(){CURRENCIES_ORDER.forEach(function(cur){var market=markets.find(function(m){return m.name===cur;});if(!market)return;var rows=byCode[market.code];if(!rows||!rows.length)return;var sorted=rows.slice().reverse();var labels=sorted.map(function(r){return(r.report_date_as_yyyy_mm_dd||'').split('T')[0];});var datasets=Object.entries(HIST_FIELDS).map(function(e){return{label:e[1].label,data:sorted.map(function(r){return(parseInt(r[e[1].fieldL]||0)||0)-(parseInt(r[e[1].fieldS]||0)||0);}),borderColor:e[1].color,backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,tension:0.2};});var ctx=document.getElementById('mob-histChart_'+cur);if(!ctx)return;if(mobHistCharts[cur])mobHistCharts[cur].destroy();mobHistCharts[cur]=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1a1a2a'},ticks:{color:'#444',font:{size:7},maxTicksLimit:5,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#444',font:{size:7},maxTicksLimit:4}}}}});});},100);}
+function updateHistCharts() {
+    var byCode = window._cotByCode, markets = window._cotMarkets;
+    if (!byCode || !markets) return;
+    CURRENCIES_ORDER.forEach(function(cur) {
+        var market = markets.find(function(m){ return m.name === cur; });
+        if (!market) return;
+        var rows = byCode[market.code];
+        if (!rows || !rows.length) return;
+        var sorted = rows.slice().reverse();
+        var labels = sorted.map(function(r){ return (r.report_date_as_yyyy_mm_dd || '').split('T')[0]; });
+        var datasets = Object.entries(HIST_FIELDS).map(function(e) {
+            return { label: e[1].label, data: sorted.map(function(r){
+                return (parseInt(r[e[1].fieldL] || 0) || 0) - (parseInt(r[e[1].fieldS] || 0) || 0);
+            }), borderColor: e[1].color, backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.2 };
+        });
+        var ctx = document.getElementById('histChart_' + cur);
+        if (!ctx) return;
+        if (histCharts[cur]) histCharts[cur].destroy();
+        histCharts[cur] = new Chart(ctx, {
+            type: 'line', data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true, maintainAspectRatio: false, animation: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { display: false }, tooltip: {
+                    backgroundColor: '#0d0d0d', borderColor: '#1e2230', borderWidth: 1,
+                    titleColor: '#888', bodyColor: '#fff',
+                    callbacks: { label: function(c){ return ' ' + c.dataset.label + ': ' + (c.parsed.y >= 0 ? '+' : '') + c.parsed.y.toLocaleString(); }}
+                }},
+                scales: {
+                    x: { grid:{color:'#1a1a2a'}, ticks:{color:'#444',font:{size:8},maxTicksLimit:8,maxRotation:0} },
+                    y: { position:'right', grid:{color:'#1a1a2a'}, ticks:{color:'#444',font:{size:8},callback:function(v){ return v>=0?'+'+v.toLocaleString():v.toLocaleString(); }} }
+                }
+            }
+        });
+    });
+}
+
+function mobBuildHistGrid(cotData) {
+    var grid = document.getElementById('mob-histGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    var byCode = window._cotByCode, markets = window._cotMarkets;
+    if (!byCode || !markets) return;
+    CURRENCIES_ORDER.forEach(function(cur) {
+        var market = markets.find(function(m){ return m.name === cur; });
+        if (!market) return;
+        var rows = byCode[market.code];
+        if (!rows || !rows.length) return;
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'background:#161616;border:1px solid #1e2230;border-radius:8px;padding:8px';
+        wrap.innerHTML = '<div style="font-size:11px;font-weight:bold;color:#fff;margin-bottom:5px">' + cur + '</div>' +
+            '<div style="position:relative;height:80px"><canvas id="mob-histChart_' + cur + '"></canvas></div>';
+        grid.appendChild(wrap);
+    });
+    setTimeout(function() {
+        CURRENCIES_ORDER.forEach(function(cur) {
+            var market = markets.find(function(m){ return m.name === cur; });
+            if (!market) return;
+            var rows = byCode[market.code];
+            if (!rows || !rows.length) return;
+            var sorted = rows.slice().reverse();
+            var labels = sorted.map(function(r){ return (r.report_date_as_yyyy_mm_dd || '').split('T')[0]; });
+            var datasets = Object.entries(HIST_FIELDS).map(function(e) {
+                return { label: e[1].label, data: sorted.map(function(r){
+                    return (parseInt(r[e[1].fieldL] || 0) || 0) - (parseInt(r[e[1].fieldS] || 0) || 0);
+                }), borderColor: e[1].color, backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.2 };
+            });
+            var ctx = document.getElementById('mob-histChart_' + cur);
+            if (!ctx) return;
+            if (mobHistCharts[cur]) mobHistCharts[cur].destroy();
+            mobHistCharts[cur] = new Chart(ctx, {
+                type: 'line', data: { labels: labels, datasets: datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false, animation: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid:{color:'#1a1a2a'}, ticks:{color:'#444',font:{size:7},maxTicksLimit:5,maxRotation:0} },
+                        y: { position:'right', grid:{color:'#1a1a2a'}, ticks:{color:'#444',font:{size:7},maxTicksLimit:4} }
+                    }
+                }
+            });
+        });
+    }, 100);
+}
 
 /* =========================================================
    CURRENCY STRENGTH (RSI-based) — PC
    ========================================================= */
-function csAllPairs(){var set=new Set();Object.values(CS_PAIRS).forEach(function(v){v.base.forEach(function(p){set.add(p);});v.quote.forEach(function(p){set.add(p);});});return Array.from(set);}
-function calcRSI(closes){var period=14,rsi=new Array(closes.length).fill(null);if(closes.length<period+1)return rsi;var ag=0,al=0;for(var i=1;i<=period;i++){var d=closes[i]-closes[i-1];if(d>0)ag+=d;else al-=d;}ag/=period;al/=period;rsi[period]=al===0?100:100-100/(1+ag/al);for(var j=period+1;j<closes.length;j++){var dd=closes[j]-closes[j-1],g=dd>0?dd:0,l=dd<0?-dd:0;ag=(ag*(period-1)+g)/period;al=(al*(period-1)+l)/period;rsi[j]=al===0?100:100-100/(1+ag/al);}return rsi;}
-async function fetchCandles(instrument,count,tf){var tfStr=tf||CS_TF[csTF];var url=OANDA_URL+'/instruments/'+instrument+'/candles?granularity='+tfStr+'&count='+count+'&price=M';try{var r=await fetch(url,{headers:{'Authorization':'Bearer '+OANDA_KEY}});if(!r.ok)return null;var d=await r.json();if(!d.candles||!d.candles.length)return null;return{closes:d.candles.map(function(c){return parseFloat(c.mid.c);}),times:d.candles.map(function(c){return c.time;})};}catch(e){return null;}}
-function buildLabels(times,tf){var labels=[],useTF=tf||csTF;times.forEach(function(t){if(!t){labels.push('');return;}var dt=new Date(t);if(useTF==='D'){labels.push(dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}));}else{labels.push(dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));}});return labels;}
+function csAllPairs() {
+    var set = new Set();
+    Object.values(CS_PAIRS).forEach(function(v) {
+        v.base.forEach(function(p){ set.add(p); });
+        v.quote.forEach(function(p){ set.add(p); });
+    });
+    return Array.from(set);
+}
+
+function calcRSI(closes) {
+    var period = 14, rsi = new Array(closes.length).fill(null);
+    if (closes.length < period + 1) return rsi;
+    var ag = 0, al = 0;
+    for (var i = 1; i <= period; i++) {
+        var d = closes[i] - closes[i-1];
+        if (d > 0) ag += d; else al -= d;
+    }
+    ag /= period; al /= period;
+    rsi[period] = al === 0 ? 100 : 100 - 100 / (1 + ag / al);
+    for (var j = period + 1; j < closes.length; j++) {
+        var dd = closes[j] - closes[j-1], g = dd > 0 ? dd : 0, l = dd < 0 ? -dd : 0;
+        ag = (ag * (period-1) + g) / period;
+        al = (al * (period-1) + l) / period;
+        rsi[j] = al === 0 ? 100 : 100 - 100 / (1 + ag / al);
+    }
+    return rsi;
+}
+
+async function fetchCandles(instrument, count, tf) {
+    var tfStr = tf || CS_TF[csTF];
+    var url = OANDA_URL + '/instruments/' + instrument + '/candles?granularity=' + tfStr + '&count=' + count + '&price=M';
+    try {
+        var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + OANDA_KEY } });
+        if (!r.ok) return null;
+        var d = await r.json();
+        if (!d.candles || !d.candles.length) return null;
+        return {
+            closes: d.candles.map(function(c){ return parseFloat(c.mid.c); }),
+            times:  d.candles.map(function(c){ return c.time; })
+        };
+    } catch(e) { return null; }
+}
+
+function buildLabels(times, tf) {
+    var useTF = tf || csTF;
+    return times.map(function(t) {
+        if (!t) return '';
+        var dt = new Date(t);
+        return useTF === 'D'
+            ? dt.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit' })
+            : dt.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    });
+}
 
 async function csLoad(){
     var el=document.getElementById('csStatus');if(el)el.textContent='Loading...';
@@ -2078,11 +2284,9 @@ function renderCSChart(labels,series){
     ctx.style.cursor='crosshair';
     ctx.ondblclick=function(){csResetZoom();};
     var totalLen=labels.length,viewLen=CS_VIEW[csTF]||100;
-    if(savedMin!==null&&savedMax!==null){
-        /* User had panned away from edge: keep their view position, shift by new data offset */
-        var newOffset=totalLen-csChart.data.labels.length;
-        csChart.options.scales.x.min=Math.max(0,savedMin);
-        csChart.options.scales.x.max=Math.min(totalLen-1,savedMax);
+    if (savedMin !== null && savedMax !== null) {
+        csChart.options.scales.x.min = Math.max(0, savedMin);
+        csChart.options.scales.x.max = Math.min(totalLen - 1, savedMax);
     } else {
         csChart.options.scales.x.min=Math.max(0,totalLen-viewLen);
         csChart.options.scales.x.max=totalLen-1;
@@ -2091,49 +2295,279 @@ function renderCSChart(labels,series){
     buildCSLegend();
 }
 
-function csResetZoom(){if(!csChart)return;var totalLen=csChart.data.labels.length,viewLen=CS_VIEW[csTF]||100;csChart.options.scales.x.min=Math.max(0,totalLen-viewLen);csChart.options.scales.x.max=totalLen-1;csChart.update('none');}
-function buildCSLegend(){var legend=document.getElementById('csLegend');if(!legend)return;legend.innerHTML='';CS_CURRENCIES.forEach(function(cur){var item=document.createElement('div');item.className='cs-legend-item'+(csHidden.has(cur)?' hidden':'');item.innerHTML='<div class="cs-legend-dot" style="background:'+CS_COLORS[cur]+'"></div><span>'+cur+'</span>';item.onclick=function(){if(csHidden.has(cur)){csHidden.delete(cur);item.classList.remove('hidden');}else{csHidden.add(cur);item.classList.add('hidden');}if(!csChart)return;var ds=csChart.data.datasets.find(function(d){return d.label===cur;});if(ds){ds.hidden=csHidden.has(cur);csChart.update();}};legend.appendChild(item);});}
-function renderCSRank(series,bodyId){var vals=CS_CURRENCIES.map(function(cur){var s=series[cur],f=s?s.filter(function(v){return v!==null;}):[];return{cur:cur,val:f.length?f[f.length-1]:null};}).filter(function(x){return x.val!==null;});vals.sort(function(a,b){return b.val-a.val;});var body=document.getElementById(bodyId);if(!body)return;body.innerHTML='';var max=vals.length?vals[0].val:100,min=vals.length?vals[vals.length-1].val:0;vals.forEach(function(item,i){var pct=max===min?50:Math.round((item.val-min)/(max-min)*100),color=CS_COLORS[item.cur],row=document.createElement('div');var isPC=bodyId==='csRankBody';row.className=isPC?'cs-rank-row':'mob-cs-rank-row';row.innerHTML='<div class="'+(isPC?'cs':'mob-cs')+'-rank-pos">'+(i+1)+'</div><div class="'+(isPC?'cs':'mob-cs')+'-rank-dot" style="background:'+color+'"></div><div class="'+(isPC?'cs':'mob-cs')+'-rank-name">'+item.cur+'</div><div class="'+(isPC?'cs':'mob-cs')+'-rank-bar-wrap"><div class="'+(isPC?'cs':'mob-cs')+'-rank-bar" style="width:'+pct+'%;background:'+color+'"></div></div><div class="'+(isPC?'cs':'mob-cs')+'-rank-val" style="color:'+color+'">'+item.val.toFixed(1)+'</div>';body.appendChild(row);});var strong=vals.filter(function(x){return x.val>=55;}).map(function(x){return x.cur;}),weak=vals.filter(function(x){return x.val<=45;}).map(function(x){return x.cur;});if(strong.length||weak.length){var s=document.createElement('div');s.style.cssText='margin-top:8px;padding:8px;border-top:1px solid #1e2230;font-size:11px;color:#aaa;line-height:1.7';s.innerHTML=(strong.length?'<div><b style="color:#2E832B">Bullish</b>: '+strong.join(', ')+'</div>':'')+(weak.length?'<div><b style="color:#AD3644">Bearish</b>: '+weak.join(', ')+'</div>':'');body.appendChild(s);}}
-function csSetTF(tf,btn){csTF=tf;document.querySelectorAll('#sub-rsi .cs-tf-btn').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');csLoad();}
-function csRefresh(){csLoad();}
+function csResetZoom() {
+    if (!csChart) return;
+    var totalLen = csChart.data.labels.length, viewLen = CS_VIEW[csTF] || 100;
+    csChart.options.scales.x.min = Math.max(0, totalLen - viewLen);
+    csChart.options.scales.x.max = totalLen - 1;
+    csChart.update('none');
+}
+
+function buildCSLegend() {
+    var legend = document.getElementById('csLegend');
+    if (!legend) return;
+    legend.innerHTML = '';
+    CS_CURRENCIES.forEach(function(cur) {
+        var item = document.createElement('div');
+        item.className = 'cs-legend-item' + (csHidden.has(cur) ? ' hidden' : '');
+        item.innerHTML = '<div class="cs-legend-dot" style="background:' + CS_COLORS[cur] + '"></div><span>' + cur + '</span>';
+        item.onclick = function() {
+            if (csHidden.has(cur)) { csHidden.delete(cur); item.classList.remove('hidden'); }
+            else { csHidden.add(cur); item.classList.add('hidden'); }
+            if (!csChart) return;
+            var ds = csChart.data.datasets.find(function(d){ return d.label === cur; });
+            if (ds) { ds.hidden = csHidden.has(cur); csChart.update(); }
+        };
+        legend.appendChild(item);
+    });
+}
+
+function renderCSRank(series, bodyId) {
+    var vals = CS_CURRENCIES.map(function(cur) {
+        var s = series[cur], f = s ? s.filter(function(v){ return v !== null; }) : [];
+        return { cur: cur, val: f.length ? f[f.length-1] : null };
+    }).filter(function(x){ return x.val !== null; });
+    vals.sort(function(a, b){ return b.val - a.val; });
+
+    var body = document.getElementById(bodyId);
+    if (!body) return;
+    body.innerHTML = '';
+
+    var max = vals.length ? vals[0].val : 100, min = vals.length ? vals[vals.length-1].val : 0;
+    var isPC = bodyId === 'csRankBody';
+    var pfx = isPC ? 'cs' : 'mob-cs';
+
+    vals.forEach(function(item, i) {
+        var pct = max === min ? 50 : Math.round((item.val - min) / (max - min) * 100);
+        var color = CS_COLORS[item.cur];
+        var row = document.createElement('div');
+        row.className = pfx + '-rank-row';
+        row.innerHTML =
+            '<div class="' + pfx + '-rank-pos">' + (i+1) + '</div>' +
+            '<div class="' + pfx + '-rank-dot" style="background:' + color + '"></div>' +
+            '<div class="' + pfx + '-rank-name">' + item.cur + '</div>' +
+            '<div class="' + pfx + '-rank-bar-wrap"><div class="' + pfx + '-rank-bar" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+            '<div class="' + pfx + '-rank-val" style="color:' + color + '">' + item.val.toFixed(1) + '</div>';
+        body.appendChild(row);
+    });
+
+    var strong = vals.filter(function(x){ return x.val >= 55; }).map(function(x){ return x.cur; });
+    var weak   = vals.filter(function(x){ return x.val <= 45; }).map(function(x){ return x.cur; });
+    if (strong.length || weak.length) {
+        var s = document.createElement('div');
+        s.style.cssText = 'margin-top:8px;padding:8px;border-top:1px solid #1e2230;font-size:11px;color:#aaa;line-height:1.7';
+        s.innerHTML =
+            (strong.length ? '<div><b style="color:#2E832B">Bullish</b>: ' + strong.join(', ') + '</div>' : '') +
+            (weak.length   ? '<div><b style="color:#AD3644">Bearish</b>: ' + weak.join(', ')   + '</div>' : '');
+        body.appendChild(s);
+    }
+}
+function csSetTF(tf, btn) {
+    csTF = tf;
+    document.querySelectorAll('#sub-rsi .cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    csLoad();
+}
 
 /* =========================================================
    CURRENCY STRENGTH — MOBILE
    ========================================================= */
-async function mobCsLoad(){
-    var el=document.getElementById('mob-csStatus');if(el)el.textContent='Loading...';
-    var pairs=csAllPairs(),results={};
-    await Promise.all(pairs.map(async function(p){var url=OANDA_URL+'/instruments/'+p+'/candles?granularity='+CS_TF[mobCsTF]+'&count='+(CS_COUNT[mobCsTF]+20)+'&price=M';try{var r=await fetch(url,{headers:{'Authorization':'Bearer '+OANDA_KEY}});if(!r.ok)return;var d=await r.json();if(d.candles&&d.candles.length){results[p]={closes:d.candles.map(function(c){return parseFloat(c.mid.c);}),times:d.candles.map(function(c){return c.time;})};}}catch(e){}}));
-    var ok=pairs.filter(function(p){return results[p]&&results[p].closes.length>14;});
-    if(!ok.length){if(el)el.textContent='Error';return;}
-    var rsiMap={};ok.forEach(function(p){rsiMap[p]=calcRSI(results[p].closes);});
-    var lens=ok.map(function(p){return rsiMap[p].length;}),minLen=Math.min.apply(null,lens);
-    var chartLen=Math.min(minLen,CS_COUNT[mobCsTF]),startIdx=minLen-chartLen;
-    var rawTimes=results[ok[0]].times;_mobCsRawTimes=rawTimes.slice(rawTimes.length-chartLen);
-    var labels=buildLabels(_mobCsRawTimes,mobCsTF);
-    _mobCsStrengthSeries={};
-    CS_CURRENCIES.forEach(function(cur){var base=CS_PAIRS[cur].base,quote=CS_PAIRS[cur].quote,series=[];for(var i=0;i<chartLen;i++){var idx=startIdx+i,sum=0,cnt=0;base.forEach(function(p){if(rsiMap[p]&&rsiMap[p][idx]!=null){sum+=rsiMap[p][idx];cnt++;}});quote.forEach(function(p){if(rsiMap[p]&&rsiMap[p][idx]!=null){sum+=(100-rsiMap[p][idx]);cnt++;}});series.push(cnt>0?parseFloat((sum/cnt).toFixed(2)):null);}_mobCsStrengthSeries[cur]=series;});
-    var viewLen=CS_VIEW[mobCsTF]||100,EMPTY_RIGHT=Math.round(viewLen*0.10);
-    for(var e=0;e<EMPTY_RIGHT;e++){labels.push('');CS_CURRENCIES.forEach(function(cur){_mobCsStrengthSeries[cur].push(null);});_mobCsRawTimes.push(null);}
-    mobRenderCSChart(labels,_mobCsStrengthSeries);
-    renderCSRank(_mobCsStrengthSeries,'mob-csRankBody');
+async function mobCsLoad() {
+    var el = document.getElementById('mob-csStatus');
+    if (el) el.textContent = 'Loading...';
+    var pairs = csAllPairs(), results = {};
+    await Promise.all(pairs.map(async function(p) {
+        var url = OANDA_URL + '/instruments/' + p + '/candles?granularity=' + CS_TF[mobCsTF] + '&count=' + (CS_COUNT[mobCsTF] + 20) + '&price=M';
+        try {
+            var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + OANDA_KEY } });
+            if (!r.ok) return;
+            var d = await r.json();
+            if (d.candles && d.candles.length) {
+                results[p] = {
+                    closes: d.candles.map(function(c){ return parseFloat(c.mid.c); }),
+                    times:  d.candles.map(function(c){ return c.time; })
+                };
+            }
+        } catch(e) {}
+    }));
+    var ok = pairs.filter(function(p){ return results[p] && results[p].closes.length > 14; });
+    if (!ok.length) { if (el) el.textContent = 'Error'; return; }
+    var rsiMap = {};
+    ok.forEach(function(p){ rsiMap[p] = calcRSI(results[p].closes); });
+    var lens = ok.map(function(p){ return rsiMap[p].length; });
+    var minLen = Math.min.apply(null, lens);
+    var chartLen = Math.min(minLen, CS_COUNT[mobCsTF]), startIdx = minLen - chartLen;
+    var rawTimes = results[ok[0]].times;
+    _mobCsRawTimes = rawTimes.slice(rawTimes.length - chartLen);
+    var labels = buildLabels(_mobCsRawTimes, mobCsTF);
+    _mobCsStrengthSeries = {};
+    CS_CURRENCIES.forEach(function(cur) {
+        var base = CS_PAIRS[cur].base, quote = CS_PAIRS[cur].quote, series = [];
+        for (var i = 0; i < chartLen; i++) {
+            var idx = startIdx + i, sum = 0, cnt = 0;
+            base.forEach(function(p){ if (rsiMap[p] && rsiMap[p][idx] != null){ sum += rsiMap[p][idx]; cnt++; } });
+            quote.forEach(function(p){ if (rsiMap[p] && rsiMap[p][idx] != null){ sum += (100 - rsiMap[p][idx]); cnt++; } });
+            series.push(cnt > 0 ? parseFloat((sum / cnt).toFixed(2)) : null);
+        }
+        _mobCsStrengthSeries[cur] = series;
+    });
+    var viewLen = CS_VIEW[mobCsTF] || 100, EMPTY_RIGHT = Math.round(viewLen * 0.10);
+    for (var e = 0; e < EMPTY_RIGHT; e++) {
+        labels.push('');
+        CS_CURRENCIES.forEach(function(cur){ _mobCsStrengthSeries[cur].push(null); });
+        _mobCsRawTimes.push(null);
+    }
+    mobRenderCSChart(labels, _mobCsStrengthSeries);
+    renderCSRank(_mobCsStrengthSeries, 'mob-csRankBody');
     mobBuildCSLegend();
-    if(el)el.textContent=fmtTime();
+    if (el) el.textContent = fmtTime();
 }
 
-function mobRenderCSChart(labels,series){
-    var ctx=document.getElementById('mob-csChart');if(!ctx)return;
-    if(mobCsChart)mobCsChart.destroy();
-    var datasets=CS_CURRENCIES.map(function(cur){return{label:cur,data:series[cur]||[],borderColor:CS_COLORS[cur],backgroundColor:'transparent',borderWidth:1.8,pointRadius:0,pointHoverRadius:0,tension:0.3,hidden:mobCsHidden.has(cur)};});
-    mobCsChart=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{enabled:true,mode:'index',intersect:false,backgroundColor:'rgba(16,16,24,0.95)',borderColor:'#1e2230',borderWidth:1,titleColor:'#888',bodyColor:'#fff',callbacks:{label:function(c){return' '+c.dataset.label+': '+c.parsed.y.toFixed(1);}}}},scales:{x:{grid:{color:'#161616'},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:6,color:'#444',font:{size:8}},min:Math.max(0,labels.length-(CS_VIEW[mobCsTF]||100)),max:labels.length-1},y:{position:'right',min:15,max:85,grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:8},stepSize:10}}}},plugins:[{id:'refLine',afterDraw:function(ch){var c2=ch.ctx,ca=ch.chartArea,y=ch.scales.y,yp=y.getPixelForValue(50);if(yp<ca.top||yp>ca.bottom)return;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([]);c2.stroke();c2.restore();}}]});
-    mobSetupChartTouch(ctx,mobCsChart);
+function mobRenderCSChart(labels, series) {
+    var ctx = document.getElementById('mob-csChart');
+    if (!ctx) return;
+    if (mobCsChart) mobCsChart.destroy();
+    var datasets = CS_CURRENCIES.map(function(cur) {
+        return { label: cur, data: series[cur] || [], borderColor: CS_COLORS[cur],
+            backgroundColor: 'transparent', borderWidth: 1.8, pointRadius: 0,
+            pointHoverRadius: 0, tension: 0.3, hidden: mobCsHidden.has(cur) };
+    });
+    mobCsChart = new Chart(ctx, {
+        type: 'line', data: { labels: labels, datasets: datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { display: false }, tooltip: {
+                enabled: true, mode: 'index', intersect: false,
+                backgroundColor: 'rgba(16,16,24,0.95)', borderColor: '#1e2230', borderWidth: 1,
+                titleColor: '#888', bodyColor: '#fff',
+                callbacks: { label: function(c){ return ' ' + c.dataset.label + ': ' + c.parsed.y.toFixed(1); }}
+            }},
+            scales: {
+                x: { grid: {color:'#161616'}, ticks: {maxRotation:0,autoSkip:true,maxTicksLimit:6,color:'#444',font:{size:8}},
+                    min: Math.max(0, labels.length - (CS_VIEW[mobCsTF] || 100)), max: labels.length - 1 },
+                y: { position: 'right', min: 15, max: 85, grid: {color:'#1a1a2a'}, ticks: {color:'#555',font:{size:8},stepSize:10} }
+            }
+        },
+        plugins: [{ id: 'refLine', afterDraw: function(ch) {
+            var c2 = ch.ctx, ca = ch.chartArea, y = ch.scales.y;
+            var yp = y.getPixelForValue(50);
+            if (yp < ca.top || yp > ca.bottom) return;
+            c2.save(); c2.beginPath(); c2.moveTo(ca.left, yp); c2.lineTo(ca.right, yp);
+            c2.strokeStyle = '#383850'; c2.lineWidth = 1.5; c2.setLineDash([]); c2.stroke(); c2.restore();
+        }}]
+    });
+    mobSetupChartTouch(ctx, mobCsChart);
 }
 
-function mobSetupChartTouch(canvas,chart){var touch0=null,touch1=null,dragStartMin=null,dragStartMax=null,pinchStartDist=null,pinchStartMin=null,pinchStartMax=null;function getChartRange(){return{min:chart.options.scales.x.min,max:chart.options.scales.x.max};}function setView(newMin,newMax){var totalLen=chart.data.labels.length;newMin=Math.max(0,Math.round(newMin));newMax=Math.min(totalLen-1,Math.round(newMax));if(newMax-newMin<10)return;chart.options.scales.x.min=newMin;chart.options.scales.x.max=newMax;chart.update('none');}function getPinchDist(t0,t1){var dx=t1.clientX-t0.clientX,dy=t1.clientY-t0.clientY;return Math.sqrt(dx*dx+dy*dy);}function getChartX(touchX){var rect=canvas.getBoundingClientRect(),ca=chart.chartArea;if(!ca)return null;var ratio=(touchX-rect.left-ca.left)/(ca.right-ca.left);return ratio;}canvas.addEventListener('touchstart',function(e){e.preventDefault();if(e.touches.length===1){touch0=e.touches[0];touch1=null;var r=getChartRange();dragStartMin=r.min;dragStartMax=r.max;pinchStartDist=null;}else if(e.touches.length===2){touch0=e.touches[0];touch1=e.touches[1];pinchStartDist=getPinchDist(touch0,touch1);var r2=getChartRange();pinchStartMin=r2.min;pinchStartMax=r2.max;dragStartMin=null;}},{passive:false});canvas.addEventListener('touchmove',function(e){e.preventDefault();if(e.touches.length===1&&dragStartMin!==null&&touch0){var dx=e.touches[0].clientX-touch0.clientX;var rect=canvas.getBoundingClientRect(),ca=chart.chartArea;var chartW=ca?ca.right-ca.left:1;var range=dragStartMax-dragStartMin;var shift=-(dx/chartW)*range;setView(dragStartMin+shift,dragStartMax+shift);}else if(e.touches.length===2&&pinchStartDist!==null){var t0=e.touches[0],t1=e.touches[1];var dist=getPinchDist(t0,t1);var scale=pinchStartDist/dist;var origRange=pinchStartMax-pinchStartMin;var newRange=Math.max(10,Math.min(chart.data.labels.length,origRange*scale));var cx=(t0.clientX+t1.clientX)/2;var ratio=getChartX(cx);if(ratio===null){ratio=0.5;}ratio=Math.max(0,Math.min(1,ratio));var anchor=pinchStartMin+ratio*origRange;setView(anchor-ratio*newRange,anchor+(1-ratio)*newRange);}},{passive:false});canvas.addEventListener('touchend',function(e){if(e.touches.length===0){touch0=null;touch1=null;dragStartMin=null;pinchStartDist=null;}else if(e.touches.length===1){touch0=e.touches[0];touch1=null;var r=getChartRange();dragStartMin=r.min;dragStartMax=r.max;pinchStartDist=null;}},{passive:false});var lastTap=0;canvas.addEventListener('touchend',function(e){var now=Date.now();if(now-lastTap<300){var totalLen=chart.data.labels.length,viewLen=CS_VIEW[mobCsTF]||100;setView(Math.max(0,totalLen-viewLen),totalLen-1);}lastTap=now;});}
+function mobSetupChartTouch(canvas, chart) {
+    var touch0 = null, dragStartMin = null, dragStartMax = null;
+    var pinchStartDist = null, pinchStartMin = null, pinchStartMax = null;
 
-function mobBuildCSLegend(){var legend=document.getElementById('mob-csLegend');if(!legend)return;legend.innerHTML='';CS_CURRENCIES.forEach(function(cur){var item=document.createElement('div');item.className='mob-cs-legend-item'+(mobCsHidden.has(cur)?' hidden':'');item.innerHTML='<div class="mob-cs-legend-dot" style="background:'+CS_COLORS[cur]+'"></div><span style="color:'+(mobCsHidden.has(cur)?'#555':'#ccc')+'">'+cur+'</span>';item.onclick=function(){if(mobCsHidden.has(cur)){mobCsHidden.delete(cur);item.classList.remove('hidden');item.querySelector('span').style.color='#ccc';}else{mobCsHidden.add(cur);item.classList.add('hidden');item.querySelector('span').style.color='#555';}if(!mobCsChart)return;var ds=mobCsChart.data.datasets.find(function(d){return d.label===cur;});if(ds){ds.hidden=mobCsHidden.has(cur);mobCsChart.update();}};legend.appendChild(item);});}
-function mobCsSetTF(tf,btn){mobCsTF=tf;document.querySelectorAll('.mob-cs-tf-btn').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');mobCsLoad();}
-function mobCsRefresh(){mobCsLoad();}
+    function getRange(){ return { min: chart.options.scales.x.min, max: chart.options.scales.x.max }; }
+    function setView(newMin, newMax) {
+        var t = chart.data.labels.length;
+        newMin = Math.max(0, Math.round(newMin));
+        newMax = Math.min(t - 1, Math.round(newMax));
+        if (newMax - newMin < 10) return;
+        chart.options.scales.x.min = newMin;
+        chart.options.scales.x.max = newMax;
+        chart.update('none');
+    }
+    function pinchDist(t0, t1) {
+        var dx = t1.clientX - t0.clientX, dy = t1.clientY - t0.clientY;
+        return Math.sqrt(dx*dx + dy*dy);
+    }
+    function chartRatio(touchX) {
+        var rect = canvas.getBoundingClientRect(), ca = chart.chartArea;
+        if (!ca) return null;
+        return (touchX - rect.left - ca.left) / (ca.right - ca.left);
+    }
+
+    canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (e.touches.length === 1) {
+            touch0 = e.touches[0];
+            var r = getRange(); dragStartMin = r.min; dragStartMax = r.max;
+            pinchStartDist = null;
+        } else if (e.touches.length === 2) {
+            touch0 = e.touches[0];
+            pinchStartDist = pinchDist(e.touches[0], e.touches[1]);
+            var r2 = getRange(); pinchStartMin = r2.min; pinchStartMax = r2.max;
+            dragStartMin = null;
+        }
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        if (e.touches.length === 1 && dragStartMin !== null && touch0) {
+            var dx = e.touches[0].clientX - touch0.clientX;
+            var ca = chart.chartArea, chartW = ca ? ca.right - ca.left : 1;
+            var range = dragStartMax - dragStartMin;
+            setView(dragStartMin - (dx / chartW) * range, dragStartMax - (dx / chartW) * range);
+        } else if (e.touches.length === 2 && pinchStartDist !== null) {
+            var t0 = e.touches[0], t1 = e.touches[1];
+            var scale = pinchStartDist / pinchDist(t0, t1);
+            var origRange = pinchStartMax - pinchStartMin;
+            var newRange = Math.max(10, Math.min(chart.data.labels.length, origRange * scale));
+            var cx = (t0.clientX + t1.clientX) / 2;
+            var ratio = chartRatio(cx);
+            if (ratio === null) ratio = 0.5;
+            ratio = Math.max(0, Math.min(1, ratio));
+            var anchor = pinchStartMin + ratio * origRange;
+            setView(anchor - ratio * newRange, anchor + (1 - ratio) * newRange);
+        }
+    }, { passive: false });
+
+    var lastTap = 0;
+    canvas.addEventListener('touchend', function(e) {
+        if (e.touches.length === 0) {
+            touch0 = null; dragStartMin = null; pinchStartDist = null;
+        } else if (e.touches.length === 1) {
+            touch0 = e.touches[0];
+            var r = getRange(); dragStartMin = r.min; dragStartMax = r.max;
+            pinchStartDist = null;
+        }
+        var now = Date.now();
+        if (now - lastTap < 300) {
+            var t = chart.data.labels.length, viewLen = CS_VIEW[mobCsTF] || 100;
+            setView(Math.max(0, t - viewLen), t - 1);
+        }
+        lastTap = now;
+    }, { passive: false });
+}
+
+function mobBuildCSLegend() {
+    var legend = document.getElementById('mob-csLegend');
+    if (!legend) return;
+    legend.innerHTML = '';
+    CS_CURRENCIES.forEach(function(cur) {
+        var item = document.createElement('div');
+        var hidden = mobCsHidden.has(cur);
+        item.className = 'mob-cs-legend-item' + (hidden ? ' hidden' : '');
+        item.innerHTML = '<div class="mob-cs-legend-dot" style="background:' + CS_COLORS[cur] + '"></div>' +
+            '<span style="color:' + (hidden ? '#555' : '#ccc') + '">' + cur + '</span>';
+        item.onclick = function() {
+            if (mobCsHidden.has(cur)) {
+                mobCsHidden.delete(cur); item.classList.remove('hidden');
+                item.querySelector('span').style.color = '#ccc';
+            } else {
+                mobCsHidden.add(cur); item.classList.add('hidden');
+                item.querySelector('span').style.color = '#555';
+            }
+            if (!mobCsChart) return;
+            var ds = mobCsChart.data.datasets.find(function(d){ return d.label === cur; });
+            if (ds) { ds.hidden = mobCsHidden.has(cur); mobCsChart.update(); }
+        };
+        legend.appendChild(item);
+    });
+}
+function mobCsSetTF(tf, btn) {
+    mobCsTF = tf;
+    document.querySelectorAll('.mob-cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    mobCsLoad();
+}
 
 /* =========================================================
    FX PERFORMANCE
