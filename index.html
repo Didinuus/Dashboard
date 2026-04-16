@@ -890,6 +890,7 @@ var _ciIndexSeries = {};
 var _ciTimes = [];
 var _ciCharts = {};
 var ciCombinedChart = null;
+var mobCiCombinedChart = null;
 var ciCombinedHidden = new Set();
 var ciModalChartInst = null;
 var _ciCurrentLastVals = {};
@@ -1328,6 +1329,7 @@ function renderCICombinedChart(labels) {
         if (!c) return;
         var id = c.id;
         if (id === 'ciCombinedChart' && ciCombinedChart) { ciCombinedChart.destroy(); ciCombinedChart = null; }
+        if (id === 'mob-ciCombinedChart' && mobCiCombinedChart) { mobCiCombinedChart.destroy(); mobCiCombinedChart = null; }
 
         var datasets = CS_CURRENCIES.map(function(cur) {
             return {
@@ -1397,6 +1399,8 @@ function renderCICombinedChart(labels) {
             buildCICombinedLegend();
             ciSetupMouseInteraction(c, newChart);
         } else {
+            mobCiCombinedChart = newChart;
+            buildCICombinedLegend();
             mobSetupChartTouchCI(c, newChart);
         }
     });
