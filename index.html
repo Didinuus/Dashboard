@@ -484,7 +484,7 @@
                     <div class="ov-pairs-title" style="margin-bottom:0;">Pair Directional Bias</div>
                     <div style="display:flex;gap:6px;align-items:center;">
                         <span style="font-size:10px;color:#555;">Sort:</span>
-                        <button id="ovSortBtn" onclick="ovToggleSort()" style="padding:4px 12px;background:#1e2230;border:1px solid #2a3060;border-radius:5px;color:#aaa;font-size:11px;font-weight:bold;cursor:pointer;">Bull → Bear ↓</button>
+                        <button id="ovSortBtn" onclick="ovToggleSort()" style="padding:4px 12px;background:#1e2230;border:1px solid #2a3060;border-radius:5px;color:#aaa;font-size:11px;font-weight:bold;cursor:pointer;">A → Z</button>
                     </div>
                 </div>
                 <div class="ov-pairs-grid" id="ovPairsGrid"></div>
@@ -724,7 +724,7 @@
             <div class="ov-pairs-section" style="padding:12px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                     <div class="ov-pairs-title" style="margin-bottom:0;">Pair Directional Bias</div>
-                    <button id="mob-ovSortBtn" onclick="ovToggleSort()" style="padding:4px 10px;background:#1e2230;border:1px solid #2a3060;border-radius:5px;color:#aaa;font-size:10px;font-weight:bold;cursor:pointer;">Bull→Bear ↓</button>
+                    <button id="mob-ovSortBtn" onclick="ovToggleSort()" style="padding:4px 10px;background:#1e2230;border:1px solid #2a3060;border-radius:5px;color:#aaa;font-size:10px;font-weight:bold;cursor:pointer;">A → Z</button>
                 </div>
                 <div class="ov-pairs-grid" id="mob-ovPairsGrid"></div>
             </div>
@@ -2977,7 +2977,7 @@ var OV_LABEL_CONFIG = [
 ];
 
 /* Sort state: true = bull→bear (desc), false = bear→bull (asc) */
-var _ovSortDesc = true;
+var _ovSortDesc = null;  /* null=alpha, true=bull→bear, false=bear→bull */
 var _ovLastBias = null;
 
 function ovGetLabel(score) {
@@ -3239,6 +3239,12 @@ function renderOverview(bias) {
 }
 
 function ovSortedPairs(pairBiases) {
+    if (_ovSortDesc === null) {
+        /* Alphabetical by pair name */
+        return pairBiases.slice().sort(function(a, b) {
+            return a.pair < b.pair ? -1 : a.pair > b.pair ? 1 : 0;
+        });
+    }
     return pairBiases.slice().sort(function(a, b) {
         var sa = a.score !== null ? a.score : -999;
         var sb = b.score !== null ? b.score : -999;
@@ -3249,9 +3255,10 @@ function ovSortedPairs(pairBiases) {
 function ovRenderPairsGrid(pairBiases) {
     var sorted = ovSortedPairs(pairBiases);
     /* Update button labels */
+    var sortLabel = _ovSortDesc === null ? 'A → Z' : _ovSortDesc ? 'Bull → Bear ↓' : 'Bear → Bull ↑';
     ['ovSortBtn','mob-ovSortBtn'].forEach(function(id) {
         var btn = document.getElementById(id);
-        if (btn) btn.textContent = _ovSortDesc ? 'Bull → Bear ↓' : 'Bear → Bull ↑';
+        if (btn) btn.textContent = sortLabel;
     });
     ['ovPairsGrid', 'mob-ovPairsGrid'].forEach(function(gridId) {
         var grid = document.getElementById(gridId);
@@ -3295,7 +3302,10 @@ function ovRenderPairsGrid(pairBiases) {
 }
 
 function ovToggleSort() {
-    _ovSortDesc = !_ovSortDesc;
+    /* Cycle: alpha (null) → bull→bear (true) → bear→bull (false) → alpha (null) */
+    if (_ovSortDesc === null)       _ovSortDesc = true;
+    else if (_ovSortDesc === true)  _ovSortDesc = false;
+    else                            _ovSortDesc = null;
     if (_ovLastBias) {
         var pairBiases = ovPairBias(_ovLastBias);
         ovRenderPairsGrid(pairBiases);
