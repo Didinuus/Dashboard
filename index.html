@@ -78,7 +78,6 @@
 
         .cs-header-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
         .cs-chart-wrap { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:15px; display:flex; flex-direction:column; }
-        .cs-chart-inner { flex:1; position:relative; min-height:0; margin-top:10px; background:#101010; border-radius:6px; overflow:hidden; }
         #csChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
         .cs-sidebar { display:flex; flex-direction:column; gap:10px; }
         .cs-rank-card { background:#161616; border:1px solid #1e2230; border-radius:8px; overflow:hidden; flex:1; display:flex; flex-direction:column; }
@@ -100,7 +99,8 @@
         .cs-legend-item:hover { border-color:#1e2230; }
         .cs-legend-item.hidden { opacity:0.3; }
         .cs-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-        .cs-layout { display:grid; grid-template-columns:1fr 340px; gap:15px; height:60vh; }
+        .cs-layout { display:flex; flex-direction:column; gap:15px; }
+        .cs-chart-inner { flex:1; position:relative; min-height:0; height:60vh; margin-top:10px; background:#101010; border-radius:6px; overflow:hidden; }
 
         .ir-layout { display:flex; flex-direction:column; gap:15px; }
         .ir-cards-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:6px; }
@@ -533,27 +533,19 @@
                 <div class="ph-center">Currency Strength Index</div>
                 <div class="ph-right"><span class="ph-status" id="csStatus">Loading...</span></div>
             </div>
-            <div class="cs-layout">
-                <div class="cs-chart-wrap">
-                    <div class="cs-header-row">
-                        <div class="cs-tf-btns">
-                            <button class="cs-tf-btn" onclick="csSetTF('M5',this)">5 Min</button>
-                            <button class="cs-tf-btn" onclick="csSetTF('M15',this)">15 Min</button>
-                            <button class="cs-tf-btn active" onclick="csSetTF('H1',this)">Hourly</button>
-                            <button class="cs-tf-btn" onclick="csSetTF('H4',this)">4H</button>
-                            <button class="cs-tf-btn" onclick="csSetTF('D',this)">Daily</button>
-                            <button class="cs-tf-btn" onclick="csRefresh()" style="margin-left:4px">&#8634;</button>
-                        </div>
-                        <div class="cs-legend" id="csLegend"></div>
+            <div class="cs-chart-wrap">
+                <div class="cs-header-row">
+                    <div class="cs-tf-btns">
+                        <button class="cs-tf-btn" onclick="csSetTF('M5',this)">5 Min</button>
+                        <button class="cs-tf-btn" onclick="csSetTF('M15',this)">15 Min</button>
+                        <button class="cs-tf-btn active" onclick="csSetTF('H1',this)">Hourly</button>
+                        <button class="cs-tf-btn" onclick="csSetTF('H4',this)">4H</button>
+                        <button class="cs-tf-btn" onclick="csSetTF('D',this)">Daily</button>
+                        <button class="cs-tf-btn" onclick="csRefresh()" style="margin-left:4px">&#8634;</button>
                     </div>
-                    <div class="cs-chart-inner"><canvas id="csChart"></canvas></div>
+                    <div class="cs-legend" id="csLegend"></div>
                 </div>
-                <div class="cs-sidebar">
-                    <div class="cs-rank-card">
-                        <div class="cs-rank-header">Strength</div>
-                        <div class="cs-rank-body" id="csRankBody"><div class="loading">Loading...</div></div>
-                    </div>
-                </div>
+                <div class="cs-chart-inner"><canvas id="csChart"></canvas></div>
             </div>
             <div style="margin-top:15px;">
                 <div class="page-header">
@@ -2501,7 +2493,96 @@ function renderCSChart(labels,series){
         if(!wasAtEnd){savedMin=oldMin;savedMax=oldMax;}
         csChart.destroy();
     }
-    csChart=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{grid:{color:'#161616'},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12,color:'#444',font:{size:9}}},y:{position:'right',min:15,max:85,grid:{color:'#161616'},ticks:{color:'#555',font:{size:9},stepSize:10}}}},plugins:[{id:'refLines',afterDraw:function(chart){if(chart.canvas.id!=='csChart')return;var c2=chart.ctx,ca=chart.chartArea,y=chart.scales.y;[50].forEach(function(v){var yp=y.getPixelForValue(v);if(yp<ca.top||yp>ca.bottom)return;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([]);c2.stroke();c2.restore();});}},{id:'floatingLabels',afterDraw:function(chart){if(chart.canvas.id!=='csChart')return;if(_csHoverIdx<0)return;var c2=chart.ctx,ca=chart.chartArea,xScale=chart.scales.x,yScale=chart.scales.y,idx=_csHoverIdx,xp=xScale.getPixelForValue(idx);if(xp<ca.left||xp>ca.right)return;c2.save();c2.beginPath();c2.moveTo(xp,ca.top);c2.lineTo(xp,ca.bottom);c2.strokeStyle='rgba(200,200,200,0.25)';c2.lineWidth=1;c2.setLineDash([3,3]);c2.stroke();c2.restore();var items=[];chart.data.datasets.forEach(function(ds){if(ds.hidden)return;var val=ds.data[idx];if(val===null||val===undefined)return;var yp2=yScale.getPixelForValue(val);if(yp2<ca.top||yp2>ca.bottom)return;var prev=idx>0?ds.data[idx-1]:null,delta=(prev!==null&&prev!==undefined)?(val-prev):0;items.push({label:ds.label,color:ds.borderColor,val:val,delta:delta,yp:yp2});});items.sort(function(a,b){return a.yp-b.yp;});var LH=17;for(var pass=0;pass<5;pass++){for(var ii=1;ii<items.length;ii++){if(items[ii].yp-items[ii-1].yp<LH){var mid=(items[ii].yp+items[ii-1].yp)/2;items[ii-1].yp=mid-LH/2;items[ii].yp=mid+LH/2;}}}items.forEach(function(item){var text=item.label+' '+item.val.toFixed(1),isRight=(xp>ca.left+(ca.right-ca.left)*0.75),boxW=72,boxH=15,pad=5,bx=isRight?xp-boxW-6:xp+6,by=item.yp-boxH/2;by=Math.max(ca.top,Math.min(ca.bottom-boxH,by));c2.save();c2.fillStyle=item.color;c2.globalAlpha=0.92;var r2=4;c2.beginPath();c2.moveTo(bx+r2,by);c2.lineTo(bx+boxW-r2,by);c2.arcTo(bx+boxW,by,bx+boxW,by+boxH,r2);c2.lineTo(bx+boxW,by+boxH-r2);c2.arcTo(bx+boxW,by+boxH,bx+boxW-r2,by+boxH,r2);c2.lineTo(bx+r2,by+boxH);c2.arcTo(bx,by+boxH,bx,by+boxH-r2,r2);c2.lineTo(bx,by+r2);c2.arcTo(bx,by,bx+r2,by,r2);c2.closePath();c2.fill();c2.globalAlpha=1;c2.fillStyle='#fff';c2.font='bold 10px Arial';c2.textAlign='left';c2.textBaseline='middle';c2.fillText(text,bx+pad,by+boxH/2);c2.restore();c2.save();c2.beginPath();c2.arc(xp,item.yp,3.5,0,Math.PI*2);c2.fillStyle=item.color;c2.fill();c2.strokeStyle='#fff';c2.lineWidth=1.2;c2.stroke();c2.restore();});if(_csRawTimes[idx]){var dt=new Date(_csRawTimes[idx]),dateStr;if(csTF==='D'){dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}else{dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+'  '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}var dtBoxW=c2.measureText(dateStr).width+20,dtBoxH=18,dtX=xp-dtBoxW/2,dtY=ca.bottom+4;dtX=Math.max(ca.left,Math.min(ca.right-dtBoxW,dtX));c2.save();c2.fillStyle='rgba(30,34,48,0.95)';c2.strokeStyle='rgba(140,160,220,0.5)';c2.lineWidth=1;var br=4;c2.beginPath();c2.moveTo(dtX+br,dtY);c2.lineTo(dtX+dtBoxW-br,dtY);c2.arcTo(dtX+dtBoxW,dtY,dtX+dtBoxW,dtY+dtBoxH,br);c2.lineTo(dtX+dtBoxW,dtY+dtBoxH-br);c2.arcTo(dtX+dtBoxW,dtY+dtBoxH,dtX+dtBoxW-br,dtY+dtBoxH,br);c2.lineTo(dtX+br,dtY+dtBoxH);c2.arcTo(dtX,dtY+dtBoxH,dtX,dtY+dtBoxH-br,br);c2.lineTo(dtX,dtY+br);c2.arcTo(dtX,dtY,dtX+br,dtY,br);c2.closePath();c2.fill();c2.stroke();c2.fillStyle='#c8d4f0';c2.font='bold 10px Arial';c2.textAlign='center';c2.textBaseline='middle';c2.fillText(dateStr,dtX+dtBoxW/2,dtY+dtBoxH/2);c2.restore();}}}]});
+    csChart=new Chart(ctx,{
+        type:'line',
+        data:{labels:labels,datasets:datasets},
+        options:{
+            responsive:true, maintainAspectRatio:false, animation:false,
+            interaction:{mode:'index',intersect:false},
+            layout:{ padding:{ right:48 } },
+            plugins:{ legend:{display:false}, tooltip:{enabled:false} },
+            scales:{
+                x:{ grid:{color:'#161616'}, ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12,color:'#444',font:{size:9}} },
+                y:{ position:'right', min:15, max:85, grid:{color:'#1a1a2a'},
+                    ticks:{ display:false },
+                    afterFit:function(axis){ axis.width=0; }
+                }
+            }
+        },
+        plugins:[
+            {
+                id:'csBefore',
+                beforeDraw:function(chart){
+                    var c2=chart.ctx, ca=chart.chartArea; if(!ca)return;
+                    c2.save(); c2.fillStyle='#101010';
+                    c2.fillRect(ca.right,0,chart.width-ca.right,chart.height);
+                    c2.restore();
+                }
+            },
+            {
+                id:'refLines',
+                afterDraw:function(chart){
+                    if(chart.canvas.id!=='csChart')return;
+                    var c2=chart.ctx,ca=chart.chartArea,y=chart.scales.y;
+                    /* 50 reference line */
+                    var yp=y.getPixelForValue(50);
+                    if(yp>=ca.top&&yp<=ca.bottom){c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([]);c2.stroke();c2.restore();}
+                    /* Y-axis tick labels */
+                    var ticks=y.ticks||[];
+                    c2.save();c2.font='9px Arial';c2.fillStyle='#555';c2.textAlign='left';c2.textBaseline='middle';
+                    ticks.forEach(function(tick){
+                        var tyPx=y.getPixelForValue(tick.value);
+                        if(tyPx<ca.top||tyPx>ca.bottom)return;
+                        c2.fillText(tick.value,ca.right+3,tyPx);
+                    });
+                    c2.restore();
+                    /* End-of-line value badges */
+                    var xMax=chart.options.scales.x.max;
+                    var items=[];
+                    chart.data.datasets.forEach(function(ds){
+                        if(ds.hidden)return;
+                        var val=null, maxIdx=Math.min(Math.round(xMax),ds.data.length-1);
+                        for(var k=maxIdx;k>=0;k--){if(ds.data[k]!==null&&ds.data[k]!==undefined){val=ds.data[k];break;}}
+                        if(val===null)return;
+                        var yPx=y.getPixelForValue(val);
+                        if(yPx<ca.top||yPx>ca.bottom)return;
+                        items.push({label:ds.label,color:ds.borderColor,val:val,yp:yPx});
+                    });
+                    items.sort(function(a,b){return a.yp-b.yp;});
+                    var BH=16,gap=2;
+                    for(var pass=0;pass<10;pass++){for(var ii=1;ii<items.length;ii++){if(items[ii].yp-items[ii-1].yp<BH+gap){var mid=(items[ii].yp+items[ii-1].yp)/2;items[ii-1].yp=mid-(BH+gap)/2;items[ii].yp=mid+(BH+gap)/2;}}}
+                    var BW=44, bx=chart.width-BW-1;
+                    items.forEach(function(item){
+                        var text=item.label+' '+item.val.toFixed(1);
+                        var by=item.yp-BH/2;
+                        by=Math.max(ca.top,Math.min(ca.bottom-BH,by));
+                        c2.save();c2.fillStyle=item.color;
+                        var r=3;
+                        c2.beginPath();c2.moveTo(bx+r,by);c2.lineTo(bx+BW-r,by);c2.arcTo(bx+BW,by,bx+BW,by+BH,r);c2.lineTo(bx+BW,by+BH-r);c2.arcTo(bx+BW,by+BH,bx+BW-r,by+BH,r);c2.lineTo(bx+r,by+BH);c2.arcTo(bx,by+BH,bx,by+BH-r,r);c2.lineTo(bx,by+r);c2.arcTo(bx,by,bx+r,by,r);c2.closePath();c2.fill();
+                        c2.fillStyle='#fff';c2.font='bold 9px Arial';c2.textAlign='center';c2.textBaseline='middle';
+                        c2.fillText(text,bx+BW/2,by+BH/2);
+                        c2.restore();
+                    });
+                }
+            },
+            {
+                id:'floatingLabels',
+                afterDraw:function(chart){
+                    if(chart.canvas.id!=='csChart')return;
+                    if(_csHoverIdx<0)return;
+                    var c2=chart.ctx,ca=chart.chartArea,xScale=chart.scales.x,yScale=chart.scales.y,idx=_csHoverIdx,xp=xScale.getPixelForValue(idx);
+                    if(xp<ca.left||xp>ca.right)return;
+                    c2.save();c2.beginPath();c2.moveTo(xp,ca.top);c2.lineTo(xp,ca.bottom);c2.strokeStyle='rgba(200,200,200,0.25)';c2.lineWidth=1;c2.setLineDash([3,3]);c2.stroke();c2.restore();
+                    var items=[];
+                    chart.data.datasets.forEach(function(ds){if(ds.hidden)return;var val=ds.data[idx];if(val===null||val===undefined)return;var yp2=yScale.getPixelForValue(val);if(yp2<ca.top||yp2>ca.bottom)return;items.push({label:ds.label,color:ds.borderColor,val:val,yp:yp2});});
+                    items.sort(function(a,b){return a.yp-b.yp;});
+                    var LH=17;for(var pass=0;pass<5;pass++){for(var ii=1;ii<items.length;ii++){if(items[ii].yp-items[ii-1].yp<LH){var mid=(items[ii].yp+items[ii-1].yp)/2;items[ii-1].yp=mid-LH/2;items[ii].yp=mid+LH/2;}}}
+                    items.forEach(function(item){var text=item.label+' '+item.val.toFixed(1),isRight=(xp>ca.left+(ca.right-ca.left)*0.75),boxW=72,boxH=15,pad=5,bx=isRight?xp-boxW-6:xp+6,by=item.yp-boxH/2;by=Math.max(ca.top,Math.min(ca.bottom-boxH,by));c2.save();c2.fillStyle=item.color;c2.globalAlpha=0.92;var r2=4;c2.beginPath();c2.moveTo(bx+r2,by);c2.lineTo(bx+boxW-r2,by);c2.arcTo(bx+boxW,by,bx+boxW,by+boxH,r2);c2.lineTo(bx+boxW,by+boxH-r2);c2.arcTo(bx+boxW,by+boxH,bx+boxW-r2,by+boxH,r2);c2.lineTo(bx+r2,by+boxH);c2.arcTo(bx,by+boxH,bx,by+boxH-r2,r2);c2.lineTo(bx,by+r2);c2.arcTo(bx,by,bx+r2,by,r2);c2.closePath();c2.fill();c2.globalAlpha=1;c2.fillStyle='#fff';c2.font='bold 10px Arial';c2.textAlign='left';c2.textBaseline='middle';c2.fillText(text,bx+pad,by+boxH/2);c2.restore();c2.save();c2.beginPath();c2.arc(xp,item.yp,3.5,0,Math.PI*2);c2.fillStyle=item.color;c2.fill();c2.strokeStyle='#fff';c2.lineWidth=1.2;c2.stroke();c2.restore();});
+                    if(_csRawTimes[idx]){var dt=new Date(_csRawTimes[idx]),dateStr;if(csTF==='D'){dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}else{dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+'  '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}var dtBoxW=c2.measureText(dateStr).width+20,dtBoxH=18,dtX=xp-dtBoxW/2,dtY=ca.bottom+4;dtX=Math.max(ca.left,Math.min(ca.right-dtBoxW,dtX));c2.save();c2.fillStyle='rgba(30,34,48,0.95)';c2.strokeStyle='rgba(140,160,220,0.5)';c2.lineWidth=1;var br=4;c2.beginPath();c2.moveTo(dtX+br,dtY);c2.lineTo(dtX+dtBoxW-br,dtY);c2.arcTo(dtX+dtBoxW,dtY,dtX+dtBoxW,dtY+dtBoxH,br);c2.lineTo(dtX+dtBoxW,dtY+dtBoxH-br);c2.arcTo(dtX+dtBoxW,dtY+dtBoxH,dtX+dtBoxW-br,dtY+dtBoxH,br);c2.lineTo(dtX+br,dtY+dtBoxH);c2.arcTo(dtX,dtY+dtBoxH,dtX,dtY+dtBoxH-br,br);c2.lineTo(dtX,dtY+br);c2.arcTo(dtX,dtY,dtX+br,dtY,br);c2.closePath();c2.fill();c2.stroke();c2.fillStyle='#c8d4f0';c2.font='bold 10px Arial';c2.textAlign='center';c2.textBaseline='middle';c2.fillText(dateStr,dtX+dtBoxW/2,dtY+dtBoxH/2);c2.restore();}
+                }
+            }
+        ]
+    });
     ctx.onmousedown=function(e){if(e.button!==0)return;_csDrag={startX:e.clientX,startMin:csChart.options.scales.x.min,startMax:csChart.options.scales.x.max};ctx.style.cursor='grabbing';e.preventDefault();};
     ctx.onmousemove=function(e){if(!csChart)return;var rect=ctx.getBoundingClientRect(),mx=e.clientX-rect.left,xScale=csChart.scales.x,ca=csChart.chartArea;if(_csDrag){var dx=e.clientX-_csDrag.startX,range=_csDrag.startMax-_csDrag.startMin,chartWidth=ca?(ca.right-ca.left):1,shift=-(dx/chartWidth)*range;csSetView(_csDrag.startMin+shift,_csDrag.startMax+shift);return;}if(!ca||mx<ca.left||mx>ca.right){_csHoverIdx=-1;csChart.draw();return;}var minIdx=Math.round(xScale.min),maxIdx=Math.round(xScale.max),best=minIdx,bestDist=Infinity;for(var i=minIdx;i<=maxIdx;i++){var xp2=xScale.getPixelForValue(i),d=Math.abs(xp2-mx);if(d<bestDist){bestDist=d;best=i;}}_csHoverIdx=best;csChart.draw();};
     ctx.onmouseleave=function(){_csDrag=null;ctx.style.cursor='crosshair';_csHoverIdx=-1;if(csChart)csChart.draw();};
