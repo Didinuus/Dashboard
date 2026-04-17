@@ -484,7 +484,7 @@
                     <div class="ov-pairs-title" style="margin-bottom:0;">Pair Directional Bias</div>
                     <div style="display:flex;gap:6px;align-items:center;">
                         <span style="font-size:10px;color:#555;">Sort:</span>
-                        <button id="ovSortBtn" onclick="ovToggleSort()" style="padding:4px 12px;background:#1e2230;border:1px solid #2a3060;border-radius:5px;color:#aaa;font-size:11px;font-weight:bold;cursor:pointer;">A → Z</button>
+                        <button id="ovSortBtn" onclick="ovToggleSort()" style="padding:4px 12px;background:#1e2230;border:1px solid #2a3060;border-radius:5px;color:#aaa;font-size:11px;font-weight:bold;cursor:pointer;">Majors First</button>
                     </div>
                 </div>
                 <div class="ov-pairs-grid" id="ovPairsGrid"></div>
@@ -724,7 +724,7 @@
             <div class="ov-pairs-section" style="padding:12px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                     <div class="ov-pairs-title" style="margin-bottom:0;">Pair Directional Bias</div>
-                    <button id="mob-ovSortBtn" onclick="ovToggleSort()" style="padding:4px 10px;background:#1e2230;border:1px solid #2a3060;border-radius:5px;color:#aaa;font-size:10px;font-weight:bold;cursor:pointer;">A → Z</button>
+                    <button id="mob-ovSortBtn" onclick="ovToggleSort()" style="padding:4px 10px;background:#1e2230;border:1px solid #2a3060;border-radius:5px;color:#aaa;font-size:10px;font-weight:bold;cursor:pointer;">Majors First</button>
                 </div>
                 <div class="ov-pairs-grid" id="mob-ovPairsGrid"></div>
             </div>
@@ -3240,9 +3240,14 @@ function renderOverview(bias) {
 
 function ovSortedPairs(pairBiases) {
     if (_ovSortDesc === null) {
-        /* Alphabetical by pair name */
+        var majors = ['AUDUSD','EURUSD','GBPUSD','NZDUSD','USDCAD','USDCHF','USDJPY'];
         return pairBiases.slice().sort(function(a, b) {
-            return a.pair < b.pair ? -1 : a.pair > b.pair ? 1 : 0;
+            var ai = majors.indexOf(a.pair), bi = majors.indexOf(b.pair);
+            var aMajor = ai !== -1, bMajor = bi !== -1;
+            if (aMajor && bMajor) return ai - bi;          /* both major → keep major order */
+            if (aMajor) return -1;                          /* a major, b not → a first */
+            if (bMajor) return 1;                           /* b major, a not → b first */
+            return a.pair < b.pair ? -1 : a.pair > b.pair ? 1 : 0; /* both minor → alpha */
         });
     }
     return pairBiases.slice().sort(function(a, b) {
@@ -3255,7 +3260,7 @@ function ovSortedPairs(pairBiases) {
 function ovRenderPairsGrid(pairBiases) {
     var sorted = ovSortedPairs(pairBiases);
     /* Update button labels */
-    var sortLabel = _ovSortDesc === null ? 'A → Z' : _ovSortDesc ? 'Bull → Bear ↓' : 'Bear → Bull ↑';
+    var sortLabel = _ovSortDesc === null ? 'Majors First' : _ovSortDesc ? 'Bull → Bear ↓' : 'Bear → Bull ↑';
     ['ovSortBtn','mob-ovSortBtn'].forEach(function(id) {
         var btn = document.getElementById(id);
         if (btn) btn.textContent = sortLabel;
