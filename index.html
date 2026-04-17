@@ -997,33 +997,13 @@ var CI_PAIRS = {
 };
 
 var CI_TF_CONFIG = {
-    M5:  {gran:'M5',  count:1000, view:200,  label:'5 Min',  anchor:'week'},
-    M15: {gran:'M15', count:800,  view:160,  label:'15 Min', anchor:'week'},
-    H1:  {gran:'H1',  count:720,  view:120,  label:'Hourly', anchor:'week'},
-    H4:  {gran:'H4',  count:500,  view:270,  label:'4H',     anchor:'year'},
-    D:   {gran:'D',   count:365,  view:180,  label:'Daily',  anchor:'year'},
-    W:   {gran:'W',   count:200,  view:100,  label:'Weekly', anchor:'year'}
+    M5:  {gran:'M5',  count:500,  view:200,  label:'5 Min'},
+    M15: {gran:'M15', count:300,  view:160,  label:'15 Min'},
+    H1:  {gran:'H1',  count:250,  view:120,  label:'Hourly'},
+    H4:  {gran:'H4',  count:280,  view:270,  label:'4H'},
+    D:   {gran:'D',   count:285,  view:180,  label:'Daily'},
+    W:   {gran:'W',   count:200,  view:100,  label:'Weekly'}
 };
-
-/* Returns the ISO string of the anchor start date/time for a given TF.
-   anchor='week'  → Monday 00:00 UTC of the current week
-   anchor='month' → 1st of the current month 00:00 UTC
-   anchor='year'  → 1st Jan of the current year 00:00 UTC                */
-function ciAnchorTime(anchor) {
-    var now = new Date();
-    var d;
-    if (anchor === 'week') {
-        /* Roll back to Monday */
-        var day = now.getUTCDay(); /* 0=Sun … 6=Sat */
-        var diff = (day === 0) ? 6 : day - 1;
-        d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - diff));
-    } else if (anchor === 'month') {
-        d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-    } else { /* year */
-        d = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
-    }
-    return d.toISOString();
-}
 
 var ciTF = 'H1';
 var _ciIndexSeries = {};
@@ -1046,6 +1026,21 @@ var CI_FLAGS = {EUR:'🇪🇺',USD:'🇺🇸',GBP:'🇬🇧',AUD:'🇦🇺',CHF:
 var _ciCardVals = {};
 var _ciOhlcSeries = {};
 
+/* Called after every pan/zoom — recomputes index series from new viewMin base */
+function ciUpdateFromView(xMin) {
+    var baseIdx = Math.max(0, Math.min(Math.round(xMin), _ciMinLen - 1));
+    ciRecomputeFromBase(baseIdx);
+    /* Update both charts datasets in-place (no destroy/rebuild) */
+    [ciCombinedChart, mobCiCombinedChart].forEach(function(ch) {
+        if (!ch) return;
+        CS_CURRENCIES.forEach(function(cur) {
+            var ds = ch.data.datasets.find(function(d){ return d.label === cur; });
+            if (ds) ds.data = _ciIndexSeries[cur] || [];
+        });
+        ch.update('none');
+    });
+}
+
 function ciMakeLabels() {
     return _ciTimes.map(function(t) {
         if (!t) return '';
@@ -1055,36 +1050,49 @@ function ciMakeLabels() {
     });
 }
 
-var _ciAnchorCloses = {};  /* pair → fixed close at anchor candle */
+/* _ciRawCloses: pair → full closes array (aligned to minLen) */
+var _ciRawCloses = {};   /* pair → closes[] aligned */
+var _ciMinLen = 0;
 
-function ciRecompute() {
+function ciRecompute(viewMin) {
     var allPairs = Object.keys(_ciRawData);
+    if (!allPairs.length) return;
     var lengths = allPairs.map(function(p){ return _ciRawData[p].closes.length; });
-    var minLen = Math.min.apply(null, lengths);
+    _ciMinLen = Math.min.apply(null, lengths);
+
+    /* Align raw closes for fast access */
+    _ciRawCloses = {};
+    allPairs.forEach(function(p) {
+        var pd = _ciRawData[p];
+        var startIdx = pd.closes.length - _ciMinLen;
+        _ciRawCloses[p] = pd.closes.slice(startIdx);
+    });
 
     var timesSource = _ciRawData[allPairs[0]].times;
-    _ciTimes = timesSource.slice(timesSource.length - minLen);
+    _ciTimes = timesSource.slice(timesSource.length - _ciMinLen);
 
+    /* base index = first visible candle (viewMin), clamped to valid range */
+    var baseIdx = Math.max(0, Math.min(Math.round(viewMin || 0), _ciMinLen - 1));
+
+    ciRecomputeFromBase(baseIdx);
+}
+
+function ciRecomputeFromBase(baseIdx) {
     _ciIndexSeries = {};
     CS_CURRENCIES.forEach(function(cur) {
         var basket = CI_PAIRS[cur];
         var series = [];
-        for (var i = 0; i < minLen; i++) {
+        for (var i = 0; i < _ciMinLen; i++) {
             var sum = 0, cnt = 0;
             basket.forEach(function(item) {
-                var pd = _ciRawData[item.pair];
-                if (!pd) return;
-                var startIdx = pd.closes.length - minLen;
-                /* Use anchor close if available, otherwise fall back to first candle close */
-                var rawClose0 = _ciAnchorCloses[item.pair] !== undefined
-                    ? _ciAnchorCloses[item.pair]
-                    : pd.closes[startIdx];
-                var rawCloseI = pd.closes[startIdx + i];
+                var closes = _ciRawCloses[item.pair];
+                if (!closes) return;
+                var rawClose0 = closes[baseIdx];
+                var rawCloseI = closes[i];
                 if (!rawClose0 || !rawCloseI) return;
                 var close0 = item.inv ? 1 / rawClose0 : rawClose0;
                 var closeI = item.inv ? 1 / rawCloseI : rawCloseI;
-                var variation = (closeI - close0) / close0;
-                sum += variation;
+                sum += (closeI - close0) / close0;
                 cnt++;
             });
             series.push(cnt > 0 ? parseFloat((sum / cnt).toFixed(6)) : null);
@@ -1154,6 +1162,10 @@ function ciComputeOhlcSeries(longRawData) {
     var lengths = allPairs.map(function(p){ return longRawData[p].closes.length; });
     var minLen = Math.min.apply(null, lengths);
     _ciOhlcSeries = {};
+    /* Use the same baseIdx as the current view */
+    var baseIdx = ciCombinedChart
+        ? Math.max(0, Math.round(ciCombinedChart.options.scales.x.min || 0))
+        : 0;
     CS_CURRENCIES.forEach(function(cur) {
         var basket = CI_PAIRS[cur], ohlcArr = [];
         for (var i = 0; i < minLen; i++) {
@@ -1162,11 +1174,8 @@ function ciComputeOhlcSeries(longRawData) {
                 var pd = longRawData[item.pair];
                 if (!pd || !pd.opens) return;
                 var startIdx = pd.closes.length - minLen;
-                /* Use anchor close if available */
-                var rawClose0 = (_ciAnchorCloses[item.pair] !== undefined)
-                    ? _ciAnchorCloses[item.pair]
-                    : pd.closes[startIdx];
-                if (!rawClose0) return;
+                var rawClose0 = pd.closes[startIdx + baseIdx];
+                if (!rawClose0) rawClose0 = pd.closes[startIdx];
                 var si = startIdx + i;
                 var rO=pd.opens[si],rH=pd.highs[si],rL=pd.lows[si],rC=pd.closes[si];
                 if (!rO||!rH||!rL||!rC) return;
@@ -1190,7 +1199,7 @@ async function ciLoad() {
     if(el2) el2.textContent = '...';
 
     _ciRawData = {};
-    _ciAnchorCloses = {};
+    _ciRawCloses = {};
     _ciLoadingMore = false;
     _ciNoMoreData = false;
     _ciHoverIdx = -1;
@@ -1204,24 +1213,13 @@ async function ciLoad() {
     var allPairs = Array.from(pairSet);
     var longRawData = {};
 
-    /* Step 1: compute anchor timestamp (fixed base for this TF) */
-    var anchorISO = ciAnchorTime(cfg.anchor);
-
-    /* Step 2: fetch all candles + anchor candle in parallel */
     await Promise.all(allPairs.map(async function(pair) {
-        /* Main candle fetch */
         var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + cfg.count + '&price=M';
-        /* Anchor candle fetch: 1 candle from anchor time */
-        var anchorUrl = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=1&price=M&from=' + encodeURIComponent(anchorISO);
         try {
-            var [mainResp, anchorResp] = await Promise.all([
-                fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}}),
-                fetch(anchorUrl, {headers:{'Authorization':'Bearer '+OANDA_KEY}})
-            ]);
-            if (!mainResp.ok) return;
-            var d = await mainResp.json();
+            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
+            if (!r.ok) return;
+            var d = await r.json();
             if (!d.candles || d.candles.length <= 1) return;
-
             longRawData[pair] = {
                 opens:  d.candles.map(function(c){ return parseFloat(c.mid.o); }),
                 highs:  d.candles.map(function(c){ return parseFloat(c.mid.h); }),
@@ -1233,41 +1231,20 @@ async function ciLoad() {
                 closes: longRawData[pair].closes,
                 times:  longRawData[pair].times
             };
-
-            /* Extract anchor close — use open of first anchor candle as the fixed base */
-            if (anchorResp.ok) {
-                var ad = await anchorResp.json();
-                if (ad.candles && ad.candles.length) {
-                    /* Use the open of the anchor candle as base (most stable — never changes) */
-                    _ciAnchorCloses[pair] = parseFloat(ad.candles[0].mid.o);
-                }
-            }
-            /* Fallback: if anchor candle not available (weekend / holiday), find closest
-               candle in main data whose time >= anchorISO */
-            if (!_ciAnchorCloses[pair]) {
-                var times = longRawData[pair].times;
-                var closes = longRawData[pair].closes;
-                for (var k = 0; k < times.length; k++) {
-                    if (times[k] >= anchorISO) {
-                        _ciAnchorCloses[pair] = parseFloat(closes[k]);
-                        break;
-                    }
-                }
-                /* Last resort: first close in dataset */
-                if (!_ciAnchorCloses[pair]) _ciAnchorCloses[pair] = closes[0];
-            }
         } catch(e) {}
     }));
 
     var loaded = Object.keys(_ciRawData);
     if (!loaded.length) { if(el) el.textContent='Error'; return; }
 
-    ciRecompute();
+    /* Initial view: last `view` candles, base = first visible candle */
+    var total = loaded.length ? _ciRawData[loaded[0]].closes.length : 0;
+    var viewMin = Math.max(0, total - cfg.view);
+    ciRecompute(viewMin);
     ciComputeOhlcSeries(longRawData);
     await ciComputeCardValsMataf();
 
     var labels = ciMakeLabels();
-
     renderCICombinedChart(labels);
     renderCIMiniCharts(labels);
     renderCIRankTable();
@@ -1331,11 +1308,15 @@ async function ciLoadMoreHistory() {
     var offsetFromRight = prevTotal - 1 - prevMax;
     var viewRange = prevMax - prevMin;
 
-    ciRecompute();
+    /* Recompute aligned data with new prepended candles */
+    ciRecompute(0); /* temporary base=0 to get _ciMinLen and _ciTimes updated */
     var labels = ciMakeLabels();
     var newTotal = _ciTimes.length;
     var newMax = newTotal - 1 - offsetFromRight;
-    var newMin = newMax - viewRange;
+    var newMin = Math.max(0, newMax - viewRange);
+
+    /* Now recompute from correct new viewMin */
+    ciRecomputeFromBase(newMin);
 
     if (ciCombinedChart) {
         ciCombinedChart.data.labels = labels;
@@ -1343,7 +1324,7 @@ async function ciLoadMoreHistory() {
             var ds = ciCombinedChart.data.datasets.find(function(d){ return d.label === cur; });
             if (ds) ds.data = _ciIndexSeries[cur] || [];
         });
-        ciCombinedChart.options.scales.x.min = Math.max(0, newMin);
+        ciCombinedChart.options.scales.x.min = newMin;
         ciCombinedChart.options.scales.x.max = Math.min(newTotal - 1, newMax);
         ciCombinedChart.update('none');
     }
@@ -1725,7 +1706,7 @@ function ciSetupMouseInteraction(canvas, chart) {
             var newMax = Math.min(total - 1, drag.startMax + shift);
             chart.options.scales.x.min = newMin;
             chart.options.scales.x.max = newMax;
-            chart.update('none');
+            ciUpdateFromView(newMin);
             if (newMin < (drag.startMax - drag.startMin) * 0.15) ciLoadMoreHistory();
             return;
         }
@@ -1756,22 +1737,25 @@ function ciSetupMouseInteraction(canvas, chart) {
         var range = curMax - curMin, factor = e.deltaY > 0 ? 1.12 : 0.88;
         var newRange = Math.max(10, Math.min(chart.data.labels.length, range * factor));
         var mid = (curMin + curMax) / 2;
-        chart.options.scales.x.min = Math.max(0, mid - newRange/2);
+        var newMin = Math.max(0, mid - newRange/2);
+        chart.options.scales.x.min = newMin;
         chart.options.scales.x.max = Math.min(chart.data.labels.length-1, mid + newRange/2);
-        chart.update('none');
-        if (chart.options.scales.x.min < newRange * 0.15) ciLoadMoreHistory();
+        ciUpdateFromView(newMin);
+        if (newMin < newRange * 0.15) ciLoadMoreHistory();
     };
 
     canvas.style.cursor = 'crosshair';
     canvas.ondblclick = function() {
         var total = chart.data.labels.length, view = CI_TF_CONFIG[ciTF].view || 100;
-        chart.options.scales.x.min = Math.max(0, total - view);
+        var newMin = Math.max(0, total - view);
+        chart.options.scales.x.min = newMin;
         chart.options.scales.x.max = total - 1;
-        chart.update('none');
+        ciUpdateFromView(newMin);
     };
 
     var total = chart.data.labels.length, view = CI_TF_CONFIG[ciTF].view || 100;
-    chart.options.scales.x.min = Math.max(0, total - view);
+    var initMin = Math.max(0, total - view);
+    chart.options.scales.x.min = initMin;
     chart.options.scales.x.max = total - 1;
     chart.update('none');
 }
@@ -1785,10 +1769,11 @@ function mobSetupChartTouchCI(canvas, chart) {
 
     function setView(mn, mx) {
         var t = chart.data.labels.length;
-        chart.options.scales.x.min = Math.max(0, Math.round(mn));
+        var newMin = Math.max(0, Math.round(mn));
+        chart.options.scales.x.min = newMin;
         chart.options.scales.x.max = Math.min(t - 1, Math.round(mx));
-        chart.update('none');
-        if (chart.options.scales.x.min < (mx - mn) * 0.15) ciLoadMoreHistory();
+        ciUpdateFromView(newMin);
+        if (newMin < (mx - mn) * 0.15) ciLoadMoreHistory();
     }
 
     function updateHoverFromTouch(touchX) {
@@ -1869,12 +1854,11 @@ function mobSetupChartTouchCI(canvas, chart) {
     }, { passive: false });
 
     var total = chart.data.labels.length, view = CI_TF_CONFIG[ciTF].view || 100;
-    chart.options.scales.x.min = Math.max(0, total - view);
+    var initMin = Math.max(0, total - view);
+    chart.options.scales.x.min = initMin;
     chart.options.scales.x.max = total - 1;
-    chart.update('none');
+    ciUpdateFromView(initMin);
 }
-
-/* --- 8 mini-charts --- */
 function renderCIMiniCharts(labels) {
     Object.values(_ciCharts).forEach(function(ch){ if(ch && ch.destroy && !ch.isCanvas) ch.destroy(); });
     _ciCharts = {};
