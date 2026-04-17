@@ -454,20 +454,23 @@
 
     <!-- OVERVIEW -->
     <div class="tab-page active" id="page-overview">
-        <div class="page-header">
-            <div class="ph-left" style="min-width:260px;">
+        <div class="page-header" style="position:relative;">
+            <div class="ph-left" style="min-width:0;flex:1;">
                 <div style="display:flex;gap:14px;align-items:center;">
                     <div><div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Strongest</div><div id="ovStrongest" style="font-size:13px;font-weight:bold;">—</div></div>
-                    <div style="width:1px;height:28px;background:#1e2230;"></div>
+                    <div style="width:1px;height:28px;background:#1e2230;flex-shrink:0;"></div>
                     <div><div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Weakest</div><div id="ovWeakest" style="font-size:13px;font-weight:bold;">—</div></div>
-                    <div style="width:1px;height:28px;background:#1e2230;"></div>
+                    <div style="width:1px;height:28px;background:#1e2230;flex-shrink:0;"></div>
                     <div><div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Top Pair</div><div id="ovTopPair" style="font-size:12px;font-weight:bold;">—</div></div>
-                    <div style="width:1px;height:28px;background:#1e2230;"></div>
+                    <div style="width:1px;height:28px;background:#1e2230;flex-shrink:0;"></div>
                     <div><div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Sources</div><div id="ovSources" style="font-size:11px;color:#888;">Waiting...</div></div>
                 </div>
             </div>
-            <div class="ph-center">Market Bias Overview</div>
-            <div class="ph-right">
+            <!-- Title absolutely centered over the whole header -->
+            <div style="position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                <span style="font-size:14px;font-weight:bold;color:#fff;">Market Bias Overview</span>
+            </div>
+            <div class="ph-right" style="flex-shrink:0;z-index:1;">
                 <span class="ph-status" id="ovStatus">Loading...</span>
                 <button class="refresh-icon-btn" onclick="ovRefresh()">&#8634;</button>
             </div>
@@ -610,16 +613,7 @@
     <!-- CURRENCY INDEX -->
     <div class="tab-page" id="page-ci">
         <div class="page-header">
-            <div class="ph-left">
-                <div style="display:flex;gap:6px;">
-                    <button class="cs-tf-btn" onclick="ciSetTF('M5',this)">5M</button>
-                    <button class="cs-tf-btn" onclick="ciSetTF('M15',this)">15M</button>
-                    <button class="cs-tf-btn active" onclick="ciSetTF('H1',this)">1H</button>
-                    <button class="cs-tf-btn" onclick="ciSetTF('H4',this)">4H</button>
-                    <button class="cs-tf-btn" onclick="ciSetTF('D',this)">Daily</button>
-                    <button class="cs-tf-btn" onclick="ciSetTF('W',this)">Weekly</button>
-                </div>
-            </div>
+            <div class="ph-left"></div>
             <div class="ph-center">Currency Index &mdash; Mataf Method (% Variation from Base)</div>
             <div class="ph-right">
                 <span class="ph-status" id="ciStatus">Loading...</span>
@@ -630,7 +624,14 @@
         <!-- Combined chart -->
         <div class="ci-combined-wrap" style="margin-bottom:15px;">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-                <div style="font-size:12px;font-weight:bold;color:#aaa;letter-spacing:1px;">ALL CURRENCIES</div>
+                <div style="display:flex;gap:6px;">
+                    <button class="cs-tf-btn" onclick="ciSetTF('M5',this)">5M</button>
+                    <button class="cs-tf-btn" onclick="ciSetTF('M15',this)">15M</button>
+                    <button class="cs-tf-btn active" id="ciCombinedTfActive" onclick="ciSetTF('H1',this)">1H</button>
+                    <button class="cs-tf-btn" onclick="ciSetTF('H4',this)">4H</button>
+                    <button class="cs-tf-btn" onclick="ciSetTF('D',this)">Daily</button>
+                    <button class="cs-tf-btn" onclick="ciSetTF('W',this)">Weekly</button>
+                </div>
                 <div class="ci-combined-legend" id="ciCombinedLegend"></div>
             </div>
             <div class="ci-combined-chart"><canvas id="ciCombinedChart"></canvas></div>
@@ -848,7 +849,6 @@
             </div>
             <!-- Combined chart mobile -->
             <div class="mob-chart-card" style="padding:10px;">
-                <div class="mob-chart-title">ALL CURRENCIES</div>
                 <div class="mob-cs-legend" id="mob-ciCombinedLegend"></div>
                 <div style="position:relative;height:220px;background:#101010;border-radius:6px;overflow:hidden;touch-action:none;" id="mobCiChartInner">
                     <canvas id="mob-ciCombinedChart"></canvas>
@@ -2904,11 +2904,13 @@ var OV_PAIRS_DISPLAY = [
     'NZDCAD','NZDCHF','NZDJPY'
 ];
 
+/* Alphabetical display order for currency cards */
+var OV_CUR_ORDER = ['AUD','CAD','CHF','EUR','GBP','JPY','NZD','USD'];
+
 var OV_LABEL_CONFIG = [
     { min:  60, max: 100, label:'Strong Bull', bg:'rgba(20,188,96,0.18)',  color:'#14BC60' },
-    { min:  20, max:  60, label:'Bullish',      bg:'rgba(47,153,95,0.15)',  color:'#2F995F' },
-    { min: -20, max:  20, label:'Neutral',      bg:'rgba(100,100,100,0.15)',color:'#888'    },
-    { min: -60, max: -20, label:'Bearish',      bg:'rgba(192,57,57,0.15)',  color:'#C03939' },
+    { min:   0, max:  60, label:'Bullish',      bg:'rgba(47,153,95,0.15)',  color:'#2F995F' },
+    { min: -60, max:   0, label:'Bearish',      bg:'rgba(192,57,57,0.15)',  color:'#C03939' },
     { min:-100, max: -60, label:'Strong Bear',  bg:'rgba(200,30,30,0.18)',  color:'#F26666' }
 ];
 
@@ -2917,11 +2919,13 @@ var _ovSortDesc = true;
 var _ovLastBias = null;
 
 function ovGetLabel(score) {
+    /* score >= 0 → Bullish family, score < 0 → Bearish family */
     for (var i = 0; i < OV_LABEL_CONFIG.length; i++) {
         var c = OV_LABEL_CONFIG[i];
         if (score >= c.min && score <= c.max) return c;
     }
-    return OV_LABEL_CONFIG[2];
+    /* fallback: positive → Bullish, negative → Bearish */
+    return score >= 0 ? OV_LABEL_CONFIG[1] : OV_LABEL_CONFIG[2];
 }
 
 /* ---- Signal extractors ---- */
@@ -3103,7 +3107,7 @@ function renderOverview(bias) {
         if (!grid) return;
         grid.innerHTML = '';
 
-        CS_CURRENCIES.forEach(function(cur) {
+        OV_CUR_ORDER.forEach(function(cur) {
             var d = bias[cur];
             if (!d || d.score === null) return;
             var lbl = ovGetLabel(d.score);
