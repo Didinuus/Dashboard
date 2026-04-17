@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FX Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.1/dist/chartjs-chart-financial.min.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:Arial,sans-serif; background:#111111; color:#fff; }
@@ -119,14 +118,6 @@
         .ir-next-date { font-size:12px; color:#ccc; font-weight:bold; margin-top:2px; }
         .ir-expectation { font-size:11px; margin-top:3px; font-weight:bold; }
         .ir-accent-bar { position:absolute; left:0; top:0; bottom:0; width:3px; }
-        .ir-comparison-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
-        .ir-comp-title { font-size:12px; color:#aaa; font-weight:bold; letter-spacing:1px; text-transform:uppercase; margin-bottom:16px; }
-        .ir-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-        .ir-bar-label { font-size:12px; font-weight:bold; width:50px; flex-shrink:0; }
-        .ir-bar-outer { flex:1; height:24px; background:#111; border-radius:4px; overflow:hidden; position:relative; }
-        .ir-bar-inner { height:100%; border-radius:4px; display:flex; align-items:center; padding-left:8px; transition:width .8s ease; }
-        .ir-bar-rate-text { font-size:11px; font-weight:bold; color:#fff; }
-        .ir-bar-rate-right { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:11px; color:#666; }
         .ir-hist-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; }
         .ir-hist-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:14px; }
         .ir-hist-title { font-size:12px; font-weight:bold; color:#ccc; margin-bottom:10px; text-align:center; }
@@ -290,13 +281,6 @@
         .ov-pair-score { font-size:11px; font-weight:bold; }
         .ov-pair-label { font-size:10px; font-weight:bold; text-transform:uppercase; letter-spacing:0.3px; }
 
-        /* Summary strip */
-        .ov-summary { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:14px 18px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-        .ov-summary-item { display:flex; flex-direction:column; gap:2px; min-width:90px; }
-        .ov-summary-lbl { font-size:9px; color:#555; text-transform:uppercase; letter-spacing:0.5px; }
-        .ov-summary-val { font-size:13px; font-weight:bold; }
-        .ov-summary-divider { width:1px; height:32px; background:#1e2230; flex-shrink:0; }
-        .ov-last-update { margin-left:auto; font-size:10px; color:#555; }
 
         /* Legend note */
         .ov-legend-note { font-size:10px; color:#444; text-align:right; padding:0 4px; }
@@ -384,8 +368,6 @@
             .pairs-modal { width:95vw; max-height:80vh; padding:16px; }
             .ov-top-row { grid-template-columns:1fr 1fr; gap:8px; }
             .ov-pairs-grid { grid-template-columns:repeat(2,1fr); gap:6px; }
-            .ov-summary { gap:10px; padding:10px 12px; }
-            .ov-summary-divider { display:none; }
             .ov-cur-card { padding:10px 12px; }
             .ov-score-num { font-size:20px; }
             .pairs-grid { grid-template-columns:repeat(3,1fr); }
@@ -1024,7 +1006,6 @@ var _mobCiHoverIdx = -1;
 var CI_FLAGS = {EUR:'🇪🇺',USD:'🇺🇸',GBP:'🇬🇧',AUD:'🇦🇺',CHF:'🇨🇭',JPY:'🇯🇵',CAD:'🇨🇦',NZD:'🇳🇿'};
 
 var _ciCardVals = {};
-var _ciOhlcSeries = {};
 
 /* Called after every pan/zoom — recomputes index series from new viewMin base */
 function ciUpdateFromView(xMin) {
@@ -1156,42 +1137,6 @@ async function ciComputeCardValsMataf() {
     return true;
 }
 
-function ciComputeOhlcSeries(longRawData) {
-    var allPairs = Object.keys(longRawData);
-    if (!allPairs.length) return;
-    var lengths = allPairs.map(function(p){ return longRawData[p].closes.length; });
-    var minLen = Math.min.apply(null, lengths);
-    _ciOhlcSeries = {};
-    /* Use the same baseIdx as the current view */
-    var baseIdx = ciCombinedChart
-        ? Math.max(0, Math.round(ciCombinedChart.options.scales.x.min || 0))
-        : 0;
-    CS_CURRENCIES.forEach(function(cur) {
-        var basket = CI_PAIRS[cur], ohlcArr = [];
-        for (var i = 0; i < minLen; i++) {
-            var sumO=0,sumH=0,sumL=0,sumC=0,cnt=0;
-            basket.forEach(function(item) {
-                var pd = longRawData[item.pair];
-                if (!pd || !pd.opens) return;
-                var startIdx = pd.closes.length - minLen;
-                var rawClose0 = pd.closes[startIdx + baseIdx];
-                if (!rawClose0) rawClose0 = pd.closes[startIdx];
-                var si = startIdx + i;
-                var rO=pd.opens[si],rH=pd.highs[si],rL=pd.lows[si],rC=pd.closes[si];
-                if (!rO||!rH||!rL||!rC) return;
-                var close0=item.inv?1/rawClose0:rawClose0;
-                var o=item.inv?1/rO:rO,h=item.inv?1/rL:rH,l=item.inv?1/rH:rL,c2=item.inv?1/rC:rC;
-                sumO+=(o-close0)/close0; sumH+=(h-close0)/close0;
-                sumL+=(l-close0)/close0; sumC+=(c2-close0)/close0; cnt++;
-            });
-            if (cnt > 0) {
-                ohlcArr.push({x:i,o:parseFloat((sumO/cnt*100).toFixed(5)),h:parseFloat((sumH/cnt*100).toFixed(5)),l:parseFloat((sumL/cnt*100).toFixed(5)),c:parseFloat((sumC/cnt*100).toFixed(5))});
-            }
-        }
-        _ciOhlcSeries[cur] = ohlcArr;
-    });
-}
-
 async function ciLoad() {
     var el = document.getElementById('ciStatus');
     var el2 = document.getElementById('mob-ciStatus');
@@ -1211,7 +1156,6 @@ async function ciLoad() {
         CI_PAIRS[cur].forEach(function(p) { pairSet.add(p.pair); });
     });
     var allPairs = Array.from(pairSet);
-    var longRawData = {};
 
     await Promise.all(allPairs.map(async function(pair) {
         var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + cfg.count + '&price=M';
@@ -1220,16 +1164,9 @@ async function ciLoad() {
             if (!r.ok) return;
             var d = await r.json();
             if (!d.candles || d.candles.length <= 1) return;
-            longRawData[pair] = {
-                opens:  d.candles.map(function(c){ return parseFloat(c.mid.o); }),
-                highs:  d.candles.map(function(c){ return parseFloat(c.mid.h); }),
-                lows:   d.candles.map(function(c){ return parseFloat(c.mid.l); }),
+            _ciRawData[pair] = {
                 closes: d.candles.map(function(c){ return parseFloat(c.mid.c); }),
                 times:  d.candles.map(function(c){ return c.time; })
-            };
-            _ciRawData[pair] = {
-                closes: longRawData[pair].closes,
-                times:  longRawData[pair].times
             };
         } catch(e) {}
     }));
@@ -1238,16 +1175,14 @@ async function ciLoad() {
     if (!loaded.length) { if(el) el.textContent='Error'; return; }
 
     /* Initial view: last `view` candles, base = first visible candle */
-    var total = loaded.length ? _ciRawData[loaded[0]].closes.length : 0;
+    var total = _ciRawData[loaded[0]].closes.length;
     var viewMin = Math.max(0, total - cfg.view);
     ciRecompute(viewMin);
-    ciComputeOhlcSeries(longRawData);
     await ciComputeCardValsMataf();
 
     var labels = ciMakeLabels();
     renderCICombinedChart(labels);
     renderCIMiniCharts(labels);
-    renderCIRankTable();
 
     var t = fmtTime();
     if(el) el.textContent = t;
@@ -1329,7 +1264,6 @@ async function ciLoadMoreHistory() {
         ciCombinedChart.update('none');
     }
 
-    renderCIRankTable();
     _ciLoadingMore = false;
     if (el) el.textContent = fmtTime();
 }
@@ -2628,6 +2562,7 @@ function renderCSRank(series, bodyId) {
         body.appendChild(s);
     }
 }
+function csRefresh() { csLoad(); }
 function csSetTF(tf, btn) {
     csTF = tf;
     document.querySelectorAll('#sub-rsi .cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
@@ -3224,13 +3159,11 @@ function renderOverview(bias) {
     var elWk = document.getElementById('ovWeakest');
     var elTp = document.getElementById('ovTopPair');
     var elSrc = document.getElementById('ovSources');
-    var elLu = document.getElementById('ovLastUpdate');
     var elSt2 = document.getElementById('ovStatus');
     if (elSt && strongest) elSt.innerHTML = '<span style="color:'+CS_COLORS[strongest.cur]+';font-weight:900">'+strongest.cur+'</span> <span style="color:#14BC60;font-size:11px">'+( strongest.score >= 0 ? '+' : '')+strongest.score+'</span>';
     if (elWk && weakest)   elWk.innerHTML = '<span style="color:'+CS_COLORS[weakest.cur]+';font-weight:900">'+weakest.cur+'</span> <span style="color:#F26666;font-size:11px">'+weakest.score+'</span>';
     if (elTp && topPair)   { var lbl = ovGetLabel(topPair.score); elTp.innerHTML = '<span style="font-weight:900">'+topPair.pair+'</span> <span style="color:'+lbl.color+';font-size:11px">'+lbl.label+'</span>'; }
     if (elSrc) elSrc.textContent = srcStr;
-    if (elLu) elLu.textContent = 'Updated ' + now;
     if (elSt2) elSt2.textContent = now;
 
     /* ---- Mobile summary ---- */
