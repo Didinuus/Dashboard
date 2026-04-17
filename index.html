@@ -819,9 +819,10 @@
                 <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('D',this)">D</button>
                 <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('W',this)">W</button>
             </div>
+            <!-- Legend outside chart card, same as CS -->
+            <div class="mob-cs-legend" id="mob-ciCombinedLegend"></div>
             <!-- Combined chart mobile -->
-            <div class="mob-chart-card" style="padding:10px;">
-                <div class="mob-cs-legend" id="mob-ciCombinedLegend"></div>
+            <div class="mob-cs-chart-wrap">
                 <div style="position:relative;height:220px;background:#101010;border-radius:6px;overflow:hidden;touch-action:none;" id="mobCiChartInner">
                     <canvas id="mob-ciCombinedChart"></canvas>
                 </div>
@@ -1594,8 +1595,19 @@ function buildCICombinedLegend() {
             item.onclick = function() {
                 if (ciCombinedHidden.has(cur)) ciCombinedHidden.delete(cur);
                 else ciCombinedHidden.add(cur);
-                item.classList.toggle('ci-hidden');
-                [ciCombinedChart].forEach(function(ch) {
+                /* Sync both legend instances */
+                ['ciCombinedLegend','mob-ciCombinedLegend'].forEach(function(lid2) {
+                    var leg2 = document.getElementById(lid2); if (!leg2) return;
+                    leg2.querySelectorAll('.ci-combined-legend-item').forEach(function(el) {
+                        var span = el.querySelector('span');
+                        if (span && span.textContent === cur) {
+                            if (ciCombinedHidden.has(cur)) el.classList.add('ci-hidden');
+                            else el.classList.remove('ci-hidden');
+                        }
+                    });
+                });
+                /* Update both PC and mobile charts */
+                [ciCombinedChart, mobCiCombinedChart].forEach(function(ch) {
                     if (!ch) return;
                     var ds = ch.data.datasets.find(function(d){ return d.label===cur; });
                     if (ds) { ds.hidden = ciCombinedHidden.has(cur); ch.update(); }
