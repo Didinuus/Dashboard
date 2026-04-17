@@ -246,6 +246,61 @@
         /* =============================================
            MOBILE STYLES
            ============================================= */
+        /* =============================================
+           OVERVIEW / BIAS
+           ============================================= */
+        .ov-layout { display:flex; flex-direction:column; gap:18px; }
+        .ov-top-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+        .ov-cur-card {
+            background:#161616; border:1px solid #1e2230; border-radius:10px;
+            padding:14px 16px; position:relative; overflow:hidden;
+            transition:border-color .2s; cursor:default;
+        }
+        .ov-cur-card:hover { border-color:#2a3060; }
+        .ov-accent { position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
+        .ov-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+        .ov-cur-name { font-size:15px; font-weight:900; letter-spacing:0.5px; }
+        .ov-label-badge {
+            font-size:10px; font-weight:bold; padding:3px 9px; border-radius:10px;
+            letter-spacing:0.5px; text-transform:uppercase;
+        }
+        .ov-score-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+        .ov-score-num { font-size:26px; font-weight:900; line-height:1; min-width:52px; }
+        .ov-gauge-wrap { flex:1; height:8px; background:#111; border-radius:4px; overflow:hidden; position:relative; }
+        .ov-gauge-fill { height:100%; border-radius:4px; transition:width .6s ease; position:absolute; }
+        .ov-gauge-mid { position:absolute; top:0; bottom:0; left:50%; width:1px; background:#333; }
+        .ov-signals { display:flex; flex-direction:column; gap:3px; }
+        .ov-signal-row { display:flex; align-items:center; justify-content:space-between; font-size:10px; }
+        .ov-signal-label { color:#666; }
+        .ov-signal-val { font-weight:bold; font-size:10px; }
+        .ov-signal-bar { flex:1; height:3px; background:#111; border-radius:2px; margin:0 6px; overflow:hidden; }
+        .ov-signal-bar-fill { height:100%; border-radius:2px; }
+
+        /* Pair bias section */
+        .ov-pairs-section { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:16px; }
+        .ov-pairs-title { font-size:12px; font-weight:bold; color:#aaa; letter-spacing:1px; text-transform:uppercase; margin-bottom:14px; }
+        .ov-pairs-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+        .ov-pair-row {
+            background:#111; border:1px solid #1e2230; border-radius:7px;
+            padding:10px 12px; display:flex; flex-direction:column; gap:5px;
+        }
+        .ov-pair-name { font-size:12px; font-weight:bold; color:#aaa; }
+        .ov-pair-bias-bar { height:6px; background:#1e2230; border-radius:3px; overflow:hidden; position:relative; }
+        .ov-pair-bias-fill { height:100%; border-radius:3px; position:absolute; }
+        .ov-pair-score { font-size:11px; font-weight:bold; }
+        .ov-pair-label { font-size:10px; font-weight:bold; text-transform:uppercase; letter-spacing:0.3px; }
+
+        /* Summary strip */
+        .ov-summary { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:14px 18px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+        .ov-summary-item { display:flex; flex-direction:column; gap:2px; min-width:90px; }
+        .ov-summary-lbl { font-size:9px; color:#555; text-transform:uppercase; letter-spacing:0.5px; }
+        .ov-summary-val { font-size:13px; font-weight:bold; }
+        .ov-summary-divider { width:1px; height:32px; background:#1e2230; flex-shrink:0; }
+        .ov-last-update { margin-left:auto; font-size:10px; color:#555; }
+
+        /* Legend note */
+        .ov-legend-note { font-size:10px; color:#444; text-align:right; padding:0 4px; }
+
         @media (max-width: 768px) {
             .pc-only { display:none !important; }
             .mobile-only { display:block; }
@@ -327,6 +382,12 @@
             .mob-ir-hist-wrap { position:relative; height:120px; }
             .mob-calendar-wrap { background:#161616; border:1px solid #1e2230; border-radius:8px; overflow:hidden; height:calc(100dvh - 180px); height:calc(100vh - 180px); }
             .pairs-modal { width:95vw; max-height:80vh; padding:16px; }
+            .ov-top-row { grid-template-columns:1fr 1fr; gap:8px; }
+            .ov-pairs-grid { grid-template-columns:1fr 1fr; gap:6px; }
+            .ov-summary { gap:10px; padding:10px 12px; }
+            .ov-summary-divider { display:none; }
+            .ov-cur-card { padding:10px 12px; }
+            .ov-score-num { font-size:20px; }
             .pairs-grid { grid-template-columns:repeat(3,1fr); }
             .mob-edit-pairs-btn { padding:6px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px; color:#aaa; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; }
 
@@ -365,7 +426,8 @@
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active"  onclick="showTab('sentiment')">Traders Sentiment</button>
+        <button class="tab-btn active"  onclick="showTab('overview')">&#9685; Overview</button>
+        <button class="tab-btn"         onclick="showTab('sentiment')">Traders Sentiment</button>
         <button class="tab-btn"         onclick="showTab('strength')">Currency Strength</button>
         <button class="tab-btn"         onclick="showTab('ci')">Currency Index</button>
         <button class="tab-btn"         onclick="showTab('macropage')">Macro</button>
@@ -391,8 +453,41 @@
         </div>
     </div>
 
+    <!-- OVERVIEW -->
+    <div class="tab-page active" id="page-overview">
+        <div class="page-header">
+            <div class="ph-left"></div>
+            <div class="ph-center">Market Bias Overview</div>
+            <div class="ph-right">
+                <span class="ph-status" id="ovStatus">Loading...</span>
+                <button class="refresh-icon-btn" onclick="ovRefresh()">&#8634;</button>
+            </div>
+        </div>
+        <div class="ov-layout">
+            <!-- Summary strip -->
+            <div class="ov-summary" id="ovSummary">
+                <div class="ov-summary-item"><div class="ov-summary-lbl">Strongest</div><div class="ov-summary-val" id="ovStrongest">—</div></div>
+                <div class="ov-summary-divider"></div>
+                <div class="ov-summary-item"><div class="ov-summary-lbl">Weakest</div><div class="ov-summary-val" id="ovWeakest">—</div></div>
+                <div class="ov-summary-divider"></div>
+                <div class="ov-summary-item"><div class="ov-summary-lbl">Top Pair Bias</div><div class="ov-summary-val" id="ovTopPair">—</div></div>
+                <div class="ov-summary-divider"></div>
+                <div class="ov-summary-item"><div class="ov-summary-lbl">Data Sources</div><div class="ov-summary-val" id="ovSources" style="font-size:11px;color:#888">Waiting...</div></div>
+                <div class="ov-last-update" id="ovLastUpdate">—</div>
+            </div>
+            <!-- 8 currency cards -->
+            <div class="ov-top-row" id="ovCurCards"><div style="grid-column:1/-1;text-align:center;padding:30px;color:#555;">Computing bias...</div></div>
+            <!-- Pair bias grid -->
+            <div class="ov-pairs-section">
+                <div class="ov-pairs-title">Pair Directional Bias</div>
+                <div class="ov-pairs-grid" id="ovPairsGrid"></div>
+            </div>
+            <div class="ov-legend-note">Score = RSI ×25% + CI ×25% + COT ×35% + Sentiment Contrarian ×15% &nbsp;|&nbsp; Range −100 to +100 &nbsp;|&nbsp; COT: institutional lev. funds net position &nbsp;|&nbsp; Sentiment: retail contrarian signal</div>
+        </div>
+    </div>
+
     <!-- SENTIMENT -->
-    <div class="tab-page active" id="page-sentiment">
+    <div class="tab-page" id="page-sentiment">
         <div class="sentiment-headers">
             <div class="page-header">
                 <div class="ph-left">
@@ -608,8 +703,40 @@
 
     <div class="mob-content" id="mobContent">
 
+        <!-- OVERVIEW PAGE (mobile) -->
+        <div class="mob-page active" id="mob-page-overview">
+            <div class="mob-section-header">
+                <span class="msh-title">Market Bias</span>
+                <div class="msh-right">
+                    <span class="msh-status" id="mob-ovStatus">...</span>
+                    <button class="refresh-icon-btn" onclick="ovRefresh()" style="font-size:18px">&#8634;</button>
+                </div>
+            </div>
+            <!-- Summary strip -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+                <div style="background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px;text-align:center">
+                    <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Strongest</div>
+                    <div style="font-size:14px;font-weight:bold" id="mob-ovStrongest">—</div>
+                </div>
+                <div style="background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px;text-align:center">
+                    <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Weakest</div>
+                    <div style="font-size:14px;font-weight:bold" id="mob-ovWeakest">—</div>
+                </div>
+            </div>
+            <!-- Currency cards -->
+            <div class="ov-top-row" id="mob-ovCurCards" style="margin-bottom:10px;">
+                <div style="grid-column:1/-1;text-align:center;padding:20px;color:#555;font-size:12px;">Computing...</div>
+            </div>
+            <!-- Pair bias -->
+            <div class="ov-pairs-section" style="padding:12px;">
+                <div class="ov-pairs-title">Pair Directional Bias</div>
+                <div class="ov-pairs-grid" id="mob-ovPairsGrid"></div>
+            </div>
+            <div style="font-size:9px;color:#333;text-align:right;padding:6px 2px;">RSI×25 + CI×25 + COT×35 + Sentiment×15 | Range −100 to +100</div>
+        </div>
+
         <!-- SENTIMENT PAGE -->
-        <div class="mob-page active" id="mob-page-sentiment">
+        <div class="mob-page" id="mob-page-sentiment">
             <div class="mob-section-header">
                 <button class="mob-edit-pairs-btn" onclick="openPairsModal()">&#9881; Pairs</button>
                 <span class="msh-title">Traders Sentiment</span>
@@ -771,26 +898,30 @@
 
     </div><!-- end mob-content -->
 
-    <!-- Bottom navigation (5 tabs now) -->
+    <!-- Bottom navigation (6 tabs) -->
     <nav class="mob-nav" id="mobNav">
         <div class="mob-nav-indicator" id="mobNavIndicator"></div>
-        <button class="mob-nav-btn active" onclick="mobShowPage('sentiment',0,this)" id="mobnav-sentiment">
+        <button class="mob-nav-btn active" onclick="mobShowPage('overview',0,this)" id="mobnav-overview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Overview
+        </button>
+        <button class="mob-nav-btn" onclick="mobShowPage('sentiment',1,this)" id="mobnav-sentiment">
             <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             Sentiment
         </button>
-        <button class="mob-nav-btn" onclick="mobShowPage('strength',1,this)" id="mobnav-strength">
+        <button class="mob-nav-btn" onclick="mobShowPage('strength',2,this)" id="mobnav-strength">
             <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             Strength
         </button>
-        <button class="mob-nav-btn" onclick="mobShowPage('ci',2,this)" id="mobnav-ci">
+        <button class="mob-nav-btn" onclick="mobShowPage('ci',3,this)" id="mobnav-ci">
             <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
             CI
         </button>
-        <button class="mob-nav-btn" onclick="mobShowPage('macro',3,this)" id="mobnav-macro">
+        <button class="mob-nav-btn" onclick="mobShowPage('macro',4,this)" id="mobnav-macro">
             <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             Macro
         </button>
-        <button class="mob-nav-btn" onclick="mobShowPage('calendar',4,this)" id="mobnav-calendar">
+        <button class="mob-nav-btn" onclick="mobShowPage('calendar',5,this)" id="mobnav-calendar">
             <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             Calendar
         </button>
@@ -1850,7 +1981,7 @@ function mobShowPage(name, idx, btn) {
     btn.classList.add('active'); btn.style.color='#fff';
     var s=btn.querySelector('svg'); if(s)s.style.stroke='#fff';
     var nav = document.getElementById('mobNav');
-    var btnWidth = nav.offsetWidth / 5;
+    var btnWidth = nav.offsetWidth / 6;
     var ind = document.getElementById('mobNavIndicator');
     ind.style.left = (idx * btnWidth) + 'px';
     ind.style.width = btnWidth + 'px';
@@ -1859,12 +1990,13 @@ function mobShowPage(name, idx, btn) {
     if (name === 'macro') mobRenderRates();
     if (name === 'sentiment') actualiserDonnees();
     if (name === 'ci') ciLoad();
+    if (name === 'overview') ovRefresh();
 }
 
 window.addEventListener('load', function() {
     var nav = document.getElementById('mobNav');
     if (nav) {
-        var btnWidth = nav.offsetWidth / 5;
+        var btnWidth = nav.offsetWidth / 6;
         var ind = document.getElementById('mobNavIndicator');
         if (ind) { ind.style.left='0'; ind.style.width=btnWidth+'px'; }
     }
@@ -2743,6 +2875,8 @@ window.addEventListener('load', function() {
     } else {
         mobRenderRates();
     }
+    /* Overview loads after other data is ready */
+    setTimeout(ovRefresh, 3000);
     setInterval(function(){ actualiserDonnees(); }, 30*60*1000);
     setInterval(function(){ chargerCOT(); }, 15*60*1000);
     setInterval(function(){
@@ -2751,11 +2885,15 @@ window.addEventListener('load', function() {
             if(p&&p.classList.contains('active')){ csLoad(); setTimeout(fxpLoad,1000); }
             var pc=document.getElementById('page-ci');
             if(pc&&pc.classList.contains('active')) ciLoad();
+            var po=document.getElementById('page-overview');
+            if(po&&po.classList.contains('active')) ovRefresh();
         } else {
             var mp=document.getElementById('mob-page-strength');
             if(mp&&mp.classList.contains('active')){ mobCsLoad(); setTimeout(mobFxpLoad,1000); }
             var mpc=document.getElementById('mob-page-ci');
             if(mpc&&mpc.classList.contains('active')) ciLoad();
+            var mpo=document.getElementById('mob-page-overview');
+            if(mpo&&mpo.classList.contains('active')) ovRefresh();
         }
     }, 10*60*1000);
     setInterval(function(){ if(!IS_MOBILE)renderRates(); else mobRenderRates(); }, 60*60*1000);
@@ -2770,6 +2908,338 @@ function showTab(name){
     if(name==='macropage') renderRates();
     if(name==='sentiment') actualiserDonnees();
     if(name==='ci') ciLoad();
+    if(name==='overview') ovRefresh();
+}
+
+/* =========================================================
+   OVERVIEW / BIAS ENGINE
+   ========================================================= */
+
+var OV_PAIRS_DISPLAY = [
+    'EURUSD','GBPUSD','AUDUSD','NZDUSD',
+    'USDJPY','USDCAD','USDCHF','EURJPY',
+    'EURGBP','GBPJPY','AUDJPY','CADJPY'
+];
+
+var OV_LABEL_CONFIG = [
+    { min:  60, max: 100, label:'Strong Bull', bg:'rgba(20,188,96,0.18)',  color:'#14BC60' },
+    { min:  20, max:  60, label:'Bullish',      bg:'rgba(47,153,95,0.15)',  color:'#2F995F' },
+    { min: -20, max:  20, label:'Neutral',      bg:'rgba(100,100,100,0.15)',color:'#888'    },
+    { min: -60, max: -20, label:'Bearish',      bg:'rgba(192,57,57,0.15)',  color:'#C03939' },
+    { min:-100, max: -60, label:'Strong Bear',  bg:'rgba(200,30,30,0.18)',  color:'#F26666' }
+];
+
+function ovGetLabel(score) {
+    for (var i = 0; i < OV_LABEL_CONFIG.length; i++) {
+        var c = OV_LABEL_CONFIG[i];
+        if (score >= c.min && score <= c.max) return c;
+    }
+    return OV_LABEL_CONFIG[2];
+}
+
+/* ---- Signal extractors ---- */
+
+function ovGetRsiScore(cur) {
+    /* Uses the last value of the H1 CS strength series already loaded */
+    var series = _mobCsStrengthSeries[cur] || [];
+    /* If mobile series empty, fall back to PC cs series */
+    if (!series.length) {
+        if (csChart) {
+            var ds = csChart.data.datasets.find(function(d){ return d.label === cur; });
+            if (ds) series = ds.data;
+        }
+    }
+    var valid = series.filter(function(v){ return v !== null; });
+    if (!valid.length) return null;
+    var rsi = valid[valid.length - 1]; /* 0–100 */
+    /* Map 0–100 → -100 to +100, neutral at 50 */
+    return parseFloat(((rsi - 50) * 2).toFixed(1));
+}
+
+function ovGetCiScore(cur) {
+    /* Uses _ciCurrentLastVals — variation from base (small float) */
+    var val = _ciCurrentLastVals[cur];
+    if (val === null || val === undefined) return null;
+    /* val is typically in range ±0.05; scale to ±100 */
+    var scaled = val * 2000;
+    return parseFloat(Math.max(-100, Math.min(100, scaled)).toFixed(1));
+}
+
+function ovGetCotScore(cur) {
+    /* Uses Leveraged Funds net position, normalised across all currencies */
+    var byCode = window._cotByCode, markets = window._cotMarkets;
+    if (!byCode || !markets) return null;
+    var market = markets.find(function(m){ return m.name === cur; });
+    if (!market) return null;
+    var rows = byCode[market.code];
+    if (!rows || !rows.length) return null;
+    var r = rows[0];
+    var net = (parseInt(r.lev_money_positions_long||0)||0) - (parseInt(r.lev_money_positions_short||0)||0);
+    /* Normalise: collect all nets to find range */
+    var allNets = [];
+    markets.forEach(function(m) {
+        var mr = byCode[m.code]; if (!mr || !mr.length) return;
+        var n = (parseInt(mr[0].lev_money_positions_long||0)||0) - (parseInt(mr[0].lev_money_positions_short||0)||0);
+        allNets.push(n);
+    });
+    var maxAbs = Math.max.apply(null, allNets.map(Math.abs)) || 1;
+    return parseFloat((net / maxAbs * 100).toFixed(1));
+}
+
+function ovGetSentimentScore(cur) {
+    /* Contrarian: if retail is mostly long → institutional likely short → bearish signal */
+    /* We aggregate sentiment across pairs containing this currency */
+    var map = _sentimentMap;
+    if (!Object.keys(map).length) return null;
+    var longSum = 0, cnt = 0;
+    Object.keys(map).forEach(function(pair) {
+        var b = pair.substring(0, 3), q = pair.substring(3, 6);
+        var d = map[pair]; if (!d) return;
+        if (b === cur) { longSum += d.longPercentage; cnt++; }
+        else if (q === cur) { longSum += d.shortPercentage; cnt++; } /* inverted: quote long = base short */
+    });
+    if (!cnt) return null;
+    var avgLong = longSum / cnt; /* 0–100, how much retail is long on this cur */
+    /* Contrarian: high retail long → bearish signal → negative score */
+    return parseFloat(((50 - avgLong) * 2).toFixed(1)); /* 50% retail long = 0, 80% long = -60 */
+}
+
+/* ---- Main compute ---- */
+
+function computeBias() {
+    var result = {};
+    var sourceFlags = { rsi: false, ci: false, cot: false, sentiment: false };
+
+    CS_CURRENCIES.forEach(function(cur) {
+        var rsi  = ovGetRsiScore(cur);
+        var ci   = ovGetCiScore(cur);
+        var cot  = ovGetCotScore(cur);
+        var sent = ovGetSentimentScore(cur);
+
+        if (rsi  !== null) sourceFlags.rsi  = true;
+        if (ci   !== null) sourceFlags.ci   = true;
+        if (cot  !== null) sourceFlags.cot  = true;
+        if (sent !== null) sourceFlags.sentiment = true;
+
+        /* Weighted composite — skip missing sources, re-normalise weights */
+        var weights = [];
+        var vals    = [];
+        if (rsi  !== null) { weights.push(0.25); vals.push(rsi);  }
+        if (ci   !== null) { weights.push(0.25); vals.push(ci);   }
+        if (cot  !== null) { weights.push(0.35); vals.push(cot);  }
+        if (sent !== null) { weights.push(0.15); vals.push(sent); }
+
+        var score = null;
+        if (vals.length) {
+            var totalW = weights.reduce(function(a,b){ return a+b; }, 0);
+            var weighted = vals.reduce(function(sum, v, i){ return sum + v * weights[i]; }, 0);
+            score = parseFloat((weighted / totalW).toFixed(1));
+        }
+
+        result[cur] = { score: score, rsi: rsi, ci: ci, cot: cot, sentiment: sent };
+    });
+
+    result._sources = sourceFlags;
+    return result;
+}
+
+/* ---- Pair bias from currency scores ---- */
+
+function ovPairBias(bias) {
+    var pairs = [];
+    OV_PAIRS_DISPLAY.forEach(function(pair) {
+        var b = pair.substring(0, 3), q = pair.substring(3, 6);
+        var bs = bias[b] ? bias[b].score : null;
+        var qs = bias[q] ? bias[q].score : null;
+        if (bs === null || qs === null) { pairs.push({ pair: pair, score: null }); return; }
+        /* Base strong vs quote weak = bullish pair */
+        var pairScore = parseFloat(((bs - qs) / 2).toFixed(1));
+        pairs.push({ pair: pair, score: pairScore, baseScore: bs, quoteScore: qs });
+    });
+    return pairs;
+}
+
+/* ---- Render ---- */
+
+function renderOverview(bias) {
+    var isMob = IS_MOBILE;
+
+    /* Source flags */
+    var sf = bias._sources;
+    var srcList = [];
+    if (sf.rsi)       srcList.push('RSI');
+    if (sf.ci)        srcList.push('CI');
+    if (sf.cot)       srcList.push('COT');
+    if (sf.sentiment) srcList.push('Sent.');
+    var srcStr = srcList.join(' · ') || 'No data';
+
+    /* Sort currencies by score */
+    var ranked = CS_CURRENCIES.map(function(c){ return { cur: c, score: bias[c] ? bias[c].score : null }; })
+        .filter(function(x){ return x.score !== null; })
+        .sort(function(a, b){ return b.score - a.score; });
+
+    var strongest = ranked.length ? ranked[0] : null;
+    var weakest   = ranked.length ? ranked[ranked.length-1] : null;
+
+    /* Pair biases */
+    var pairBiases = ovPairBias(bias);
+    var topPair = pairBiases.filter(function(p){ return p.score !== null; })
+        .sort(function(a,b){ return Math.abs(b.score) - Math.abs(a.score); })[0];
+
+    var now = fmtTime();
+
+    /* ---- PC elements ---- */
+    var elSt = document.getElementById('ovStrongest');
+    var elWk = document.getElementById('ovWeakest');
+    var elTp = document.getElementById('ovTopPair');
+    var elSrc = document.getElementById('ovSources');
+    var elLu = document.getElementById('ovLastUpdate');
+    var elSt2 = document.getElementById('ovStatus');
+    if (elSt && strongest) elSt.innerHTML = '<span style="color:'+CS_COLORS[strongest.cur]+';font-weight:900">'+strongest.cur+'</span> <span style="color:#14BC60;font-size:11px">'+( strongest.score >= 0 ? '+' : '')+strongest.score+'</span>';
+    if (elWk && weakest)   elWk.innerHTML = '<span style="color:'+CS_COLORS[weakest.cur]+';font-weight:900">'+weakest.cur+'</span> <span style="color:#F26666;font-size:11px">'+weakest.score+'</span>';
+    if (elTp && topPair)   { var lbl = ovGetLabel(topPair.score); elTp.innerHTML = '<span style="font-weight:900">'+topPair.pair+'</span> <span style="color:'+lbl.color+';font-size:11px">'+lbl.label+'</span>'; }
+    if (elSrc) elSrc.textContent = srcStr;
+    if (elLu) elLu.textContent = 'Updated ' + now;
+    if (elSt2) elSt2.textContent = now;
+
+    /* ---- Mobile summary ---- */
+    var mSt = document.getElementById('mob-ovStrongest');
+    var mWk = document.getElementById('mob-ovWeakest');
+    var mSt2 = document.getElementById('mob-ovStatus');
+    if (mSt && strongest) mSt.innerHTML = '<span style="color:'+CS_COLORS[strongest.cur]+'">'+strongest.cur+'</span> <span style="color:#14BC60;font-size:11px">+'+(strongest.score >= 0 ? strongest.score : strongest.score)+'</span>';
+    if (mWk && weakest)   mWk.innerHTML = '<span style="color:'+CS_COLORS[weakest.cur]+'">'+weakest.cur+'</span> <span style="color:#F26666;font-size:11px">'+weakest.score+'</span>';
+    if (mSt2) mSt2.textContent = now;
+
+    /* ---- Currency cards (shared renderer, placed into both PC and mobile grids) ---- */
+    ['ovCurCards', 'mob-ovCurCards'].forEach(function(gridId) {
+        var grid = document.getElementById(gridId);
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        CS_CURRENCIES.forEach(function(cur) {
+            var d = bias[cur];
+            if (!d || d.score === null) return;
+            var lbl = ovGetLabel(d.score);
+            var color = CS_COLORS[cur];
+            var scoreAbs = Math.abs(d.score);
+            /* Gauge: map -100..+100 to 0..100% fill from center */
+            var gaugePos  = d.score >= 0;
+            var gaugeW    = (scoreAbs / 100 * 50).toFixed(1);
+
+            /* 4 signal mini-bars */
+            function sigBar(val, weight) {
+                if (val === null) return '<div class="ov-signal-row"><div class="ov-signal-label" style="width:52px">—</div><div class="ov-signal-bar"><div class="ov-signal-bar-fill" style="width:0%;background:#333"></div></div><div class="ov-signal-val" style="color:#444">N/A</div></div>';
+                var abs = Math.abs(val), pct = (abs/100*50).toFixed(1);
+                var col = val >= 0 ? '#2F995F' : '#C03939';
+                var leftPct = val >= 0 ? '50%' : (50 - abs/100*50).toFixed(1)+'%';
+                var barW = pct+'%';
+                return '<div class="ov-signal-bar-fill" style="width:'+barW+'%;background:'+col+';position:absolute;'+(val>=0?'left:50%':'right:50%')+'"></div>';
+            }
+
+            var signals = [
+                { label:'RSI',  val: d.rsi,       w:'25%' },
+                { label:'CI',   val: d.ci,        w:'25%' },
+                { label:'COT',  val: d.cot,       w:'35%' },
+                { label:'Sent', val: d.sentiment, w:'15%' }
+            ];
+
+            var sigsHTML = signals.map(function(sig) {
+                var isNull = sig.val === null;
+                var col = isNull ? '#444' : (sig.val >= 0 ? '#2F995F' : '#C03939');
+                var abs = isNull ? 0 : Math.abs(sig.val);
+                var barW = (abs / 100 * 50).toFixed(1);
+                var barPos = (!isNull && sig.val >= 0) ? 'left:50%' : 'right:50%';
+                return '<div class="ov-signal-row">' +
+                    '<div class="ov-signal-label" style="width:28px">'+sig.label+'</div>' +
+                    '<div style="font-size:8px;color:#444;width:16px;flex-shrink:0;">×'+sig.w+'</div>' +
+                    '<div class="ov-signal-bar" style="position:relative">' +
+                        '<div style="position:absolute;top:0;bottom:0;left:50%;width:1px;background:#222"></div>' +
+                        (isNull ? '' : '<div class="ov-signal-bar-fill" style="width:'+barW+'%;background:'+col+';position:absolute;'+barPos+'"></div>') +
+                    '</div>' +
+                    '<div class="ov-signal-val" style="color:'+col+';width:32px;text-align:right">'+(isNull?'—':(sig.val>=0?'+':'')+sig.val)+'</div>' +
+                '</div>';
+            }).join('');
+
+            var card = document.createElement('div');
+            card.className = 'ov-cur-card';
+            card.innerHTML =
+                '<div class="ov-accent" style="background:'+color+'"></div>' +
+                '<div class="ov-card-top">' +
+                    '<span class="ov-cur-name" style="color:'+color+'">'+cur+'</span>' +
+                    '<span class="ov-label-badge" style="background:'+lbl.bg+';color:'+lbl.color+'">'+lbl.label+'</span>' +
+                '</div>' +
+                '<div class="ov-score-row">' +
+                    '<div class="ov-score-num" style="color:'+lbl.color+'">'+(d.score >= 0 ? '+' : '')+d.score+'</div>' +
+                    '<div class="ov-gauge-wrap">' +
+                        '<div class="ov-gauge-mid"></div>' +
+                        '<div class="ov-gauge-fill" style="width:'+gaugeW+'%;'+(gaugePos?'left:50%':'right:50%')+';background:'+lbl.color+'"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ov-signals">'+sigsHTML+'</div>';
+            grid.appendChild(card);
+        });
+    });
+
+    /* ---- Pair bias grid (shared) ---- */
+    ['ovPairsGrid', 'mob-ovPairsGrid'].forEach(function(gridId) {
+        var grid = document.getElementById(gridId);
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        pairBiases.forEach(function(p) {
+            var lbl = p.score !== null ? ovGetLabel(p.score) : { label:'—', color:'#555', bg:'#111' };
+            var scoreDisp = p.score !== null ? (p.score >= 0 ? '+' : '') + p.score : '—';
+            var barW = p.score !== null ? (Math.abs(p.score)/100*50).toFixed(1) : '0';
+            var barPos = (p.score !== null && p.score >= 0) ? 'left:50%' : 'right:50%';
+
+            var b = p.pair.substring(0,3), q = p.pair.substring(3,6);
+            var bColor = CS_COLORS[b] || '#888';
+            var qColor = CS_COLORS[q] || '#888';
+
+            var div = document.createElement('div');
+            div.className = 'ov-pair-row';
+            div.innerHTML =
+                '<div style="display:flex;align-items:center;justify-content:space-between">' +
+                    '<div class="ov-pair-name">' +
+                        '<span style="color:'+bColor+'">'+b+'</span>' +
+                        '<span style="color:#444">/</span>' +
+                        '<span style="color:'+qColor+'">'+q+'</span>' +
+                    '</div>' +
+                    '<div class="ov-pair-label" style="color:'+lbl.color+'">'+lbl.label+'</div>' +
+                '</div>' +
+                '<div class="ov-pair-bias-bar" style="position:relative">' +
+                    '<div style="position:absolute;top:0;bottom:0;left:50%;width:1px;background:#2a2a3a"></div>' +
+                    (p.score !== null ? '<div class="ov-pair-bias-fill" style="width:'+barW+'%;background:'+lbl.color+';'+barPos+'"></div>' : '') +
+                '</div>' +
+                '<div style="display:flex;justify-content:space-between;align-items:center">' +
+                    '<span class="ov-pair-score" style="color:'+lbl.color+'">'+scoreDisp+'</span>' +
+                    (p.baseScore !== undefined && p.quoteScore !== undefined ?
+                        '<span style="font-size:9px;color:#444">'+b+':'+(p.baseScore>=0?'+':'')+p.baseScore+' / '+q+':'+(p.quoteScore>=0?'+':'')+p.quoteScore+'</span>'
+                        : '') +
+                '</div>';
+            grid.appendChild(div);
+        });
+    });
+}
+
+async function ovRefresh() {
+    /* Update status indicators */
+    ['ovStatus','mob-ovStatus'].forEach(function(id){
+        var el = document.getElementById(id); if (el) el.textContent = 'Loading...';
+    });
+
+    /* Step 1: make sure CS data is loaded (we need RSI values) */
+    var needCs = !Object.keys(_mobCsStrengthSeries).length;
+    var needCi = !Object.keys(_ciCurrentLastVals).length;
+
+    var promises = [];
+    if (needCs) promises.push(mobCsLoad());
+    if (needCi) promises.push(ciLoad());
+    if (promises.length) await Promise.all(promises);
+
+    /* Step 2: compute and render */
+    var bias = computeBias();
+    renderOverview(bias);
 }
 </script>
 </body>
