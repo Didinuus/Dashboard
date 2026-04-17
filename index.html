@@ -1535,28 +1535,13 @@ function renderCICombinedChart(labels) {
                         position: 'right',
                         grid: { color: '#1a1a2a' },
                         ticks: {
-                            color: '#444', font:{size:9},
-                            callback: function(v){ return (v>=0?'+':'') + (v*100).toFixed(2) + '%'; }
+                            display: false
                         }
                     }
                 }
             },
             plugins: [{
                 id: 'ciCombinedPlugin',
-                beforeDraw: function(chart) {
-                    /* Fill right padding area with chart background so no black gap */
-                    var c2 = chart.ctx;
-                    var w = chart.width, h = chart.height;
-                    var ca = chart.chartArea;
-                    if (!ca) return;
-                    var yScale = chart.scales.y;
-                    /* Right padding zone: from end of y-axis to canvas right edge */
-                    var padLeft = yScale ? yScale.right : ca.right;
-                    c2.save();
-                    c2.fillStyle = '#101010';
-                    c2.fillRect(padLeft, 0, w - padLeft, h);
-                    c2.restore();
-                },
                 afterDraw: function(chart) {
                     var y = chart.scales.y, ca = chart.chartArea;
                     if (!y || !ca) return;
@@ -1571,12 +1556,28 @@ function renderCICombinedChart(labels) {
                         c2.stroke(); c2.restore();
                     }
 
-                    /* End-of-line value badges (Mataf style) */
+                    /* Draw y-axis tick labels manually in the right padding zone */
+                    var tickX = ca.right + 4;
+                    var ticks = y.ticks || [];
+                    c2.save();
+                    c2.font = '9px Arial';
+                    c2.fillStyle = '#555';
+                    c2.textAlign = 'left';
+                    c2.textBaseline = 'middle';
+                    ticks.forEach(function(tick) {
+                        var v = tick.value;
+                        var tyPx = y.getPixelForValue(v);
+                        if (tyPx < ca.top || tyPx > ca.bottom) return;
+                        var label = (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + '%';
+                        c2.fillText(label, tickX, tyPx);
+                    });
+                    c2.restore();
+
+                    /* End-of-line value badges — placed after the tick labels */
                     var xMax = chart.options.scales.x.max;
                     var items = [];
                     chart.data.datasets.forEach(function(ds) {
                         if (ds.hidden) return;
-                        /* Find last non-null value within visible range */
                         var val = null;
                         var maxIdx = Math.min(Math.round(xMax), ds.data.length - 1);
                         for (var k = maxIdx; k >= 0; k--) {
@@ -1588,7 +1589,7 @@ function renderCICombinedChart(labels) {
                         items.push({ label: ds.label, color: ds.borderColor, val: val, yp: yPx });
                     });
 
-                    /* Sort by y position and spread overlapping badges */
+                    /* Sort and spread overlapping badges */
                     items.sort(function(a, b) { return a.yp - b.yp; });
                     var BH = 16, gap = 2;
                     for (var pass = 0; pass < 10; pass++) {
@@ -1601,9 +1602,9 @@ function renderCICombinedChart(labels) {
                         }
                     }
 
+                    /* Badges sit at the far right of the padding zone */
                     var BW = chart.canvas.id === 'ciCombinedChart' ? 54 : 46;
-                    var yScale = chart.scales.y;
-                    var bx = yScale ? yScale.right + 3 : ca.right + 4;
+                    var bx = chart.width - BW - 2;
 
                     items.forEach(function(item) {
                         var pct = (item.val * 100).toFixed(2);
@@ -1614,7 +1615,7 @@ function renderCICombinedChart(labels) {
                         /* Badge background */
                         c2.save();
                         c2.fillStyle = item.color;
-                        c2.globalAlpha = 0.92;
+                        c2.globalAlpha = 0.95;
                         var r = 3;
                         c2.beginPath();
                         c2.moveTo(bx + r, by);
@@ -1638,13 +1639,13 @@ function renderCICombinedChart(labels) {
                         c2.fillText(text, bx + BW / 2, by + BH / 2);
                         c2.restore();
 
-                        /* Small tick from line end to badge */
+                        /* Tick line from right edge of chart to badge */
                         c2.save();
                         c2.beginPath();
                         c2.moveTo(ca.right, item.yp);
-                        c2.lineTo(bx, by + BH / 2);
+                        c2.lineTo(bx - 1, by + BH / 2);
                         c2.strokeStyle = item.color;
-                        c2.globalAlpha = 0.5;
+                        c2.globalAlpha = 0.4;
                         c2.lineWidth = 1;
                         c2.stroke();
                         c2.restore();
