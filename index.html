@@ -997,12 +997,12 @@ var CI_PAIRS = {
 };
 
 var CI_TF_CONFIG = {
-    M5:  {gran:'M5',  count:500,  view:187,  label:'5 Min'},
-    M15: {gran:'M15', count:400,  view:197,  label:'15 Min'},
-    H1:  {gran:'H1',  count:400,  view:251,  label:'Hourly'},
-    H4:  {gran:'H4',  count:400,  view:274,  label:'4H'},
-    D:   {gran:'D',   count:400,  view:281,  label:'Daily'},
-    W:   {gran:'W',   count:200,  view:100,  label:'Weekly'}
+    M5:  {gran:'M5',  count:800,  view:187,  label:'5 Min'},
+    M15: {gran:'M15', count:700,  view:197,  label:'15 Min'},
+    H1:  {gran:'H1',  count:700,  view:251,  label:'Hourly'},
+    H4:  {gran:'H4',  count:700,  view:274,  label:'4H'},
+    D:   {gran:'D',   count:700,  view:281,  label:'Daily'},
+    W:   {gran:'W',   count:300,  view:100,  label:'Weekly'}
 };
 
 var ciTF = 'H1';
@@ -1521,7 +1521,7 @@ function renderCICombinedChart(labels) {
                 maintainAspectRatio: false,
                 animation: false,
                 interaction: { mode: 'index', intersect: false },
-                layout: { padding: { right: 62 } },
+                layout: { padding: { right: 48 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: { enabled: false }
@@ -1537,7 +1537,8 @@ function renderCICombinedChart(labels) {
                         ticks: {
                             color: '#444', font:{size:9},
                             callback: function(v){ return (v>=0?'+':'') + (v*100).toFixed(2) + '%'; }
-                        }
+                        },
+                        afterFit: function(axis) { axis.width = 0; }
                     }
                 }
             },
@@ -1546,7 +1547,7 @@ function renderCICombinedChart(labels) {
                 beforeDraw: function(chart) {
                     var c2 = chart.ctx, ca = chart.chartArea;
                     if (!ca) return;
-                    /* Fill the right padding zone with the chart background */
+                    /* Fill entire right padding zone with chart background */
                     c2.save();
                     c2.fillStyle = '#101010';
                     c2.fillRect(ca.right, 0, chart.width - ca.right, chart.height);
@@ -1566,7 +1567,22 @@ function renderCICombinedChart(labels) {
                         c2.stroke(); c2.restore();
                     }
 
-                    /* End-of-line badges — placed directly on the y-axis */
+                    /* Draw y-axis tick labels manually in the padding zone */
+                    var ticks = y.ticks || [];
+                    c2.save();
+                    c2.font = '9px Arial';
+                    c2.fillStyle = '#555';
+                    c2.textAlign = 'left';
+                    c2.textBaseline = 'middle';
+                    ticks.forEach(function(tick) {
+                        var tyPx = y.getPixelForValue(tick.value);
+                        if (tyPx < ca.top || tyPx > ca.bottom) return;
+                        var lbl = (tick.value >= 0 ? '+' : '') + (tick.value * 100).toFixed(2) + '%';
+                        c2.fillText(lbl, ca.right + 3, tyPx);
+                    });
+                    c2.restore();
+
+                    /* End-of-line badges flush to right edge of canvas */
                     var xMax = chart.options.scales.x.max;
                     var items = [];
                     chart.data.datasets.forEach(function(ds) {
@@ -1594,8 +1610,8 @@ function renderCICombinedChart(labels) {
                         }
                     }
 
-                    var BW = chart.canvas.id === 'ciCombinedChart' ? 54 : 46;
-                    var bx = ca.right + 2;  /* directly on the y-axis */
+                    var BW = chart.canvas.id === 'ciCombinedChart' ? 44 : 38;
+                    var bx = ca.right + 2;
 
                     items.forEach(function(item) {
                         var pct = (item.val * 100).toFixed(2);
@@ -1607,8 +1623,7 @@ function renderCICombinedChart(labels) {
                         c2.fillStyle = item.color;
                         var r = 3;
                         c2.beginPath();
-                        c2.moveTo(bx + r, by);
-                        c2.lineTo(bx + BW - r, by);
+                        c2.moveTo(bx + r, by); c2.lineTo(bx + BW - r, by);
                         c2.arcTo(bx + BW, by, bx + BW, by + BH, r);
                         c2.lineTo(bx + BW, by + BH - r);
                         c2.arcTo(bx + BW, by + BH, bx + BW - r, by + BH, r);
@@ -1725,15 +1740,19 @@ function ciSetupMouseInteraction(canvas, chart) {
 
     canvas.onwheel = function(e) {
         if (!chart) return; e.preventDefault();
+        var total = chart.data.labels.length;
         var curMin = chart.options.scales.x.min, curMax = chart.options.scales.x.max;
         var range = curMax - curMin, factor = e.deltaY > 0 ? 1.12 : 0.88;
-        var newRange = Math.max(10, Math.min(chart.data.labels.length, range * factor));
+        /* Cap dezoom to actual data length so we never go beyond available candles */
+        var newRange = Math.max(10, Math.min(total - 1, range * factor));
         var mid = (curMin + curMax) / 2;
-        var newMin = Math.max(0, mid - newRange/2);
+        var newMin = Math.max(0, Math.min(total - 1 - newRange, mid - newRange/2));
+        var newMax = Math.min(total - 1, newMin + newRange);
         chart.options.scales.x.min = newMin;
-        chart.options.scales.x.max = Math.min(chart.data.labels.length-1, mid + newRange/2);
+        chart.options.scales.x.max = newMax;
         ciUpdateFromView(newMin);
-        if (newMin < newRange * 0.15) ciLoadMoreHistory();
+        /* Load more history when near the left edge (30% threshold) */
+        if (newMin < newRange * 0.30) ciLoadMoreHistory();
     };
 
     canvas.style.cursor = 'crosshair';
@@ -1762,10 +1781,13 @@ function mobSetupChartTouchCI(canvas, chart) {
     function setView(mn, mx) {
         var t = chart.data.labels.length;
         var newMin = Math.max(0, Math.round(mn));
+        var newMax = Math.min(t - 1, Math.round(mx));
+        /* Never go beyond available data */
+        if (newMax - newMin > t - 1) { newMin = 0; newMax = t - 1; }
         chart.options.scales.x.min = newMin;
-        chart.options.scales.x.max = Math.min(t - 1, Math.round(mx));
+        chart.options.scales.x.max = newMax;
         ciUpdateFromView(newMin);
-        if (newMin < (mx - mn) * 0.15) ciLoadMoreHistory();
+        if (newMin < (newMax - newMin) * 0.30) ciLoadMoreHistory();
     }
 
     function updateHoverFromTouch(touchX) {
