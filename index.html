@@ -2450,13 +2450,6 @@ async function csLoad(){
     await Promise.all(pairs.map(async function(p){results[p]=await fetchCandles(p,CS_COUNT[csTF]+20);}));
     var ok=pairs.filter(function(p){return results[p]&&results[p].closes.length>14;});
     if(!ok.length){if(el)el.textContent='Error';return;}
-
-    /* Exclude the last candle (still open/incomplete) for stability */
-    ok.forEach(function(p){
-        results[p].closes=results[p].closes.slice(0,-1);
-        results[p].times=results[p].times.slice(0,-1);
-    });
-
     var rsiMap={};ok.forEach(function(p){rsiMap[p]=calcRSI(results[p].closes);});
 
     /* Use the smallest length but cap to exact CS_COUNT — all series same length */
@@ -2609,13 +2602,6 @@ async function mobCsLoad() {
     }));
     var ok = pairs.filter(function(p){ return results[p] && results[p].closes.length > 14; });
     if (!ok.length) { if (el) el.textContent = 'Error'; return; }
-
-    /* Exclude last incomplete candle for stability */
-    ok.forEach(function(p){
-        results[p].closes = results[p].closes.slice(0, -1);
-        results[p].times  = results[p].times.slice(0, -1);
-    });
-
     var rsiMap = {};
     ok.forEach(function(p){ rsiMap[p] = calcRSI(results[p].closes); });
     var lens = ok.map(function(p){ return rsiMap[p].length; });
@@ -2966,14 +2952,22 @@ window.addEventListener('load', function() {
             var po=document.getElementById('page-overview');
             if(po&&po.classList.contains('active')) ovRefresh();
         } else {
-            var mp=document.getElementById('mob-page-strength');
-            if(mp&&mp.classList.contains('active')){ mobCsLoad(); setTimeout(mobFxpLoad,1000); }
             var mpc=document.getElementById('mob-page-ci');
             if(mpc&&mpc.classList.contains('active')) ciLoad();
             var mpo=document.getElementById('mob-page-overview');
             if(mpo&&mpo.classList.contains('active')) ovRefresh();
         }
     }, 10*60*1000);
+    /* CS refreshes every 5 minutes (live candle) */
+    setInterval(function(){
+        if (!IS_MOBILE) {
+            var p=document.getElementById('page-strength');
+            if(p&&p.classList.contains('active')){ csLoad(); setTimeout(fxpLoad,1000); }
+        } else {
+            var mp=document.getElementById('mob-page-strength');
+            if(mp&&mp.classList.contains('active')){ mobCsLoad(); setTimeout(mobFxpLoad,1000); }
+        }
+    }, 5*60*1000);
     setInterval(function(){ if(!IS_MOBILE)renderRates(); else mobRenderRates(); }, 60*60*1000);
 });
 
