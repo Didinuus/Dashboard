@@ -1000,7 +1000,7 @@ var CI_TF_CONFIG = {
     M5:  {gran:'M5',  count:1000, view:200,  label:'5 Min',  anchor:'week'},
     M15: {gran:'M15', count:800,  view:160,  label:'15 Min', anchor:'week'},
     H1:  {gran:'H1',  count:720,  view:120,  label:'Hourly', anchor:'week'},
-    H4:  {gran:'H4',  count:500,  view:100,  label:'4H',     anchor:'month'},
+    H4:  {gran:'H4',  count:500,  view:270,  label:'4H',     anchor:'year'},
     D:   {gran:'D',   count:365,  view:180,  label:'Daily',  anchor:'year'},
     W:   {gran:'W',   count:200,  view:100,  label:'Weekly', anchor:'year'}
 };
@@ -1540,6 +1540,7 @@ function renderCICombinedChart(labels) {
                 maintainAspectRatio: false,
                 animation: false,
                 interaction: { mode: 'index', intersect: false },
+                layout: { padding: { right: 62 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: { enabled: false }
@@ -1552,7 +1553,8 @@ function renderCICombinedChart(labels) {
                     y: {
                         position: 'right',
                         grid: { color: '#1a1a2a' },
-                        ticks: { color:'#666', font:{size:9},
+                        ticks: {
+                            color: '#444', font:{size:9},
                             callback: function(v){ return (v>=0?'+':'') + (v*100).toFixed(2) + '%'; }
                         }
                     }
@@ -1573,6 +1575,84 @@ function renderCICombinedChart(labels) {
                         c2.strokeStyle = '#4a4a6a'; c2.lineWidth = 1.5; c2.setLineDash([4,4]);
                         c2.stroke(); c2.restore();
                     }
+
+                    /* End-of-line value badges (Mataf style) */
+                    var xMax = chart.options.scales.x.max;
+                    var items = [];
+                    chart.data.datasets.forEach(function(ds) {
+                        if (ds.hidden) return;
+                        /* Find last non-null value within visible range */
+                        var val = null;
+                        var maxIdx = Math.min(Math.round(xMax), ds.data.length - 1);
+                        for (var k = maxIdx; k >= 0; k--) {
+                            if (ds.data[k] !== null && ds.data[k] !== undefined) { val = ds.data[k]; break; }
+                        }
+                        if (val === null) return;
+                        var yPx = y.getPixelForValue(val);
+                        if (yPx < ca.top || yPx > ca.bottom) return;
+                        items.push({ label: ds.label, color: ds.borderColor, val: val, yp: yPx });
+                    });
+
+                    /* Sort by y position and spread overlapping badges */
+                    items.sort(function(a, b) { return a.yp - b.yp; });
+                    var BH = 16, gap = 2;
+                    for (var pass = 0; pass < 10; pass++) {
+                        for (var ii = 1; ii < items.length; ii++) {
+                            if (items[ii].yp - items[ii-1].yp < BH + gap) {
+                                var mid = (items[ii].yp + items[ii-1].yp) / 2;
+                                items[ii-1].yp = mid - (BH + gap) / 2;
+                                items[ii].yp   = mid + (BH + gap) / 2;
+                            }
+                        }
+                    }
+
+                    var BW = chart.canvas.id === 'ciCombinedChart' ? 54 : 46;
+                    var bx = ca.right + 4;
+
+                    items.forEach(function(item) {
+                        var pct = (item.val * 100).toFixed(2);
+                        var text = (item.val >= 0 ? '+' : '') + pct + '%';
+                        var by = item.yp - BH / 2;
+                        by = Math.max(ca.top, Math.min(ca.bottom - BH, by));
+
+                        /* Badge background */
+                        c2.save();
+                        c2.fillStyle = item.color;
+                        c2.globalAlpha = 0.92;
+                        var r = 3;
+                        c2.beginPath();
+                        c2.moveTo(bx + r, by);
+                        c2.lineTo(bx + BW - r, by);
+                        c2.arcTo(bx + BW, by, bx + BW, by + BH, r);
+                        c2.lineTo(bx + BW, by + BH - r);
+                        c2.arcTo(bx + BW, by + BH, bx + BW - r, by + BH, r);
+                        c2.lineTo(bx + r, by + BH);
+                        c2.arcTo(bx, by + BH, bx, by + BH - r, r);
+                        c2.lineTo(bx, by + r);
+                        c2.arcTo(bx, by, bx + r, by, r);
+                        c2.closePath();
+                        c2.fill();
+                        c2.globalAlpha = 1;
+
+                        /* Badge text */
+                        c2.fillStyle = '#fff';
+                        c2.font = 'bold 9px Arial';
+                        c2.textAlign = 'center';
+                        c2.textBaseline = 'middle';
+                        c2.fillText(text, bx + BW / 2, by + BH / 2);
+                        c2.restore();
+
+                        /* Small tick from line end to badge */
+                        c2.save();
+                        c2.beginPath();
+                        c2.moveTo(ca.right, item.yp);
+                        c2.lineTo(bx, by + BH / 2);
+                        c2.strokeStyle = item.color;
+                        c2.globalAlpha = 0.5;
+                        c2.lineWidth = 1;
+                        c2.stroke();
+                        c2.restore();
+                    });
 
                     /* Floating hover labels */
                     var hIdx = (chart.canvas.id === 'ciCombinedChart') ? _ciHoverIdx : _mobCiHoverIdx;
