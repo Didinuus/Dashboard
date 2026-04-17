@@ -1543,6 +1543,15 @@ function renderCICombinedChart(labels) {
             },
             plugins: [{
                 id: 'ciCombinedPlugin',
+                beforeDraw: function(chart) {
+                    var c2 = chart.ctx, ca = chart.chartArea;
+                    if (!ca) return;
+                    /* Fill the right padding zone with the chart background */
+                    c2.save();
+                    c2.fillStyle = '#101010';
+                    c2.fillRect(ca.right, 0, chart.width - ca.right, chart.height);
+                    c2.restore();
+                },
                 afterDraw: function(chart) {
                     var y = chart.scales.y, ca = chart.chartArea;
                     if (!y || !ca) return;
