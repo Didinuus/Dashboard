@@ -79,17 +79,6 @@
         .cs-header-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
         .cs-chart-wrap { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:15px; display:flex; flex-direction:column; }
         #csChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
-        .cs-sidebar { display:flex; flex-direction:column; gap:10px; }
-        .cs-rank-card { background:#161616; border:1px solid #1e2230; border-radius:8px; overflow:hidden; flex:1; display:flex; flex-direction:column; }
-        .cs-rank-header { padding:10px 14px; font-weight:bold; font-size:13px; border-bottom:1px solid #1e2230; text-align:center; }
-        .cs-rank-body { flex:1; overflow-y:auto; padding:8px; scrollbar-width:thin; scrollbar-color:#888 #1e2230; }
-        .cs-rank-row { display:flex; align-items:center; gap:10px; padding:7px 8px; border-radius:6px; margin-bottom:4px; }
-        .cs-rank-pos { font-size:10px; color:#555; width:14px; text-align:right; flex-shrink:0; }
-        .cs-rank-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-        .cs-rank-name { font-weight:bold; font-size:13px; flex:1; }
-        .cs-rank-val { font-size:12px; font-weight:bold; }
-        .cs-rank-bar-wrap { flex:2; height:6px; background:#1e2230; border-radius:3px; overflow:hidden; }
-        .cs-rank-bar { height:100%; border-radius:3px; transition:width .4s ease; }
         .cs-tf-btns { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
         .cs-tf-btn { padding:5px 12px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; }
         .cs-tf-btn:hover { background:#1e2230; color:#fff; }
@@ -221,15 +210,6 @@
         .ci-combined-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 
         /* Rank table */
-        .ci-rank-table-wrap { background:#161616; border:1px solid #1e2230; border-radius:8px; overflow:hidden; }
-        .ci-rank-table { width:100%; border-collapse:collapse; font-size:13px; }
-        .ci-rank-table th { background:#1a1a2a; color:#888; padding:10px 14px; font-size:11px; font-weight:bold; text-align:left; letter-spacing:0.5px; border-bottom:1px solid #1e2230; }
-        .ci-rank-table td { padding:10px 14px; border-bottom:1px solid #111; }
-        .ci-rank-table tr:last-child td { border-bottom:none; }
-        .ci-rank-table tr:hover td { background:#1a1a2a; }
-        .ci-rank-bar-cell { width:200px; }
-        .ci-rank-bar-outer { height:8px; background:#111; border-radius:4px; overflow:hidden; }
-        .ci-rank-bar-inner { height:100%; border-radius:4px; }
 
         /* =============================================
            MOBILE STYLES
@@ -1993,49 +1973,6 @@ function closeCiModal() {
     document.getElementById('ciModalOverlay').classList.remove('open');
 }
 
-/* --- Rank table --- */
-function renderCIRankTable() {
-    var tbody = document.getElementById('ciRankBody'); if (!tbody) return;
-    var entries = CS_CURRENCIES.map(function(cur) {
-        var s = _ciIndexSeries[cur] || [];
-        var last = s.length ? s[s.length-1] : null;
-        var prev = s.length > 1 ? s[s.length-2] : null;
-        var chg = (last !== null && prev !== null) ? last - prev : null;
-        var chgPct = (chg !== null && prev !== 0) ? chg/Math.abs(prev)*100 : null;
-        var cardVal = _ciCardVals[cur];
-        return { cur:cur, val:last, cardVal:cardVal, chg:chg, chgPct:chgPct };
-    }).filter(function(e){ return e.val !== null; })
-      .sort(function(a,b){ return (b.cardVal||0) - (a.cardVal||0); });
-
-    var maxVal = entries.length ? (entries[0].cardVal||0) : 0;
-    var minVal = entries.length ? (entries[entries.length-1].cardVal||0) : 0;
-    var range = maxVal - minVal || 1;
-
-    tbody.innerHTML = '';
-    entries.forEach(function(e, i) {
-        var color = CS_COLORS[e.cur];
-        var isUp = e.cardVal !== null ? e.cardVal >= 100 : (e.chg !== null ? e.chg >= 0 : true);
-        var chgColor = isUp ? '#2F995F' : '#C03939';
-        var barPct = e.cardVal !== null ? ((e.cardVal - minVal) / range * 100).toFixed(1) : '50';
-        var displayVal = e.cardVal !== null ? e.cardVal.toFixed(3) : '—';
-        var trendLabel = (e.cardVal||100) > 100.05
-            ? '<span style="color:#2F995F;font-weight:bold">▲ Strong</span>'
-            : (e.cardVal||100) < 99.95
-                ? '<span style="color:#C03939;font-weight:bold">▼ Weak</span>'
-                : '<span style="color:#888">― Neutral</span>';
-        var row = document.createElement('tr');
-        row.innerHTML =
-            '<td style="font-size:13px;color:#555;">' + (i+1) + '</td>' +
-            '<td><span style="margin-right:6px">' + CI_FLAGS[e.cur] + '</span><b style="color:'+color+'">' + e.cur + '</b></td>' +
-            '<td style="font-size:14px;font-weight:bold;color:'+color+'">' + displayVal + '</td>' +
-            '<td style="color:'+chgColor+';font-weight:bold">' + (e.chg !== null ? (isUp?'▲ +':'▼ ') + (e.chg*100).toFixed(4) + '%' : '—') + '</td>' +
-            '<td style="color:'+chgColor+';font-weight:bold">' + (e.chgPct !== null ? (isUp?'+':'') + e.chgPct.toFixed(3) + '%' : '—') + '</td>' +
-            '<td>' + trendLabel + '</td>' +
-            '<td class="ci-rank-bar-cell"><div class="ci-rank-bar-outer"><div class="ci-rank-bar-inner" style="width:'+barPct+'%;background:'+color+'"></div></div></td>';
-        tbody.appendChild(row);
-    });
-}
-
 /* =========================================================
    MOBILE NAV
    ========================================================= */
@@ -2475,7 +2412,6 @@ async function csLoad(){
     var viewLen=CS_VIEW[csTF]||100,EMPTY_RIGHT=Math.round(viewLen*0.10);
     for(var e=0;e<EMPTY_RIGHT;e++){labels.push('');CS_CURRENCIES.forEach(function(cur){strengthSeries[cur].push(null);});_csRawTimes.push(null);}
     renderCSChart(labels,strengthSeries);
-    renderCSRank(strengthSeries,'csRankBody');
     if(el)el.textContent=fmtTime();
 }
 
@@ -2634,29 +2570,23 @@ function renderCSRank(series, bodyId) {
         return { cur: cur, val: f.length ? f[f.length-1] : null };
     }).filter(function(x){ return x.val !== null; });
     vals.sort(function(a, b){ return b.val - a.val; });
-
     var body = document.getElementById(bodyId);
     if (!body) return;
     body.innerHTML = '';
-
     var max = vals.length ? vals[0].val : 100, min = vals.length ? vals[vals.length-1].val : 0;
-    var isPC = bodyId === 'csRankBody';
-    var pfx = isPC ? 'cs' : 'mob-cs';
-
     vals.forEach(function(item, i) {
         var pct = max === min ? 50 : Math.round((item.val - min) / (max - min) * 100);
         var color = CS_COLORS[item.cur];
         var row = document.createElement('div');
-        row.className = pfx + '-rank-row';
+        row.className = 'mob-cs-rank-row';
         row.innerHTML =
-            '<div class="' + pfx + '-rank-pos">' + (i+1) + '</div>' +
-            '<div class="' + pfx + '-rank-dot" style="background:' + color + '"></div>' +
-            '<div class="' + pfx + '-rank-name">' + item.cur + '</div>' +
-            '<div class="' + pfx + '-rank-bar-wrap"><div class="' + pfx + '-rank-bar" style="width:' + pct + '%;background:' + color + '"></div></div>' +
-            '<div class="' + pfx + '-rank-val" style="color:' + color + '">' + item.val.toFixed(1) + '</div>';
+            '<div class="mob-cs-rank-pos">' + (i+1) + '</div>' +
+            '<div class="mob-cs-rank-dot" style="background:' + color + '"></div>' +
+            '<div class="mob-cs-rank-name">' + item.cur + '</div>' +
+            '<div class="mob-cs-rank-bar-wrap"><div class="mob-cs-rank-bar" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+            '<div class="mob-cs-rank-val" style="color:' + color + '">' + item.val.toFixed(1) + '</div>';
         body.appendChild(row);
     });
-
     var strong = vals.filter(function(x){ return x.val >= 55; }).map(function(x){ return x.cur; });
     var weak   = vals.filter(function(x){ return x.val <= 45; }).map(function(x){ return x.cur; });
     if (strong.length || weak.length) {
@@ -2996,12 +2926,12 @@ function mobFxpRenderHeatmap(results){var lookup={};FXP_PAIRS.forEach(function(p
    ========================================================= */
 var IR_BANKS=[
     {name:'Federal Reserve',short:'Fed',flag:'&#127482;&#127480;',currency:'USD',rate:3.625,prev:4.375,color:'#1C79B3',nextMeeting:'Apr 28, 2026',expectation:'Hold (3.5–3.75)',expectationDir:0,cpi:2.4,history:[5.50,5.25,5.00,4.75,4.50,4.25,4.00,3.75,3.50,3.25,3.00,2.75,3.625,3.625],lastChange:'Dec 10, 2025',lastChangeBps:-25},
-    {name:'European Central Bank',short:'ECB',flag:'&#127466;&#127482;',currency:'EUR',rate:2.15,prev:2.40,color:'#2E832B',nextMeeting:'Apr 29, 2026',expectation:'Hold — Iran war risk',expectationDir:0,cpi:2.6,history:[4.50,4.00,3.75,3.50,3.25,3.00,2.75,2.50,2.40,2.25,2.15,2.15,2.15,2.15],lastChange:'Jun 5, 2025',lastChangeBps:0},
-    {name:'Bank of England',short:'BoE',flag:'&#127468;&#127463;',currency:'GBP',rate:3.75,prev:4.25,color:'#AD4055',nextMeeting:'May 7, 2026',expectation:'Hold',expectationDir:0,cpi:3.0,history:[5.25,5.25,5.00,4.75,4.50,4.25,4.00,3.75,3.75,3.75,3.75,3.75,3.75,3.75],lastChange:'Dec 18, 2025',lastChangeBps:-25},
-    {name:'Bank of Japan',short:'BoJ',flag:'&#127471;&#127477;',currency:'JPY',rate:0.75,prev:0.50,color:'#885713',nextMeeting:'Apr 27, 2026',expectation:'Hold — hike bias',expectationDir:0,cpi:1.5,history:[-0.10,-0.10,0.00,0.00,0.10,0.10,0.25,0.25,0.50,0.50,0.75,0.75,0.75,0.75],lastChange:'Dec 18, 2025',lastChangeBps:+25},
-    {name:'Bank of Canada',short:'BoC',flag:'&#127464;&#127462;',currency:'CAD',rate:2.25,prev:2.75,color:'#13527B',nextMeeting:'Apr 29, 2026',expectation:'Hold (2.25)',expectationDir:0,cpi:1.8,history:[5.00,4.75,4.50,4.25,4.00,3.75,3.50,3.25,3.00,2.75,2.50,2.25,2.25,2.25],lastChange:'Oct 29, 2025',lastChangeBps:-25},
-    {name:'Reserve Bank of Australia',short:'RBA',flag:'&#127462;&#127482;',currency:'AUD',rate:4.10,prev:3.85,color:'#1A4817',nextMeeting:'May 4, 2026',expectation:'Hold — data dependent',expectationDir:0,cpi:3.8,history:[4.35,4.35,4.10,3.85,3.60,3.60,3.85,3.85,3.85,3.85,3.85,3.85,3.85,4.10],lastChange:'Mar 17, 2026',lastChangeBps:+25},
-    {name:'Reserve Bank of New Zealand',short:'RBNZ',flag:'&#127475;&#127487;',currency:'NZD',rate:2.25,prev:2.75,color:'#777777',nextMeeting:'Apr 7, 2026',expectation:'Hold (2.25)',expectationDir:0,cpi:3.1,history:[5.50,5.50,5.25,5.00,4.75,4.25,4.00,3.75,3.50,3.00,2.75,2.50,2.25,2.25],lastChange:'Nov 25, 2025',lastChangeBps:-25},
+    {name:'European Central Bank',short:'ECB',flag:'&#127466;&#127482;',currency:'EUR',rate:2.15,prev:2.40,color:'#2E832B',nextMeeting:'Apr 29, 2026',expectation:'Hold — Iran war risk',expectationDir:0,cpi:2.5,history:[4.50,4.00,3.75,3.50,3.25,3.00,2.75,2.50,2.40,2.25,2.15,2.15,2.15,2.15],lastChange:'Jun 5, 2025',lastChangeBps:0},
+    {name:'Bank of England',short:'BoE',flag:'&#127468;&#127463;',currency:'GBP',rate:3.75,prev:4.25,color:'#AD4055',nextMeeting:'Apr 30, 2026',expectation:'Hold',expectationDir:0,cpi:3.0,history:[5.25,5.25,5.00,4.75,4.50,4.25,4.00,3.75,3.75,3.75,3.75,3.75,3.75,3.75],lastChange:'Dec 18, 2025',lastChangeBps:-25},
+    {name:'Bank of Japan',short:'BoJ',flag:'&#127471;&#127477;',currency:'JPY',rate:0.75,prev:0.50,color:'#885713',nextMeeting:'Apr 27, 2026',expectation:'Hold — hike bias',expectationDir:0,cpi:1.3,history:[-0.10,-0.10,0.00,0.00,0.10,0.10,0.25,0.25,0.50,0.50,0.75,0.75,0.75,0.75],lastChange:'Dec 18, 2025',lastChangeBps:+25},
+    {name:'Bank of Canada',short:'BoC',flag:'&#127464;&#127462;',currency:'CAD',rate:2.25,prev:2.75,color:'#13527B',nextMeeting:'Apr 29, 2026',expectation:'Hold (2.25)',expectationDir:0,cpi:1.8,history:[5.00,4.75,4.50,4.25,4.00,3.75,3.50,3.25,3.00,2.75,2.50,2.25,2.25,2.25],lastChange:'Jan 29, 2026',lastChangeBps:-25},
+    {name:'Reserve Bank of Australia',short:'RBA',flag:'&#127462;&#127482;',currency:'AUD',rate:4.10,prev:3.85,color:'#1A4817',nextMeeting:'May 6, 2026',expectation:'Hold — inflation risk',expectationDir:0,cpi:3.8,history:[4.35,4.35,4.10,3.85,3.60,3.60,3.85,3.85,3.85,3.85,3.85,3.85,3.85,4.10],lastChange:'Mar 17, 2026',lastChangeBps:+25},
+    {name:'Reserve Bank of New Zealand',short:'RBNZ',flag:'&#127475;&#127487;',currency:'NZD',rate:2.25,prev:2.75,color:'#777777',nextMeeting:'May 28, 2026',expectation:'Hold (2.25)',expectationDir:0,cpi:3.1,history:[5.50,5.50,5.25,5.00,4.75,4.25,4.00,3.75,3.50,3.00,2.75,2.50,2.25,2.25],lastChange:'Nov 25, 2025',lastChangeBps:-25},
     {name:'Swiss National Bank',short:'SNB',flag:'&#127464;&#127469;',currency:'CHF',rate:0.00,prev:0.25,color:'#6C2835',nextMeeting:'Jun 18, 2026',expectation:'Hold — FX intervention',expectationDir:0,cpi:0.1,history:[1.75,1.75,1.50,1.25,1.00,0.75,0.50,0.25,0.00,0.00,0.00,0.00,0.00,0.00],lastChange:'Jun 19, 2025',lastChangeBps:-25},
 ];
 var irHistCharts={},mobIrHistCharts={};
@@ -3039,7 +2969,7 @@ function renderRates(){
             irHistCharts[b.short]=new Chart(ctx3,{type:'line',data:{labels:labels.slice(0,b.history.length),datasets:[{label:'Rate',data:b.history,borderColor:b.color,backgroundColor:b.color+'22',borderWidth:2,pointRadius:3,pointBackgroundColor:b.color,fill:true,tension:0.2,stepped:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d0d0d',borderColor:'#1e2230',borderWidth:1,callbacks:{label:function(c){return' '+c.parsed.y.toFixed(2)+'%';}}}},scales:{x:{grid:{color:'#111'},ticks:{color:'#555',font:{size:8},maxTicksLimit:7,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:8},callback:function(v){return v.toFixed(1)+'%';}}}}}}); 
         });
     },100);
-    var isel=document.getElementById('irStatus');if(isel)isel.textContent='Updated Apr 6, 2026';
+    var isel=document.getElementById('irStatus');if(isel)isel.textContent='Updated Apr 17, 2026';
 }
 
 function mobRenderRates(){
@@ -3359,15 +3289,6 @@ function renderOverview(bias) {
             var gaugeW    = (scoreAbs / 100 * 50).toFixed(1);
 
             /* 4 signal mini-bars */
-            function sigBar(val, weight) {
-                if (val === null) return '<div class="ov-signal-row"><div class="ov-signal-label" style="width:52px">—</div><div class="ov-signal-bar"><div class="ov-signal-bar-fill" style="width:0%;background:#333"></div></div><div class="ov-signal-val" style="color:#444">N/A</div></div>';
-                var abs = Math.abs(val), pct = (abs/100*50).toFixed(1);
-                var col = val >= 0 ? '#2F995F' : '#C03939';
-                var leftPct = val >= 0 ? '50%' : (50 - abs/100*50).toFixed(1)+'%';
-                var barW = pct+'%';
-                return '<div class="ov-signal-bar-fill" style="width:'+barW+'%;background:'+col+';position:absolute;'+(val>=0?'left:50%':'right:50%')+'"></div>';
-            }
-
             var signals = [
                 { label:'RSI',  val: d.rsi,       w:'25%' },
                 { label:'CI',   val: d.ci,        w:'20%' },
