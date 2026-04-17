@@ -823,7 +823,7 @@
             <div class="mob-cs-legend" id="mob-ciCombinedLegend"></div>
             <!-- Combined chart mobile -->
             <div class="mob-cs-chart-wrap">
-                <div style="position:relative;height:220px;background:#101010;border-radius:6px;overflow:hidden;touch-action:none;" id="mobCiChartInner">
+                <div class="mob-cs-chart-inner" id="mobCiChartInner">
                     <canvas id="mob-ciCombinedChart"></canvas>
                 </div>
             </div>
@@ -1587,22 +1587,38 @@ function renderCICombinedChart(labels) {
 function buildCICombinedLegend() {
     ['ciCombinedLegend','mob-ciCombinedLegend'].forEach(function(lid) {
         var leg = document.getElementById(lid); if (!leg) return;
+        var isMob = lid === 'mob-ciCombinedLegend';
         leg.innerHTML = '';
         CS_CURRENCIES.forEach(function(cur) {
             var item = document.createElement('div');
-            item.className = 'ci-combined-legend-item' + (ciCombinedHidden.has(cur) ? ' ci-hidden' : '');
-            item.innerHTML = '<div class="ci-combined-legend-dot" style="background:'+CS_COLORS[cur]+'"></div><span>'+cur+'</span>';
+            var isHidden = ciCombinedHidden.has(cur);
+            if (isMob) {
+                /* Mobile: same style as CS legend (with border) */
+                item.className = 'mob-cs-legend-item' + (isHidden ? ' hidden' : '');
+                item.innerHTML = '<div class="mob-cs-legend-dot" style="background:'+CS_COLORS[cur]+'"></div><span style="color:'+(isHidden?'#555':'#ccc')+'">'+cur+'</span>';
+            } else {
+                /* PC: existing CI combined legend style */
+                item.className = 'ci-combined-legend-item' + (isHidden ? ' ci-hidden' : '');
+                item.innerHTML = '<div class="ci-combined-legend-dot" style="background:'+CS_COLORS[cur]+'"></div><span>'+cur+'</span>';
+            }
             item.onclick = function() {
                 if (ciCombinedHidden.has(cur)) ciCombinedHidden.delete(cur);
                 else ciCombinedHidden.add(cur);
+                var nowHidden = ciCombinedHidden.has(cur);
                 /* Sync both legend instances */
                 ['ciCombinedLegend','mob-ciCombinedLegend'].forEach(function(lid2) {
+                    var isMob2 = lid2 === 'mob-ciCombinedLegend';
                     var leg2 = document.getElementById(lid2); if (!leg2) return;
-                    leg2.querySelectorAll('.ci-combined-legend-item').forEach(function(el) {
+                    leg2.querySelectorAll(isMob2 ? '.mob-cs-legend-item' : '.ci-combined-legend-item').forEach(function(el) {
                         var span = el.querySelector('span');
                         if (span && span.textContent === cur) {
-                            if (ciCombinedHidden.has(cur)) el.classList.add('ci-hidden');
-                            else el.classList.remove('ci-hidden');
+                            if (isMob2) {
+                                if (nowHidden) { el.classList.add('hidden'); span.style.color='#555'; }
+                                else { el.classList.remove('hidden'); span.style.color='#ccc'; }
+                            } else {
+                                if (nowHidden) el.classList.add('ci-hidden');
+                                else el.classList.remove('ci-hidden');
+                            }
                         }
                     });
                 });
