@@ -279,7 +279,7 @@
         /* Pair bias section */
         .ov-pairs-section { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:16px; }
         .ov-pairs-title { font-size:12px; font-weight:bold; color:#aaa; letter-spacing:1px; text-transform:uppercase; margin-bottom:14px; }
-        .ov-pairs-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+        .ov-pairs-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
         .ov-pair-row {
             background:#111; border:1px solid #1e2230; border-radius:7px;
             padding:10px 12px; display:flex; flex-direction:column; gap:5px;
@@ -383,7 +383,7 @@
             .mob-calendar-wrap { background:#161616; border:1px solid #1e2230; border-radius:8px; overflow:hidden; height:calc(100dvh - 180px); height:calc(100vh - 180px); }
             .pairs-modal { width:95vw; max-height:80vh; padding:16px; }
             .ov-top-row { grid-template-columns:1fr 1fr; gap:8px; }
-            .ov-pairs-grid { grid-template-columns:1fr 1fr; gap:6px; }
+            .ov-pairs-grid { grid-template-columns:repeat(2,1fr); gap:6px; }
             .ov-summary { gap:10px; padding:10px 12px; }
             .ov-summary-divider { display:none; }
             .ov-cur-card { padding:10px 12px; }
@@ -431,7 +431,6 @@
         <button class="tab-btn"         onclick="showTab('strength')">Currency Strength</button>
         <button class="tab-btn"         onclick="showTab('ci')">Currency Index</button>
         <button class="tab-btn"         onclick="showTab('macropage')">Macro</button>
-        <button class="tab-btn"         onclick="showTab('calendar')">Economic Calendar</button>
     </div>
 
     <div class="pairs-modal-overlay" id="pairsModalOverlay" onclick="if(event.target===this)closePairsModal()">
@@ -482,7 +481,7 @@
                 <div class="ov-pairs-title">Pair Directional Bias</div>
                 <div class="ov-pairs-grid" id="ovPairsGrid"></div>
             </div>
-            <div class="ov-legend-note">Score = RSI ×25% + CI ×25% + COT ×35% + Sentiment Contrarian ×15% &nbsp;|&nbsp; Range −100 to +100 &nbsp;|&nbsp; COT: institutional lev. funds net position &nbsp;|&nbsp; Sentiment: retail contrarian signal</div>
+            <div class="ov-legend-note">Score = RSI ×25% + CI ×20% + COT ×25% + Sentiment Contrarian ×30% &nbsp;|&nbsp; Range −100 to +100 &nbsp;|&nbsp; COT: institutional lev. funds net position &nbsp;|&nbsp; Sentiment: retail contrarian signal</div>
         </div>
     </div>
 
@@ -636,17 +635,6 @@
         <div class="ci-grid" id="ciGrid">
             <div style="grid-column:1/-1;text-align:center;padding:40px;color:#555;font-size:14px;">Loading currency indices...</div>
         </div>
-
-        <!-- Rank table -->
-        <div style="margin-top:15px;">
-            <div class="page-header" style="justify-content:center;">Current Index Values &amp; Ranking</div>
-            <div class="ci-rank-table-wrap">
-                <table class="ci-rank-table">
-                    <thead><tr><th>#</th><th>Currency</th><th>Variation</th><th>Change (candle)</th><th>Change %</th><th>Trend</th><th style="width:200px;">Relative Strength</th></tr></thead>
-                    <tbody id="ciRankBody"></tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
     <!-- MACRO PAGE -->
@@ -663,27 +651,26 @@
             </div>
             <div class="ir-layout">
                 <div class="ir-cards-grid" id="irCardsGrid"></div>
-                <div class="ir-comparison-card">
-                    <div class="ir-comp-title">Rate Comparison &mdash; Central Banks</div>
-                    <div id="irBarsContainer"></div>
-                </div>
                 <div>
                     <div class="page-header" style="justify-content:center;">Interest Rate History</div>
                     <div class="ir-hist-grid" id="irHistGrid"></div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- CALENDAR -->
-    <div class="tab-page" id="page-calendar">
-        <div class="page-header" style="justify-content:center;">Economic Calendar</div>
-        <div class="calendar-section">
-            <div class="tradingview-widget-container" style="flex:1;min-height:0;">
-                <div class="tradingview-widget-container__widget" style="height:100%;"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-                {"colorTheme":"dark","isTransparent":true,"locale":"en","countryFilter":"us,ca,eu,fr,de,es,ch,it,gb,au,nz,jp","importanceFilter":"-1,0,1","width":"100%","height":"100%"}
-                </script>
+            <!-- Economic Calendar embedded at bottom of macro -->
+            <div class="macro-page-section" style="margin-top:20px;">
+                <div class="macro-page-section-title">
+                    <div class="section-left"></div>
+                    <span class="section-title-text">Economic Calendar</span>
+                    <div class="section-right"></div>
+                </div>
+                <div class="calendar-section">
+                    <div class="tradingview-widget-container" style="flex:1;min-height:0;">
+                        <div class="tradingview-widget-container__widget" style="height:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+                        {"colorTheme":"dark","isTransparent":true,"locale":"en","countryFilter":"us,ca,eu,fr,de,es,ch,it,gb,au,nz,jp","importanceFilter":"-1,0,1","width":"100%","height":"100%"}
+                        </script>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -875,17 +862,12 @@
                 </div>
             </div>
             <div class="mob-ir-cards-grid" id="mob-irCardsGrid"></div>
-            <div class="mob-chart-card">
-                <div class="mob-chart-title">RATE COMPARISON</div>
-                <div id="mob-irBarsContainer"></div>
-            </div>
             <div style="background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px;text-align:center;font-size:12px;font-weight:bold;margin-bottom:10px;">Interest Rate History</div>
             <div class="mob-ir-hist-grid" id="mob-irHistGrid"></div>
-        </div>
-
-        <!-- CALENDAR PAGE -->
-        <div class="mob-page" id="mob-page-calendar">
-            <div class="mob-section-header"><span class="msh-title">Economic Calendar</span></div>
+            <!-- Economic Calendar at bottom -->
+            <div class="mob-section-header" style="margin-top:12px;">
+                <span class="msh-title">Economic Calendar</span>
+            </div>
             <div class="mob-calendar-wrap">
                 <div class="tradingview-widget-container" style="height:100%;">
                     <div class="tradingview-widget-container__widget" style="height:100%;"></div>
@@ -898,7 +880,7 @@
 
     </div><!-- end mob-content -->
 
-    <!-- Bottom navigation (6 tabs) -->
+    <!-- Bottom navigation (5 tabs) -->
     <nav class="mob-nav" id="mobNav">
         <div class="mob-nav-indicator" id="mobNavIndicator"></div>
         <button class="mob-nav-btn active" onclick="mobShowPage('overview',0,this)" id="mobnav-overview">
@@ -920,10 +902,6 @@
         <button class="mob-nav-btn" onclick="mobShowPage('macro',4,this)" id="mobnav-macro">
             <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             Macro
-        </button>
-        <button class="mob-nav-btn" onclick="mobShowPage('calendar',5,this)" id="mobnav-calendar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Calendar
         </button>
     </nav>
 </div>
@@ -1981,7 +1959,7 @@ function mobShowPage(name, idx, btn) {
     btn.classList.add('active'); btn.style.color='#fff';
     var s=btn.querySelector('svg'); if(s)s.style.stroke='#fff';
     var nav = document.getElementById('mobNav');
-    var btnWidth = nav.offsetWidth / 6;
+    var btnWidth = nav.offsetWidth / 5;
     var ind = document.getElementById('mobNavIndicator');
     ind.style.left = (idx * btnWidth) + 'px';
     ind.style.width = btnWidth + 'px';
@@ -1996,7 +1974,7 @@ function mobShowPage(name, idx, btn) {
 window.addEventListener('load', function() {
     var nav = document.getElementById('mobNav');
     if (nav) {
-        var btnWidth = nav.offsetWidth / 6;
+        var btnWidth = nav.offsetWidth / 5;
         var ind = document.getElementById('mobNavIndicator');
         if (ind) { ind.style.left='0'; ind.style.width=btnWidth+'px'; }
     }
@@ -2843,8 +2821,6 @@ var irHistCharts={},mobIrHistCharts={};
 function renderRates(){
     var grid=document.getElementById('irCardsGrid');if(!grid)return;grid.innerHTML='';
     IR_BANKS.forEach(function(b){var bpsChg=b.lastChangeBps||0;var changeStr=bpsChg===0?'Unchanged':(bpsChg>0?'&#9650; +':'&#9660; ')+Math.abs(bpsChg)+'bps';var changeBg=bpsChg>0?'rgba(20,188,96,0.15)':bpsChg<0?'rgba(242,102,102,0.15)':'rgba(100,100,100,0.15)';var changeCol=bpsChg>0?'#14BC60':bpsChg<0?'#F26666':'#888';var expColor=b.expectationDir>0?'#14BC60':b.expectationDir<0?'#F26666':'#888';var rateDisplay=b.short==='Fed'?'3.50–3.75':b.rate.toFixed(2)+'%';var card=document.createElement('div');card.className='ir-card';card.innerHTML='<div class="ir-accent-bar" style="background:'+b.color+'"></div><div class="ir-card-top"><span class="ir-bank-name">'+b.short+'</span><span class="ir-flag">'+b.flag+'</span></div><div class="ir-currency">'+b.name+'</div><div class="ir-rate" style="font-size:28px"><span class="ir-rate-pct">'+rateDisplay+'</span></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px"><div class="ir-change-badge" style="background:'+changeBg+';color:'+changeCol+'">'+changeStr+'</div><div style="font-size:10px;color:#666">Last: '+(b.lastChange||'—')+'</div></div><div style="margin-top:6px;display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:#888">CPI:</span><span style="font-size:12px;font-weight:bold;color:#f0c040">'+b.cpi+'%</span></div><div class="ir-next-meeting"><div class="ir-next-label">Next meeting</div><div class="ir-next-date">'+b.nextMeeting+'</div><div class="ir-expectation" style="color:'+expColor+'">Fcst: '+b.expectation+'</div></div>';grid.appendChild(card);});
-    var maxRate=Math.max.apply(null,IR_BANKS.map(function(b){return b.rate;}));
-    var bc=document.getElementById('irBarsContainer');if(bc){bc.innerHTML='';IR_BANKS.slice().sort(function(a,b){return b.rate-a.rate;}).forEach(function(b){var pct=maxRate>0?(b.rate/maxRate*100):0;var row=document.createElement('div');row.className='ir-bar-row';row.innerHTML='<div class="ir-bar-label" style="color:'+b.color+'">'+b.short+'</div><div class="ir-bar-outer"><div class="ir-bar-inner" style="width:'+pct+'%;background:'+b.color+'"><span class="ir-bar-rate-text">'+b.rate.toFixed(2)+'%</span></div><span class="ir-bar-rate-right">'+b.flag+'</span></div>';bc.appendChild(row);});}
     var hg=document.getElementById('irHistGrid');if(!hg)return;hg.innerHTML='';
     IR_BANKS.forEach(function(b){var wrap=document.createElement('div');wrap.className='ir-hist-card';wrap.innerHTML='<div class="ir-hist-title">'+b.flag+' '+b.short+' — '+b.name+'</div><div class="ir-hist-wrap"><canvas id="irHist_'+b.short+'"></canvas></div>';hg.appendChild(wrap);});
     setTimeout(function(){IR_BANKS.forEach(function(b){var ctx3=document.getElementById('irHist_'+b.short);if(!ctx3)return;if(irHistCharts[b.short])irHistCharts[b.short].destroy();var labels=['2017','2018','2019','2020','2021','2022 Q1','2022 Q3','2023 Q1','2023 Q3','2024 Q1','2024 Q2','2024 Q3','2024 Q4','2025'];irHistCharts[b.short]=new Chart(ctx3,{type:'line',data:{labels:labels.slice(0,b.history.length),datasets:[{label:'Rate',data:b.history,borderColor:b.color,backgroundColor:b.color+'22',borderWidth:2,pointRadius:3,pointBackgroundColor:b.color,fill:true,tension:0.2,stepped:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d0d0d',borderColor:'#1e2230',borderWidth:1,callbacks:{label:function(c){return' '+c.parsed.y.toFixed(2)+'%';}}}},scales:{x:{grid:{color:'#111'},ticks:{color:'#555',font:{size:8},maxTicksLimit:7,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:8},callback:function(v){return v.toFixed(1)+'%';}}}}}}); });},100);
@@ -2854,9 +2830,6 @@ function renderRates(){
 function mobRenderRates(){
     var grid=document.getElementById('mob-irCardsGrid');if(!grid)return;grid.innerHTML='';
     IR_BANKS.forEach(function(b){var bpsChg=b.lastChangeBps||0;var changeStr=bpsChg===0?'Unchanged':(bpsChg>0?'▲ +':'▼ ')+Math.abs(bpsChg)+'bps';var changeBg=bpsChg>0?'rgba(20,188,96,0.15)':bpsChg<0?'rgba(242,102,102,0.15)':'rgba(100,100,100,0.15)';var changeCol=bpsChg>0?'#14BC60':bpsChg<0?'#F26666':'#888';var expColor=b.expectationDir>0?'#14BC60':b.expectationDir<0?'#F26666':'#888';var rateDisplay=b.short==='Fed'?'3.50–3.75':b.rate.toFixed(2)+'%';var card=document.createElement('div');card.className='mob-ir-card';card.innerHTML='<div class="mob-ir-accent-bar" style="background:'+b.color+'"></div><div class="mob-ir-top"><span class="mob-ir-bank">'+b.short+'</span><span class="mob-ir-flag">'+b.flag+'</span></div><div class="mob-ir-rate" style="color:'+b.color+'">'+rateDisplay+'</div><div class="mob-ir-badge" style="background:'+changeBg+';color:'+changeCol+'">'+changeStr+'</div><div style="font-size:10px;color:#888">CPI: <b style="color:#f0c040">'+b.cpi+'%</b></div><div class="mob-ir-next-label">Next meeting</div><div class="mob-ir-next-date">'+b.nextMeeting+'</div><div class="mob-ir-exp" style="color:'+expColor+'">'+b.expectation+'</div>';grid.appendChild(card);});
-    var bc=document.getElementById('mob-irBarsContainer');if(!bc)return;bc.innerHTML='';
-    var maxRate=Math.max.apply(null,IR_BANKS.map(function(b){return b.rate;}));
-    IR_BANKS.slice().sort(function(a,b){return b.rate-a.rate;}).forEach(function(b){var pct=maxRate>0?(b.rate/maxRate*100):0;var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:8px';row.innerHTML='<div style="font-size:11px;font-weight:bold;width:36px;flex-shrink:0;color:'+b.color+'">'+b.short+'</div><div style="flex:1;height:20px;background:#111;border-radius:3px;overflow:hidden;position:relative"><div style="width:'+pct+'%;height:100%;background:'+b.color+';border-radius:3px;display:flex;align-items:center;padding-left:6px"><span style="font-size:10px;font-weight:bold;color:#fff">'+b.rate.toFixed(2)+'%</span></div></div><div style="font-size:13px">'+b.flag+'</div>';bc.appendChild(row);});
     var hg=document.getElementById('mob-irHistGrid');if(!hg)return;hg.innerHTML='';
     IR_BANKS.forEach(function(b){var wrap=document.createElement('div');wrap.className='mob-ir-hist-card';wrap.innerHTML='<div class="mob-ir-hist-title">'+b.flag+' '+b.short+' — '+b.name+'</div><div class="mob-ir-hist-wrap"><canvas id="mob-irHist_'+b.short+'"></canvas></div>';hg.appendChild(wrap);});
     setTimeout(function(){IR_BANKS.forEach(function(b){var ctx3=document.getElementById('mob-irHist_'+b.short);if(!ctx3)return;if(mobIrHistCharts[b.short])mobIrHistCharts[b.short].destroy();var labels=['2017','2018','2019','2020','2021','22Q1','22Q3','23Q1','23Q3','24Q1','24Q2','24Q3','24Q4','2025'];mobIrHistCharts[b.short]=new Chart(ctx3,{type:'line',data:{labels:labels.slice(0,b.history.length),datasets:[{label:'Rate',data:b.history,borderColor:b.color,backgroundColor:b.color+'22',borderWidth:1.5,pointRadius:2,pointBackgroundColor:b.color,fill:true,tension:0.2,stepped:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#111'},ticks:{color:'#555',font:{size:7},maxTicksLimit:5,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:7},callback:function(v){return v.toFixed(1)+'%';},maxTicksLimit:4}}}}});});},100);
@@ -2916,9 +2889,11 @@ function showTab(name){
    ========================================================= */
 
 var OV_PAIRS_DISPLAY = [
-    'EURUSD','GBPUSD','AUDUSD','NZDUSD',
-    'USDJPY','USDCAD','USDCHF','EURJPY',
-    'EURGBP','GBPJPY','AUDJPY','CADJPY'
+    'AUDUSD','EURUSD','GBPUSD','NZDUSD','USDCAD','USDCHF','USDJPY',
+    'AUDCAD','AUDCHF','AUDJPY','AUDNZD','CADCHF','CADJPY','CHFJPY',
+    'EURAUD','EURCAD','EURCHF','EURGBP','EURJPY','EURNZD',
+    'GBPAUD','GBPCAD','GBPCHF','GBPJPY','GBPNZD',
+    'NZDCAD','NZDCHF','NZDJPY'
 ];
 
 var OV_LABEL_CONFIG = [
@@ -3025,9 +3000,9 @@ function computeBias() {
         var weights = [];
         var vals    = [];
         if (rsi  !== null) { weights.push(0.25); vals.push(rsi);  }
-        if (ci   !== null) { weights.push(0.25); vals.push(ci);   }
-        if (cot  !== null) { weights.push(0.35); vals.push(cot);  }
-        if (sent !== null) { weights.push(0.15); vals.push(sent); }
+        if (ci   !== null) { weights.push(0.20); vals.push(ci);   }
+        if (cot  !== null) { weights.push(0.25); vals.push(cot);  }
+        if (sent !== null) { weights.push(0.30); vals.push(sent); }
 
         var score = null;
         if (vals.length) {
@@ -3138,9 +3113,9 @@ function renderOverview(bias) {
 
             var signals = [
                 { label:'RSI',  val: d.rsi,       w:'25%' },
-                { label:'CI',   val: d.ci,        w:'25%' },
-                { label:'COT',  val: d.cot,       w:'35%' },
-                { label:'Sent', val: d.sentiment, w:'15%' }
+                { label:'CI',   val: d.ci,        w:'20%' },
+                { label:'COT',  val: d.cot,       w:'25%' },
+                { label:'Sent', val: d.sentiment, w:'30%' }
             ];
 
             var sigsHTML = signals.map(function(sig) {
