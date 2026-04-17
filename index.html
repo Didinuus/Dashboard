@@ -818,6 +818,9 @@ var CS_VIEW = {M5:80,M15:80,H1:72,H4:48,D:30};
 var csTF = 'H1', csChart = null, csHidden = new Set(), _csRawTimes = [];
 var mobCsTF = 'H1', mobCsChart = null, mobCsHidden = new Set(), _mobCsRawTimes = [], _mobCsStrengthSeries = {};
 
+/* *** NEW: hover index for mobile CS chart (mirrors CI pattern) *** */
+var _mobCsHoverIdx = -1;
+
 function fmtTime(){ return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
 var IS_MOBILE = window.innerWidth <= 768;
 
@@ -1180,10 +1183,10 @@ function ciSetTF(tf, btn) {
 }
 
 /* =========================================================
-   CI FLOATING LABELS PLUGIN — shared drawing function
-   Used by both PC and mobile charts
+   SHARED FLOATING LABELS DRAWING FUNCTION
+   Used by CI charts AND mobile CS chart
    ========================================================= */
-function ciDrawFloatingLabels(chart, hoverIdx, rawTimes, tf) {
+function drawFloatingLabels(chart, hoverIdx, rawTimes, tf, valueFormatter) {
     if (hoverIdx < 0) return;
     var c2 = chart.ctx, ca = chart.chartArea, xScale = chart.scales.x, yScale = chart.scales.y;
     if (!c2 || !ca || !xScale || !yScale) return;
@@ -1212,9 +1215,7 @@ function ciDrawFloatingLabels(chart, hoverIdx, rawTimes, tf) {
         if (val === null || val === undefined) return;
         var yp2 = yScale.getPixelForValue(val);
         if (yp2 < ca.top || yp2 > ca.bottom) return;
-        var prev = idx > 0 ? ds.data[idx - 1] : null;
-        var delta = (prev !== null && prev !== undefined) ? (val - prev) : 0;
-        items.push({label: ds.label, color: ds.borderColor, val: val, delta: delta, yp: yp2});
+        items.push({label: ds.label, color: ds.borderColor, val: val, yp: yp2});
     });
 
     /* Sort by y position and spread overlapping labels */
@@ -1233,9 +1234,7 @@ function ciDrawFloatingLabels(chart, hoverIdx, rawTimes, tf) {
     /* Draw each label */
     var isRightSide = xp > ca.left + (ca.right - ca.left) * 0.65;
     items.forEach(function(item) {
-        var pctVal = item.val * 100;
-        var sign = pctVal >= 0 ? '+' : '';
-        var text = item.label + ' ' + sign + pctVal.toFixed(3) + '%';
+        var text = valueFormatter ? valueFormatter(item.label, item.val) : (item.label + ' ' + item.val.toFixed(1));
         var boxW = 86, boxH = 15, pad = 5;
         var bx = isRightSide ? xp - boxW - 6 : xp + 6;
         var by = item.yp - boxH / 2;
@@ -1319,6 +1318,15 @@ function ciDrawFloatingLabels(chart, hoverIdx, rawTimes, tf) {
         c2.fillText(dateStr, dtX + dtBoxW / 2, dtY + dtBoxH / 2);
         c2.restore();
     }
+}
+
+/* Keep old name as alias for CI charts */
+function ciDrawFloatingLabels(chart, hoverIdx, rawTimes, tf) {
+    drawFloatingLabels(chart, hoverIdx, rawTimes, tf, function(label, val) {
+        var pctVal = val * 100;
+        var sign = pctVal >= 0 ? '+' : '';
+        return label + ' ' + sign + pctVal.toFixed(3) + '%';
+    });
 }
 
 /* --- Combined chart --- */
@@ -1430,7 +1438,7 @@ function buildCICombinedLegend() {
 }
 
 /* =========================================================
-   PC mouse interaction — now with hover tracking for labels
+   PC mouse interaction for CI chart
    ========================================================= */
 function ciSetupMouseInteraction(canvas, chart) {
     var drag = null;
@@ -1463,7 +1471,6 @@ function ciSetupMouseInteraction(canvas, chart) {
             return;
         }
 
-        /* Hover: find closest data index to mouse X */
         if (!ca || mx < ca.left || mx > ca.right) {
             if (_ciHoverIdx !== -1) { _ciHoverIdx = -1; chart.draw(); }
             return;
@@ -1588,7 +1595,6 @@ function mobSetupChartTouchCI(canvas, chart) {
         var now = Date.now();
         if (e.touches.length === 0) {
             touch0 = null; dragStartMin = null; pinchStartDist = null;
-            /* Keep hover shown for 2s after lift */
             setTimeout(function() { _mobCiHoverIdx = -1; if (chart) chart.draw(); }, 2000);
         } else if (e.touches.length === 1) {
             touch0 = e.touches[0];
@@ -1596,7 +1602,6 @@ function mobSetupChartTouchCI(canvas, chart) {
             dragStartMin = r.min; dragStartMax = r.max;
             pinchStartDist = null;
         }
-        /* Double-tap to reset zoom */
         if (now - lastTap < 300) {
             var t = chart.data.labels.length, v = CI_TF_CONFIG[ciTF].view || 100;
             setView(Math.max(0, t - v), t - 1);
@@ -2272,7 +2277,6 @@ window.addEventListener('mouseup',function(){_csDrag=null;var ctx2=document.getE
 function renderCSChart(labels,series){
     var ctx=document.getElementById('csChart');if(!ctx)return;
     var datasets=CS_CURRENCIES.map(function(cur){return{label:cur,data:series[cur]||[],borderColor:CS_COLORS[cur],backgroundColor:'transparent',borderWidth:1.8,pointRadius:0,pointHoverRadius:0,tension:0.3,hidden:csHidden.has(cur)};});
-    /* On refresh: preserve current zoom window, just shift it to stay at right edge if user hasn't panned */
     var savedMin=null,savedMax=null,wasAtEnd=true;
     if(csChart){
         var oldTotal=csChart.data.labels.length,oldMin=csChart.options.scales.x.min,oldMax=csChart.options.scales.x.max,oldViewLen=CS_VIEW[csTF]||100;
@@ -2421,124 +2425,198 @@ async function mobCsLoad() {
         CS_CURRENCIES.forEach(function(cur){ _mobCsStrengthSeries[cur].push(null); });
         _mobCsRawTimes.push(null);
     }
+
+    /* Reset hover on new load */
+    _mobCsHoverIdx = -1;
+
     mobRenderCSChart(labels, _mobCsStrengthSeries);
     renderCSRank(_mobCsStrengthSeries, 'mob-csRankBody');
     mobBuildCSLegend();
     if (el) el.textContent = fmtTime();
 }
 
+/* =========================================================
+   MOBILE CS CHART — with CI-style floating labels on touch
+   ========================================================= */
 function mobRenderCSChart(labels, series) {
     var ctx = document.getElementById('mob-csChart');
     if (!ctx) return;
     if (mobCsChart) mobCsChart.destroy();
+
     var datasets = CS_CURRENCIES.map(function(cur) {
-        return { label: cur, data: series[cur] || [], borderColor: CS_COLORS[cur],
-            backgroundColor: 'transparent', borderWidth: 1.8, pointRadius: 0,
-            pointHoverRadius: 0, tension: 0.3, hidden: mobCsHidden.has(cur) };
+        return {
+            label: cur,
+            data: series[cur] || [],
+            borderColor: CS_COLORS[cur],
+            backgroundColor: 'transparent',
+            borderWidth: 1.8,
+            pointRadius: 0,
+            pointHoverRadius: 0,
+            tension: 0.3,
+            hidden: mobCsHidden.has(cur)
+        };
     });
+
     mobCsChart = new Chart(ctx, {
-        type: 'line', data: { labels: labels, datasets: datasets },
+        type: 'line',
+        data: { labels: labels, datasets: datasets },
         options: {
-            responsive: true, maintainAspectRatio: false, animation: false,
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
             interaction: { mode: 'index', intersect: false },
-            plugins: { legend: { display: false }, tooltip: {
-                enabled: true, mode: 'index', intersect: false,
-                backgroundColor: 'rgba(16,16,24,0.95)', borderColor: '#1e2230', borderWidth: 1,
-                titleColor: '#888', bodyColor: '#fff',
-                callbacks: { label: function(c){ return ' ' + c.dataset.label + ': ' + c.parsed.y.toFixed(1); }}
-            }},
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }  /* disabled — we use floating labels */
+            },
             scales: {
-                x: { grid: {color:'#161616'}, ticks: {maxRotation:0,autoSkip:true,maxTicksLimit:6,color:'#444',font:{size:8}},
-                    min: Math.max(0, labels.length - (CS_VIEW[mobCsTF] || 100)), max: labels.length - 1 },
-                y: { position: 'right', min: 15, max: 85, grid: {color:'#1a1a2a'}, ticks: {color:'#555',font:{size:8},stepSize:10} }
+                x: {
+                    grid: { color: '#161616' },
+                    ticks: { maxRotation:0, autoSkip:true, maxTicksLimit:6, color:'#444', font:{size:8} },
+                    min: Math.max(0, labels.length - (CS_VIEW[mobCsTF] || 100)),
+                    max: labels.length - 1
+                },
+                y: {
+                    position: 'right',
+                    min: 15, max: 85,
+                    grid: { color:'#1a1a2a' },
+                    ticks: { color:'#555', font:{size:8}, stepSize:10 }
+                }
             }
         },
-        plugins: [{ id: 'refLine', afterDraw: function(ch) {
-            var c2 = ch.ctx, ca = ch.chartArea, y = ch.scales.y;
-            var yp = y.getPixelForValue(50);
-            if (yp < ca.top || yp > ca.bottom) return;
-            c2.save(); c2.beginPath(); c2.moveTo(ca.left, yp); c2.lineTo(ca.right, yp);
-            c2.strokeStyle = '#383850'; c2.lineWidth = 1.5; c2.setLineDash([]); c2.stroke(); c2.restore();
-        }}]
+        plugins: [
+            {
+                id: 'mobCsRefLine',
+                afterDraw: function(ch) {
+                    var c2 = ch.ctx, ca = ch.chartArea, y = ch.scales.y;
+                    var yp = y.getPixelForValue(50);
+                    if (yp < ca.top || yp > ca.bottom) return;
+                    c2.save();
+                    c2.beginPath(); c2.moveTo(ca.left, yp); c2.lineTo(ca.right, yp);
+                    c2.strokeStyle = '#383850'; c2.lineWidth = 1.5; c2.setLineDash([]);
+                    c2.stroke(); c2.restore();
+                }
+            },
+            {
+                id: 'mobCsFloatingLabels',
+                afterDraw: function(chart) {
+                    /* Draw CI-style floating labels for the mobile CS chart */
+                    drawFloatingLabels(
+                        chart,
+                        _mobCsHoverIdx,
+                        _mobCsRawTimes,
+                        mobCsTF,
+                        function(label, val) { return label + ' ' + val.toFixed(1); }
+                    );
+                }
+            }
+        ]
     });
-    mobSetupChartTouch(ctx, mobCsChart);
+
+    /* Attach CI-style touch interaction */
+    mobSetupChartTouchCS(ctx, mobCsChart);
 }
 
-function mobSetupChartTouch(canvas, chart) {
+/* =========================================================
+   Mobile touch interaction for CS chart
+   — exact copy of mobSetupChartTouchCI but using
+     _mobCsHoverIdx and mobCsTF for the zoom reset
+   ========================================================= */
+function mobSetupChartTouchCS(canvas, chart) {
     var touch0 = null, dragStartMin = null, dragStartMax = null;
     var pinchStartDist = null, pinchStartMin = null, pinchStartMax = null;
 
-    function getRange(){ return { min: chart.options.scales.x.min, max: chart.options.scales.x.max }; }
-    function setView(newMin, newMax) {
+    function setView(mn, mx) {
         var t = chart.data.labels.length;
-        newMin = Math.max(0, Math.round(newMin));
-        newMax = Math.min(t - 1, Math.round(newMax));
-        if (newMax - newMin < 10) return;
-        chart.options.scales.x.min = newMin;
-        chart.options.scales.x.max = newMax;
+        chart.options.scales.x.min = Math.max(0, Math.round(mn));
+        chart.options.scales.x.max = Math.min(t - 1, Math.round(mx));
         chart.update('none');
     }
-    function pinchDist(t0, t1) {
-        var dx = t1.clientX - t0.clientX, dy = t1.clientY - t0.clientY;
-        return Math.sqrt(dx*dx + dy*dy);
-    }
-    function chartRatio(touchX) {
-        var rect = canvas.getBoundingClientRect(), ca = chart.chartArea;
-        if (!ca) return null;
-        return (touchX - rect.left - ca.left) / (ca.right - ca.left);
+
+    function updateHoverFromTouch(touchX) {
+        var rect = canvas.getBoundingClientRect();
+        var mx = touchX - rect.left;
+        var ca = chart.chartArea;
+        var xScale = chart.scales.x;
+        if (!ca || mx < ca.left || mx > ca.right) { _mobCsHoverIdx = -1; return; }
+        var minIdx = Math.round(xScale.min), maxIdx = Math.round(xScale.max);
+        var best = minIdx, bestDist = Infinity;
+        for (var i = minIdx; i <= maxIdx; i++) {
+            var xp = xScale.getPixelForValue(i);
+            var d = Math.abs(xp - mx);
+            if (d < bestDist) { bestDist = d; best = i; }
+        }
+        _mobCsHoverIdx = best;
     }
 
     canvas.addEventListener('touchstart', function(e) {
         e.preventDefault();
         if (e.touches.length === 1) {
             touch0 = e.touches[0];
-            var r = getRange(); dragStartMin = r.min; dragStartMax = r.max;
+            var r = chart.options.scales.x;
+            dragStartMin = r.min; dragStartMax = r.max;
             pinchStartDist = null;
+            updateHoverFromTouch(e.touches[0].clientX);
+            chart.draw();
         } else if (e.touches.length === 2) {
             touch0 = e.touches[0];
-            pinchStartDist = pinchDist(e.touches[0], e.touches[1]);
-            var r2 = getRange(); pinchStartMin = r2.min; pinchStartMax = r2.max;
-            dragStartMin = null;
+            var t0 = e.touches[0], t1 = e.touches[1];
+            var dx = t1.clientX - t0.clientX, dy = t1.clientY - t0.clientY;
+            pinchStartDist = Math.sqrt(dx*dx + dy*dy);
+            var r2 = chart.options.scales.x;
+            pinchStartMin = r2.min; pinchStartMax = r2.max;
+            _mobCsHoverIdx = -1;
         }
     }, { passive: false });
 
     canvas.addEventListener('touchmove', function(e) {
         e.preventDefault();
-        if (e.touches.length === 1 && dragStartMin !== null && touch0) {
+        if (e.touches.length === 1 && touch0 && dragStartMin != null) {
             var dx = e.touches[0].clientX - touch0.clientX;
-            var ca = chart.chartArea, chartW = ca ? ca.right - ca.left : 1;
+            var ca = chart.chartArea;
             var range = dragStartMax - dragStartMin;
-            setView(dragStartMin - (dx / chartW) * range, dragStartMax - (dx / chartW) * range);
-        } else if (e.touches.length === 2 && pinchStartDist !== null) {
+            var shift = -(dx / (ca ? ca.right - ca.left : 1)) * range;
+            setView(dragStartMin + shift, dragStartMax + shift);
+            updateHoverFromTouch(e.touches[0].clientX);
+            chart.draw();
+        } else if (e.touches.length === 2 && pinchStartDist != null) {
             var t0 = e.touches[0], t1 = e.touches[1];
-            var scale = pinchStartDist / pinchDist(t0, t1);
+            var dx2 = t1.clientX - t0.clientX, dy2 = t1.clientY - t0.clientY;
+            var d = Math.sqrt(dx2*dx2 + dy2*dy2);
+            var scale = pinchStartDist / d;
             var origRange = pinchStartMax - pinchStartMin;
             var newRange = Math.max(10, Math.min(chart.data.labels.length, origRange * scale));
-            var cx = (t0.clientX + t1.clientX) / 2;
-            var ratio = chartRatio(cx);
-            if (ratio === null) ratio = 0.5;
-            ratio = Math.max(0, Math.min(1, ratio));
-            var anchor = pinchStartMin + ratio * origRange;
-            setView(anchor - ratio * newRange, anchor + (1 - ratio) * newRange);
+            var mid = (pinchStartMin + pinchStartMax) / 2;
+            setView(mid - newRange/2, mid + newRange/2);
         }
     }, { passive: false });
 
     var lastTap = 0;
     canvas.addEventListener('touchend', function(e) {
+        var now = Date.now();
         if (e.touches.length === 0) {
             touch0 = null; dragStartMin = null; pinchStartDist = null;
+            /* Keep label visible 2s after lift, then clear */
+            setTimeout(function() { _mobCsHoverIdx = -1; if (chart) chart.draw(); }, 2000);
         } else if (e.touches.length === 1) {
             touch0 = e.touches[0];
-            var r = getRange(); dragStartMin = r.min; dragStartMax = r.max;
+            var r = chart.options.scales.x;
+            dragStartMin = r.min; dragStartMax = r.max;
             pinchStartDist = null;
         }
-        var now = Date.now();
+        /* Double-tap to reset zoom */
         if (now - lastTap < 300) {
-            var t = chart.data.labels.length, viewLen = CS_VIEW[mobCsTF] || 100;
-            setView(Math.max(0, t - viewLen), t - 1);
+            var t = chart.data.labels.length, v = CS_VIEW[mobCsTF] || 100;
+            setView(Math.max(0, t - v), t - 1);
         }
         lastTap = now;
     }, { passive: false });
+
+    /* Initial view */
+    var total = chart.data.labels.length, view = CS_VIEW[mobCsTF] || 100;
+    chart.options.scales.x.min = Math.max(0, total - view);
+    chart.options.scales.x.max = total - 1;
+    chart.update('none');
 }
 
 function mobBuildCSLegend() {
@@ -2566,12 +2644,16 @@ function mobBuildCSLegend() {
         legend.appendChild(item);
     });
 }
+
 function mobCsSetTF(tf, btn) {
     mobCsTF = tf;
     document.querySelectorAll('.mob-cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
     if (btn) btn.classList.add('active');
     mobCsLoad();
 }
+
+/* Keep old name wired up */
+function mobCsRefresh() { mobCsLoad(); }
 
 /* =========================================================
    FX PERFORMANCE
