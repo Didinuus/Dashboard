@@ -2446,12 +2446,28 @@ function buildLabels(times, tf) {
 async function csLoad(){
     var el=document.getElementById('csStatus');if(el)el.textContent='Loading...';
     var pairs=csAllPairs(),results={};
+    /* Fetch CS_COUNT + 20 extra to ensure we always have enough after RSI warmup */
     await Promise.all(pairs.map(async function(p){results[p]=await fetchCandles(p,CS_COUNT[csTF]+20);}));
     var ok=pairs.filter(function(p){return results[p]&&results[p].closes.length>14;});
     if(!ok.length){if(el)el.textContent='Error';return;}
+
+    /* Exclude the last candle (still open/incomplete) for stability */
+    ok.forEach(function(p){
+        results[p].closes=results[p].closes.slice(0,-1);
+        results[p].times=results[p].times.slice(0,-1);
+    });
+
     var rsiMap={};ok.forEach(function(p){rsiMap[p]=calcRSI(results[p].closes);});
-    var lens=ok.map(function(p){return rsiMap[p].length;}),minLen=Math.min.apply(null,lens),chartLen=Math.min(minLen,CS_COUNT[csTF]),startIdx=minLen-chartLen,rawTimes=results[ok[0]].times;
-    _csRawTimes=rawTimes.slice(rawTimes.length-chartLen);
+
+    /* Use the smallest length but cap to exact CS_COUNT — all series same length */
+    var lens=ok.map(function(p){return rsiMap[p].length;});
+    var minLen=Math.min.apply(null,lens);
+    var chartLen=Math.min(minLen,CS_COUNT[csTF]);
+    var startIdx=minLen-chartLen;
+
+    /* Use the reference pair (first ok) for timestamps */
+    var rawTimes=results[ok[0]].times.slice(results[ok[0]].times.length-chartLen);
+    _csRawTimes=rawTimes;
     var labels=buildLabels(_csRawTimes);
     var strengthSeries={};
     CS_CURRENCIES.forEach(function(cur){var base=CS_PAIRS[cur].base,quote=CS_PAIRS[cur].quote,series=[];for(var i=0;i<chartLen;i++){var idx=startIdx+i,sum=0,cnt=0;base.forEach(function(p){if(rsiMap[p]&&rsiMap[p][idx]!=null){sum+=rsiMap[p][idx];cnt++;}});quote.forEach(function(p){if(rsiMap[p]&&rsiMap[p][idx]!=null){sum+=(100-rsiMap[p][idx]);cnt++;}});series.push(cnt>0?parseFloat((sum/cnt).toFixed(2)):null);}strengthSeries[cur]=series;});
@@ -2593,13 +2609,19 @@ async function mobCsLoad() {
     }));
     var ok = pairs.filter(function(p){ return results[p] && results[p].closes.length > 14; });
     if (!ok.length) { if (el) el.textContent = 'Error'; return; }
+
+    /* Exclude last incomplete candle for stability */
+    ok.forEach(function(p){
+        results[p].closes = results[p].closes.slice(0, -1);
+        results[p].times  = results[p].times.slice(0, -1);
+    });
+
     var rsiMap = {};
     ok.forEach(function(p){ rsiMap[p] = calcRSI(results[p].closes); });
     var lens = ok.map(function(p){ return rsiMap[p].length; });
     var minLen = Math.min.apply(null, lens);
     var chartLen = Math.min(minLen, CS_COUNT[mobCsTF]), startIdx = minLen - chartLen;
-    var rawTimes = results[ok[0]].times;
-    _mobCsRawTimes = rawTimes.slice(rawTimes.length - chartLen);
+    _mobCsRawTimes = results[ok[0]].times.slice(results[ok[0]].times.length - chartLen);
     var labels = buildLabels(_mobCsRawTimes, mobCsTF);
     _mobCsStrengthSeries = {};
     CS_CURRENCIES.forEach(function(cur) {
