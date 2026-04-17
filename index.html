@@ -107,6 +107,7 @@
         .ir-card { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:6px; position:relative; overflow:hidden; transition:border-color .2s; }
         .ir-card:hover { border-color:#333; }
         .ir-card-top { display:flex; align-items:center; justify-content:space-between; }
+        .ir-card-hist { margin-top:10px; padding-top:10px; border-top:1px solid #1e2230; position:relative; height:90px; }
         .ir-bank-name { font-size:11px; color:#888; font-weight:bold; letter-spacing:1px; text-transform:uppercase; }
         .ir-flag { font-size:18px; }
         .ir-currency { font-size:13px; font-weight:bold; color:#aaa; margin-top:2px; }
@@ -118,10 +119,6 @@
         .ir-next-date { font-size:12px; color:#ccc; font-weight:bold; margin-top:2px; }
         .ir-expectation { font-size:11px; margin-top:3px; font-weight:bold; }
         .ir-accent-bar { position:absolute; left:0; top:0; bottom:0; width:3px; }
-        .ir-hist-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; }
-        .ir-hist-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:14px; }
-        .ir-hist-title { font-size:12px; font-weight:bold; color:#ccc; margin-bottom:10px; text-align:center; }
-        .ir-hist-wrap { position:relative; height:120px; }
 
         .macro-page-section { margin-bottom:30px; }
         .macro-page-section-title { background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:14px; color:#fff; border:1px solid #1e2230; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0; }
@@ -351,6 +348,7 @@
             .mob-fxp-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
             .mob-ir-cards-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
             .mob-ir-card { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:14px; position:relative; overflow:hidden; }
+            .mob-ir-card-hist { margin-top:8px; padding-top:8px; border-top:1px solid #1e2230; position:relative; height:80px; }
             .mob-ir-accent-bar { position:absolute; left:0; top:0; bottom:0; width:3px; }
             .mob-ir-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
             .mob-ir-bank { font-size:10px; color:#888; font-weight:bold; letter-spacing:1px; }
@@ -360,10 +358,6 @@
             .mob-ir-next-label { font-size:9px; color:#555; text-transform:uppercase; letter-spacing:0.5px; }
             .mob-ir-next-date { font-size:11px; color:#ccc; font-weight:bold; }
             .mob-ir-exp { font-size:10px; font-weight:bold; margin-top:2px; }
-            .mob-ir-hist-grid { display:grid; grid-template-columns:1fr; gap:10px; }
-            .mob-ir-hist-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:10px; }
-            .mob-ir-hist-title { font-size:10px; font-weight:bold; color:#ccc; margin-bottom:8px; text-align:center; }
-            .mob-ir-hist-wrap { position:relative; height:120px; }
             .mob-calendar-wrap { background:#161616; border:1px solid #1e2230; border-radius:8px; overflow:hidden; height:calc(100dvh - 180px); height:calc(100vh - 180px); }
             .pairs-modal { width:95vw; max-height:80vh; padding:16px; }
             .ov-top-row { grid-template-columns:1fr 1fr; gap:8px; }
@@ -639,10 +633,6 @@
             </div>
             <div class="ir-layout">
                 <div class="ir-cards-grid" id="irCardsGrid"></div>
-                <div>
-                    <div class="page-header" style="justify-content:center;">Interest Rate History</div>
-                    <div class="ir-hist-grid" id="irHistGrid"></div>
-                </div>
             </div>
             <!-- Economic Calendar embedded at bottom of macro -->
             <div class="macro-page-section" style="margin-top:20px;">
@@ -852,8 +842,6 @@
                 </div>
             </div>
             <div class="mob-ir-cards-grid" id="mob-irCardsGrid"></div>
-            <div style="background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px;text-align:center;font-size:12px;font-weight:bold;margin-bottom:10px;">Interest Rate History</div>
-            <div class="mob-ir-hist-grid" id="mob-irHistGrid"></div>
             <!-- Economic Calendar at bottom -->
             <div class="mob-section-header" style="margin-top:12px;">
                 <span class="msh-title">Economic Calendar</span>
@@ -2911,19 +2899,71 @@ var irHistCharts={},mobIrHistCharts={};
 
 function renderRates(){
     var grid=document.getElementById('irCardsGrid');if(!grid)return;grid.innerHTML='';
-    IR_BANKS.forEach(function(b){var bpsChg=b.lastChangeBps||0;var changeStr=bpsChg===0?'Unchanged':(bpsChg>0?'&#9650; +':'&#9660; ')+Math.abs(bpsChg)+'bps';var changeBg=bpsChg>0?'rgba(20,188,96,0.15)':bpsChg<0?'rgba(242,102,102,0.15)':'rgba(100,100,100,0.15)';var changeCol=bpsChg>0?'#14BC60':bpsChg<0?'#F26666':'#888';var expColor=b.expectationDir>0?'#14BC60':b.expectationDir<0?'#F26666':'#888';var rateDisplay=b.short==='Fed'?'3.50–3.75':b.rate.toFixed(2)+'%';var card=document.createElement('div');card.className='ir-card';card.innerHTML='<div class="ir-accent-bar" style="background:'+b.color+'"></div><div class="ir-card-top"><span class="ir-bank-name">'+b.short+'</span><span class="ir-flag">'+b.flag+'</span></div><div class="ir-currency">'+b.name+'</div><div class="ir-rate" style="font-size:28px"><span class="ir-rate-pct">'+rateDisplay+'</span></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px"><div class="ir-change-badge" style="background:'+changeBg+';color:'+changeCol+'">'+changeStr+'</div><div style="font-size:10px;color:#666">Last: '+(b.lastChange||'—')+'</div></div><div style="margin-top:6px;display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:#888">CPI:</span><span style="font-size:12px;font-weight:bold;color:#f0c040">'+b.cpi+'%</span></div><div class="ir-next-meeting"><div class="ir-next-label">Next meeting</div><div class="ir-next-date">'+b.nextMeeting+'</div><div class="ir-expectation" style="color:'+expColor+'">Fcst: '+b.expectation+'</div></div>';grid.appendChild(card);});
-    var hg=document.getElementById('irHistGrid');if(!hg)return;hg.innerHTML='';
-    IR_BANKS.forEach(function(b){var wrap=document.createElement('div');wrap.className='ir-hist-card';wrap.innerHTML='<div class="ir-hist-title">'+b.flag+' '+b.short+' — '+b.name+'</div><div class="ir-hist-wrap"><canvas id="irHist_'+b.short+'"></canvas></div>';hg.appendChild(wrap);});
-    setTimeout(function(){IR_BANKS.forEach(function(b){var ctx3=document.getElementById('irHist_'+b.short);if(!ctx3)return;if(irHistCharts[b.short])irHistCharts[b.short].destroy();var labels=['2017','2018','2019','2020','2021','2022 Q1','2022 Q3','2023 Q1','2023 Q3','2024 Q1','2024 Q2','2024 Q3','2024 Q4','2025'];irHistCharts[b.short]=new Chart(ctx3,{type:'line',data:{labels:labels.slice(0,b.history.length),datasets:[{label:'Rate',data:b.history,borderColor:b.color,backgroundColor:b.color+'22',borderWidth:2,pointRadius:3,pointBackgroundColor:b.color,fill:true,tension:0.2,stepped:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d0d0d',borderColor:'#1e2230',borderWidth:1,callbacks:{label:function(c){return' '+c.parsed.y.toFixed(2)+'%';}}}},scales:{x:{grid:{color:'#111'},ticks:{color:'#555',font:{size:8},maxTicksLimit:7,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:8},callback:function(v){return v.toFixed(1)+'%';}}}}}}); });},100);
+    IR_BANKS.forEach(function(b){
+        var bpsChg=b.lastChangeBps||0;
+        var changeStr=bpsChg===0?'Unchanged':(bpsChg>0?'&#9650; +':'&#9660; ')+Math.abs(bpsChg)+'bps';
+        var changeBg=bpsChg>0?'rgba(20,188,96,0.15)':bpsChg<0?'rgba(242,102,102,0.15)':'rgba(100,100,100,0.15)';
+        var changeCol=bpsChg>0?'#14BC60':bpsChg<0?'#F26666':'#888';
+        var expColor=b.expectationDir>0?'#14BC60':b.expectationDir<0?'#F26666':'#888';
+        var rateDisplay=b.short==='Fed'?'3.50–3.75':b.rate.toFixed(2)+'%';
+        var card=document.createElement('div');
+        card.className='ir-card';
+        card.innerHTML=
+            '<div class="ir-accent-bar" style="background:'+b.color+'"></div>'+
+            '<div class="ir-card-top"><span class="ir-bank-name">'+b.short+'</span><span class="ir-flag">'+b.flag+'</span></div>'+
+            '<div class="ir-currency">'+b.name+'</div>'+
+            '<div class="ir-rate" style="font-size:28px"><span class="ir-rate-pct">'+rateDisplay+'</span></div>'+
+            '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px">'+
+                '<div class="ir-change-badge" style="background:'+changeBg+';color:'+changeCol+'">'+changeStr+'</div>'+
+                '<div style="font-size:10px;color:#666">Last: '+(b.lastChange||'—')+'</div>'+
+            '</div>'+
+            '<div style="margin-top:6px;display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:#888">CPI:</span><span style="font-size:12px;font-weight:bold;color:#f0c040">'+b.cpi+'%</span></div>'+
+            '<div class="ir-next-meeting"><div class="ir-next-label">Next meeting</div><div class="ir-next-date">'+b.nextMeeting+'</div><div class="ir-expectation" style="color:'+expColor+'">Fcst: '+b.expectation+'</div></div>'+
+            '<div class="ir-card-hist"><canvas id="irHist_'+b.short+'"></canvas></div>';
+        grid.appendChild(card);
+    });
+    setTimeout(function(){
+        IR_BANKS.forEach(function(b){
+            var ctx3=document.getElementById('irHist_'+b.short);if(!ctx3)return;
+            if(irHistCharts[b.short])irHistCharts[b.short].destroy();
+            var labels=['2017','2018','2019','2020','2021','22 Q1','22 Q3','23 Q1','23 Q3','24 Q1','24 Q2','24 Q3','24 Q4','2025'];
+            irHistCharts[b.short]=new Chart(ctx3,{type:'line',data:{labels:labels.slice(0,b.history.length),datasets:[{label:'Rate',data:b.history,borderColor:b.color,backgroundColor:b.color+'22',borderWidth:2,pointRadius:3,pointBackgroundColor:b.color,fill:true,tension:0.2,stepped:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d0d0d',borderColor:'#1e2230',borderWidth:1,callbacks:{label:function(c){return' '+c.parsed.y.toFixed(2)+'%';}}}},scales:{x:{grid:{color:'#111'},ticks:{color:'#555',font:{size:8},maxTicksLimit:7,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:8},callback:function(v){return v.toFixed(1)+'%';}}}}}}); 
+        });
+    },100);
     var isel=document.getElementById('irStatus');if(isel)isel.textContent='Updated Apr 6, 2026';
 }
 
 function mobRenderRates(){
     var grid=document.getElementById('mob-irCardsGrid');if(!grid)return;grid.innerHTML='';
-    IR_BANKS.forEach(function(b){var bpsChg=b.lastChangeBps||0;var changeStr=bpsChg===0?'Unchanged':(bpsChg>0?'▲ +':'▼ ')+Math.abs(bpsChg)+'bps';var changeBg=bpsChg>0?'rgba(20,188,96,0.15)':bpsChg<0?'rgba(242,102,102,0.15)':'rgba(100,100,100,0.15)';var changeCol=bpsChg>0?'#14BC60':bpsChg<0?'#F26666':'#888';var expColor=b.expectationDir>0?'#14BC60':b.expectationDir<0?'#F26666':'#888';var rateDisplay=b.short==='Fed'?'3.50–3.75':b.rate.toFixed(2)+'%';var card=document.createElement('div');card.className='mob-ir-card';card.innerHTML='<div class="mob-ir-accent-bar" style="background:'+b.color+'"></div><div class="mob-ir-top"><span class="mob-ir-bank">'+b.short+'</span><span class="mob-ir-flag">'+b.flag+'</span></div><div class="mob-ir-rate" style="color:'+b.color+'">'+rateDisplay+'</div><div class="mob-ir-badge" style="background:'+changeBg+';color:'+changeCol+'">'+changeStr+'</div><div style="font-size:10px;color:#888">CPI: <b style="color:#f0c040">'+b.cpi+'%</b></div><div class="mob-ir-next-label">Next meeting</div><div class="mob-ir-next-date">'+b.nextMeeting+'</div><div class="mob-ir-exp" style="color:'+expColor+'">'+b.expectation+'</div>';grid.appendChild(card);});
-    var hg=document.getElementById('mob-irHistGrid');if(!hg)return;hg.innerHTML='';
-    IR_BANKS.forEach(function(b){var wrap=document.createElement('div');wrap.className='mob-ir-hist-card';wrap.innerHTML='<div class="mob-ir-hist-title">'+b.flag+' '+b.short+' — '+b.name+'</div><div class="mob-ir-hist-wrap"><canvas id="mob-irHist_'+b.short+'"></canvas></div>';hg.appendChild(wrap);});
-    setTimeout(function(){IR_BANKS.forEach(function(b){var ctx3=document.getElementById('mob-irHist_'+b.short);if(!ctx3)return;if(mobIrHistCharts[b.short])mobIrHistCharts[b.short].destroy();var labels=['2017','2018','2019','2020','2021','22Q1','22Q3','23Q1','23Q3','24Q1','24Q2','24Q3','24Q4','2025'];mobIrHistCharts[b.short]=new Chart(ctx3,{type:'line',data:{labels:labels.slice(0,b.history.length),datasets:[{label:'Rate',data:b.history,borderColor:b.color,backgroundColor:b.color+'22',borderWidth:1.5,pointRadius:2,pointBackgroundColor:b.color,fill:true,tension:0.2,stepped:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#111'},ticks:{color:'#555',font:{size:7},maxTicksLimit:5,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:7},callback:function(v){return v.toFixed(1)+'%';},maxTicksLimit:4}}}}});});},100);
+    IR_BANKS.forEach(function(b){
+        var bpsChg=b.lastChangeBps||0;
+        var changeStr=bpsChg===0?'Unchanged':(bpsChg>0?'▲ +':'▼ ')+Math.abs(bpsChg)+'bps';
+        var changeBg=bpsChg>0?'rgba(20,188,96,0.15)':bpsChg<0?'rgba(242,102,102,0.15)':'rgba(100,100,100,0.15)';
+        var changeCol=bpsChg>0?'#14BC60':bpsChg<0?'#F26666':'#888';
+        var expColor=b.expectationDir>0?'#14BC60':b.expectationDir<0?'#F26666':'#888';
+        var rateDisplay=b.short==='Fed'?'3.50–3.75':b.rate.toFixed(2)+'%';
+        var card=document.createElement('div');
+        card.className='mob-ir-card';
+        card.innerHTML=
+            '<div class="mob-ir-accent-bar" style="background:'+b.color+'"></div>'+
+            '<div class="mob-ir-top"><span class="mob-ir-bank">'+b.short+'</span><span class="mob-ir-flag">'+b.flag+'</span></div>'+
+            '<div class="mob-ir-rate" style="color:'+b.color+'">'+rateDisplay+'</div>'+
+            '<div class="mob-ir-badge" style="background:'+changeBg+';color:'+changeCol+'">'+changeStr+'</div>'+
+            '<div style="font-size:10px;color:#888">CPI: <b style="color:#f0c040">'+b.cpi+'%</b></div>'+
+            '<div class="mob-ir-next-label">Next meeting</div>'+
+            '<div class="mob-ir-next-date">'+b.nextMeeting+'</div>'+
+            '<div class="mob-ir-exp" style="color:'+expColor+'">'+b.expectation+'</div>'+
+            '<div class="mob-ir-card-hist"><canvas id="mob-irHist_'+b.short+'"></canvas></div>';
+        grid.appendChild(card);
+    });
+    setTimeout(function(){
+        IR_BANKS.forEach(function(b){
+            var ctx3=document.getElementById('mob-irHist_'+b.short);if(!ctx3)return;
+            if(mobIrHistCharts[b.short])mobIrHistCharts[b.short].destroy();
+            var labels=['2017','2018','2019','2020','2021','22Q1','22Q3','23Q1','23Q3','24Q1','24Q2','24Q3','24Q4','2025'];
+            mobIrHistCharts[b.short]=new Chart(ctx3,{type:'line',data:{labels:labels.slice(0,b.history.length),datasets:[{label:'Rate',data:b.history,borderColor:b.color,backgroundColor:b.color+'22',borderWidth:1.5,pointRadius:2,pointBackgroundColor:b.color,fill:true,tension:0.2,stepped:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#111'},ticks:{color:'#555',font:{size:7},maxTicksLimit:5,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:7},callback:function(v){return v.toFixed(1)+'%';},maxTicksLimit:4}}}}});
+        });
+    },100);
 }
 
 /* =========================================================
