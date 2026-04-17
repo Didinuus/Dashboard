@@ -104,7 +104,7 @@
         .cs-layout { display:grid; grid-template-columns:1fr 340px; gap:15px; height:60vh; }
 
         .ir-layout { display:flex; flex-direction:column; gap:15px; }
-        .ir-cards-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:6px; }
+        .ir-cards-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:6px; }
         .ir-card { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:6px; position:relative; overflow:hidden; transition:border-color .2s; }
         .ir-card:hover { border-color:#333; }
         .ir-card-top { display:flex; align-items:center; justify-content:space-between; }
@@ -455,7 +455,17 @@
     <!-- OVERVIEW -->
     <div class="tab-page active" id="page-overview">
         <div class="page-header">
-            <div class="ph-left"></div>
+            <div class="ph-left" style="min-width:260px;">
+                <div style="display:flex;gap:14px;align-items:center;">
+                    <div><div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Strongest</div><div id="ovStrongest" style="font-size:13px;font-weight:bold;">—</div></div>
+                    <div style="width:1px;height:28px;background:#1e2230;"></div>
+                    <div><div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Weakest</div><div id="ovWeakest" style="font-size:13px;font-weight:bold;">—</div></div>
+                    <div style="width:1px;height:28px;background:#1e2230;"></div>
+                    <div><div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Top Pair</div><div id="ovTopPair" style="font-size:12px;font-weight:bold;">—</div></div>
+                    <div style="width:1px;height:28px;background:#1e2230;"></div>
+                    <div><div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Sources</div><div id="ovSources" style="font-size:11px;color:#888;">Waiting...</div></div>
+                </div>
+            </div>
             <div class="ph-center">Market Bias Overview</div>
             <div class="ph-right">
                 <span class="ph-status" id="ovStatus">Loading...</span>
@@ -463,22 +473,17 @@
             </div>
         </div>
         <div class="ov-layout">
-            <!-- Summary strip -->
-            <div class="ov-summary" id="ovSummary">
-                <div class="ov-summary-item"><div class="ov-summary-lbl">Strongest</div><div class="ov-summary-val" id="ovStrongest">—</div></div>
-                <div class="ov-summary-divider"></div>
-                <div class="ov-summary-item"><div class="ov-summary-lbl">Weakest</div><div class="ov-summary-val" id="ovWeakest">—</div></div>
-                <div class="ov-summary-divider"></div>
-                <div class="ov-summary-item"><div class="ov-summary-lbl">Top Pair Bias</div><div class="ov-summary-val" id="ovTopPair">—</div></div>
-                <div class="ov-summary-divider"></div>
-                <div class="ov-summary-item"><div class="ov-summary-lbl">Data Sources</div><div class="ov-summary-val" id="ovSources" style="font-size:11px;color:#888">Waiting...</div></div>
-                <div class="ov-last-update" id="ovLastUpdate">—</div>
-            </div>
             <!-- 8 currency cards -->
             <div class="ov-top-row" id="ovCurCards"><div style="grid-column:1/-1;text-align:center;padding:30px;color:#555;">Computing bias...</div></div>
             <!-- Pair bias grid -->
             <div class="ov-pairs-section">
-                <div class="ov-pairs-title">Pair Directional Bias</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                    <div class="ov-pairs-title" style="margin-bottom:0;">Pair Directional Bias</div>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <span style="font-size:10px;color:#555;">Sort:</span>
+                        <button id="ovSortBtn" onclick="ovToggleSort()" style="padding:4px 12px;background:#1e2230;border:1px solid #2a3060;border-radius:5px;color:#aaa;font-size:11px;font-weight:bold;cursor:pointer;">Bull → Bear ↓</button>
+                    </div>
+                </div>
                 <div class="ov-pairs-grid" id="ovPairsGrid"></div>
             </div>
             <div class="ov-legend-note">Score = RSI ×25% + CI ×20% + COT ×25% + Sentiment Contrarian ×30% &nbsp;|&nbsp; Range −100 to +100 &nbsp;|&nbsp; COT: institutional lev. funds net position &nbsp;|&nbsp; Sentiment: retail contrarian signal</div>
@@ -716,10 +721,13 @@
             </div>
             <!-- Pair bias -->
             <div class="ov-pairs-section" style="padding:12px;">
-                <div class="ov-pairs-title">Pair Directional Bias</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                    <div class="ov-pairs-title" style="margin-bottom:0;">Pair Directional Bias</div>
+                    <button id="mob-ovSortBtn" onclick="ovToggleSort()" style="padding:4px 10px;background:#1e2230;border:1px solid #2a3060;border-radius:5px;color:#aaa;font-size:10px;font-weight:bold;cursor:pointer;">Bull→Bear ↓</button>
+                </div>
                 <div class="ov-pairs-grid" id="mob-ovPairsGrid"></div>
             </div>
-            <div style="font-size:9px;color:#333;text-align:right;padding:6px 2px;">RSI×25 + CI×25 + COT×35 + Sentiment×15 | Range −100 to +100</div>
+            <div style="font-size:9px;color:#333;text-align:right;padding:6px 2px;">RSI×25 + CI×20 + COT×25 + Sentiment×30 | Range −100 to +100</div>
         </div>
 
         <!-- SENTIMENT PAGE -->
@@ -2904,6 +2912,10 @@ var OV_LABEL_CONFIG = [
     { min:-100, max: -60, label:'Strong Bear',  bg:'rgba(200,30,30,0.18)',  color:'#F26666' }
 ];
 
+/* Sort state: true = bull→bear (desc), false = bear→bull (asc) */
+var _ovSortDesc = true;
+var _ovLastBias = null;
+
 function ovGetLabel(score) {
     for (var i = 0; i < OV_LABEL_CONFIG.length; i++) {
         var c = OV_LABEL_CONFIG[i];
@@ -3156,12 +3168,31 @@ function renderOverview(bias) {
     });
 
     /* ---- Pair bias grid (shared) ---- */
+    _ovLastBias = bias;
+    ovRenderPairsGrid(pairBiases);
+}
+
+function ovSortedPairs(pairBiases) {
+    return pairBiases.slice().sort(function(a, b) {
+        var sa = a.score !== null ? a.score : -999;
+        var sb = b.score !== null ? b.score : -999;
+        return _ovSortDesc ? sb - sa : sa - sb;
+    });
+}
+
+function ovRenderPairsGrid(pairBiases) {
+    var sorted = ovSortedPairs(pairBiases);
+    /* Update button labels */
+    ['ovSortBtn','mob-ovSortBtn'].forEach(function(id) {
+        var btn = document.getElementById(id);
+        if (btn) btn.textContent = _ovSortDesc ? 'Bull → Bear ↓' : 'Bear → Bull ↑';
+    });
     ['ovPairsGrid', 'mob-ovPairsGrid'].forEach(function(gridId) {
         var grid = document.getElementById(gridId);
         if (!grid) return;
         grid.innerHTML = '';
 
-        pairBiases.forEach(function(p) {
+        sorted.forEach(function(p) {
             var lbl = p.score !== null ? ovGetLabel(p.score) : { label:'—', color:'#555', bg:'#111' };
             var scoreDisp = p.score !== null ? (p.score >= 0 ? '+' : '') + p.score : '—';
             var barW = p.score !== null ? (Math.abs(p.score)/100*50).toFixed(1) : '0';
@@ -3195,6 +3226,14 @@ function renderOverview(bias) {
             grid.appendChild(div);
         });
     });
+}
+
+function ovToggleSort() {
+    _ovSortDesc = !_ovSortDesc;
+    if (_ovLastBias) {
+        var pairBiases = ovPairBias(_ovLastBias);
+        ovRenderPairsGrid(pairBiases);
+    }
 }
 
 async function ovRefresh() {
