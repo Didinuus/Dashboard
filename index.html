@@ -1521,7 +1521,7 @@ function renderCICombinedChart(labels) {
                 maintainAspectRatio: false,
                 animation: false,
                 interaction: { mode: 'index', intersect: false },
-                layout: { padding: { right: 64 } },
+                layout: { padding: { right: 62 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: { enabled: false }
@@ -1532,7 +1532,7 @@ function renderCICombinedChart(labels) {
                         ticks: { maxRotation:0, autoSkip:true, maxTicksLimit:10, color:'#444', font:{size:9} }
                     },
                     y: {
-                        position: 'left',
+                        position: 'right',
                         grid: { color: '#1a1a2a' },
                         ticks: {
                             color: '#444', font:{size:9},
@@ -1543,6 +1543,20 @@ function renderCICombinedChart(labels) {
             },
             plugins: [{
                 id: 'ciCombinedPlugin',
+                beforeDraw: function(chart) {
+                    /* Fill right padding area with chart background so no black gap */
+                    var c2 = chart.ctx;
+                    var w = chart.width, h = chart.height;
+                    var ca = chart.chartArea;
+                    if (!ca) return;
+                    var yScale = chart.scales.y;
+                    /* Right padding zone: from end of y-axis to canvas right edge */
+                    var padLeft = yScale ? yScale.right : ca.right;
+                    c2.save();
+                    c2.fillStyle = '#101010';
+                    c2.fillRect(padLeft, 0, w - padLeft, h);
+                    c2.restore();
+                },
                 afterDraw: function(chart) {
                     var y = chart.scales.y, ca = chart.chartArea;
                     if (!y || !ca) return;
@@ -1588,7 +1602,8 @@ function renderCICombinedChart(labels) {
                     }
 
                     var BW = chart.canvas.id === 'ciCombinedChart' ? 54 : 46;
-                    var bx = ca.right + 4;
+                    var yScale = chart.scales.y;
+                    var bx = yScale ? yScale.right + 3 : ca.right + 4;
 
                     items.forEach(function(item) {
                         var pct = (item.val * 100).toFixed(2);
