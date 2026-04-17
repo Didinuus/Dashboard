@@ -1535,7 +1535,8 @@ function renderCICombinedChart(labels) {
                         position: 'right',
                         grid: { color: '#1a1a2a' },
                         ticks: {
-                            display: false
+                            color: '#444', font:{size:9},
+                            callback: function(v){ return (v>=0?'+':'') + (v*100).toFixed(2) + '%'; }
                         }
                     }
                 }
@@ -1556,24 +1557,7 @@ function renderCICombinedChart(labels) {
                         c2.stroke(); c2.restore();
                     }
 
-                    /* Draw y-axis tick labels manually in the right padding zone */
-                    var tickX = ca.right + 4;
-                    var ticks = y.ticks || [];
-                    c2.save();
-                    c2.font = '9px Arial';
-                    c2.fillStyle = '#555';
-                    c2.textAlign = 'left';
-                    c2.textBaseline = 'middle';
-                    ticks.forEach(function(tick) {
-                        var v = tick.value;
-                        var tyPx = y.getPixelForValue(v);
-                        if (tyPx < ca.top || tyPx > ca.bottom) return;
-                        var label = (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + '%';
-                        c2.fillText(label, tickX, tyPx);
-                    });
-                    c2.restore();
-
-                    /* End-of-line value badges — placed after the tick labels */
+                    /* End-of-line badges — placed directly on the y-axis */
                     var xMax = chart.options.scales.x.max;
                     var items = [];
                     chart.data.datasets.forEach(function(ds) {
@@ -1589,7 +1573,6 @@ function renderCICombinedChart(labels) {
                         items.push({ label: ds.label, color: ds.borderColor, val: val, yp: yPx });
                     });
 
-                    /* Sort and spread overlapping badges */
                     items.sort(function(a, b) { return a.yp - b.yp; });
                     var BH = 16, gap = 2;
                     for (var pass = 0; pass < 10; pass++) {
@@ -1602,9 +1585,8 @@ function renderCICombinedChart(labels) {
                         }
                     }
 
-                    /* Badges sit at the far right of the padding zone */
                     var BW = chart.canvas.id === 'ciCombinedChart' ? 54 : 46;
-                    var bx = chart.width - BW - 2;
+                    var bx = ca.right + 2;  /* directly on the y-axis */
 
                     items.forEach(function(item) {
                         var pct = (item.val * 100).toFixed(2);
@@ -1612,10 +1594,8 @@ function renderCICombinedChart(labels) {
                         var by = item.yp - BH / 2;
                         by = Math.max(ca.top, Math.min(ca.bottom - BH, by));
 
-                        /* Badge background */
                         c2.save();
                         c2.fillStyle = item.color;
-                        c2.globalAlpha = 0.95;
                         var r = 3;
                         c2.beginPath();
                         c2.moveTo(bx + r, by);
@@ -1629,25 +1609,12 @@ function renderCICombinedChart(labels) {
                         c2.arcTo(bx, by, bx + r, by, r);
                         c2.closePath();
                         c2.fill();
-                        c2.globalAlpha = 1;
 
-                        /* Badge text */
                         c2.fillStyle = '#fff';
                         c2.font = 'bold 9px Arial';
                         c2.textAlign = 'center';
                         c2.textBaseline = 'middle';
                         c2.fillText(text, bx + BW / 2, by + BH / 2);
-                        c2.restore();
-
-                        /* Tick line from right edge of chart to badge */
-                        c2.save();
-                        c2.beginPath();
-                        c2.moveTo(ca.right, item.yp);
-                        c2.lineTo(bx - 1, by + BH / 2);
-                        c2.strokeStyle = item.color;
-                        c2.globalAlpha = 0.4;
-                        c2.lineWidth = 1;
-                        c2.stroke();
                         c2.restore();
                     });
 
