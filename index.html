@@ -3100,7 +3100,7 @@ function ovGetCiScore(cur) {
 }
 
 function ovGetCotScore(cur) {
-    /* Uses Leveraged Funds net position, normalised across all currencies */
+    /* Combined: Leveraged Funds (60%) + Asset Managers (40%), normalised across all currencies */
     var byCode = window._cotByCode, markets = window._cotMarkets;
     if (!byCode || !markets) return null;
     var market = markets.find(function(m){ return m.name === cur; });
@@ -3108,16 +3108,19 @@ function ovGetCotScore(cur) {
     var rows = byCode[market.code];
     if (!rows || !rows.length) return null;
     var r = rows[0];
-    var net = (parseInt(r.lev_money_positions_long||0)||0) - (parseInt(r.lev_money_positions_short||0)||0);
-    /* Normalise: collect all nets to find range */
+    var levNet = (parseInt(r.lev_money_positions_long||0)||0)  - (parseInt(r.lev_money_positions_short||0)||0);
+    var amNet  = (parseInt(r.asset_mgr_positions_long||0)||0)  - (parseInt(r.asset_mgr_positions_short||0)||0);
+    var combined = levNet * 0.60 + amNet * 0.40;
+    /* Normalise: collect combined nets across all currencies to find range */
     var allNets = [];
     markets.forEach(function(m) {
         var mr = byCode[m.code]; if (!mr || !mr.length) return;
-        var n = (parseInt(mr[0].lev_money_positions_long||0)||0) - (parseInt(mr[0].lev_money_positions_short||0)||0);
-        allNets.push(n);
+        var lv = (parseInt(mr[0].lev_money_positions_long||0)||0) - (parseInt(mr[0].lev_money_positions_short||0)||0);
+        var am = (parseInt(mr[0].asset_mgr_positions_long||0)||0) - (parseInt(mr[0].asset_mgr_positions_short||0)||0);
+        allNets.push(lv * 0.60 + am * 0.40);
     });
     var maxAbs = Math.max.apply(null, allNets.map(Math.abs)) || 1;
-    return parseFloat((net / maxAbs * 100).toFixed(1));
+    return parseFloat((combined / maxAbs * 100).toFixed(1));
 }
 
 function ovGetSentimentScore(cur) {
