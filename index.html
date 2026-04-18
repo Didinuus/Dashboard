@@ -1397,6 +1397,8 @@ function renderCICombinedChart(labels) {
                         grid: { color: '#1a1a2a' },
                         ticks: {
                             color: '#444', font:{size:9},
+                            mirror: true,
+                            padding: -4,
                             callback: function(v){ return (v>=0?'+':'') + (v*100).toFixed(2) + '%'; }
                         }
                     }
@@ -2390,7 +2392,7 @@ function renderCSChart(labels,series){
             scales:{
                 x:{ grid:{color:'#161616'}, ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12,color:'#444',font:{size:9}} },
                 y:{ position:'right', min:15, max:85, grid:{color:'#1a1a2a'},
-                    ticks:{ color:'#555', font:{size:9}, stepSize:10 }
+                    ticks:{ color:'#555', font:{size:9}, stepSize:10, mirror:true, padding:-4 }
                 }
             }
         },
@@ -2614,7 +2616,7 @@ function mobRenderCSChart(labels, series) {
                     position: 'right',
                     min: 15, max: 85,
                     grid: { color:'#1a1a2a' },
-                    ticks: { color:'#555', font:{size:8}, stepSize:10 }
+                    ticks: { color:'#555', font:{size:8}, stepSize:10, mirror:true, padding:-4 }
                 }
             }
         },
