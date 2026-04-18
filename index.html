@@ -830,7 +830,7 @@
 var CONFIG = { email:'hamdikhireddine@icloud.com', password:'Didine@06', apiUrl:'https://www.myfxbook.com/api/' };
 var ALL_PAIRS = ['AUDUSD','EURUSD','GBPUSD','NZDUSD','USDCAD','USDCHF','USDJPY','AUDCAD','AUDCHF','AUDJPY','AUDNZD','CADCHF','CADJPY','CHFJPY','EURAUD','EURCAD','EURCHF','EURGBP','EURJPY','EURNZD','GBPAUD','GBPCAD','GBPCHF','GBPJPY','GBPNZD','NZDCAD','NZDCHF','NZDJPY'];
 var MAJOR_PAIRS = ['EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD'];
-var sentimentChart = null, _sentimentMap = {};
+var sentimentChart = null, _sentimentMap = {}, _sentimentMapCache = {};
 var OANDA_KEY = 'a6109748dde9f520b7491de5f93c4fde-50b266ca427e911f6bec97df47f92a4b';
 var OANDA_URL = 'https://api-fxpractice.oanda.com/v3';
 var CS_CURRENCIES = ['EUR','USD','GBP','AUD','CHF','JPY','CAD','NZD'];
@@ -2031,6 +2031,7 @@ async function actualiserDonnees() {
         if (sd.error||!sd.symbols) throw new Error('data');
         _sentimentMap = {};
         sd.symbols.forEach(function(s){ _sentimentMap[s.name] = s; });
+        _sentimentMapCache = _sentimentMap; /* save for fallback */
         if (!IS_MOBILE) { afficherTableau(_sentimentMap); afficherGraphique(_sentimentMap); }
         mobAfficherTableau(_sentimentMap);
         mobRenderSentBars();
@@ -2039,8 +2040,17 @@ async function actualiserDonnees() {
         if (el2) el2.textContent = t;
         setTimeout(syncScrollbarPlaceholder, 50);
     } catch(e) {
-        if (el1) el1.textContent = 'Erreur';
-        if (el2) el2.textContent = 'Err';
+        if (_sentimentMapCache && Object.keys(_sentimentMapCache).length) {
+            /* Restore last known data silently */
+            if (!IS_MOBILE) { afficherTableau(_sentimentMapCache); afficherGraphique(_sentimentMapCache); }
+            mobAfficherTableau(_sentimentMapCache);
+            mobRenderSentBars();
+            if (el1) el1.textContent = 'cached ' + fmtTime();
+            if (el2) el2.textContent = 'cached';
+        } else {
+            if (el1) el1.textContent = 'Erreur';
+            if (el2) el2.textContent = 'Err';
+        }
     }
 }
 
