@@ -55,7 +55,6 @@
         .cot-pies { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px; }
         .cot-pie-item { display:flex; flex-direction:column; align-items:center; gap:4px; }
         .cot-pie-item canvas { width:80px!important; height:80px!important; }
-        .cot-pie-label { font-size:10px; color:#aaa; text-align:center; }
 
         .tabs { display:flex; gap:6px; justify-content:center; margin-bottom:20px; flex-wrap:wrap; }
         .tab-btn { padding:9px 24px; background:#161616; color:#aaa; border:1px solid #1e2230; border-radius:6px; cursor:pointer; font-weight:bold; font-size:13px; transition:all .15s; }
@@ -171,7 +170,6 @@
         /* =============================================
            CURRENCY INDEX PAGE
            ============================================= */
-        .ci-layout { display:flex; flex-direction:column; gap:15px; }
         .ci-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
         .ci-chart-card {
             background:#161616; border:1px solid #1e2230; border-radius:8px;
@@ -860,7 +858,6 @@ var OANDA_URL = 'https://api-fxpractice.oanda.com/v3';
 var CS_CURRENCIES = ['EUR','USD','GBP','AUD','CHF','JPY','CAD','NZD'];
 var CS_COLORS = {EUR:'#1C79B3',USD:'#AD4055',GBP:'#2E832B',AUD:'#6C2835',CHF:'#885713',JPY:'#777777',CAD:'#13527B',NZD:'#1A4817'};
 var CS_PAIRS = {EUR:{base:['EUR_USD','EUR_GBP','EUR_AUD','EUR_JPY','EUR_CAD','EUR_CHF'],quote:[]},USD:{base:['USD_JPY','USD_CAD','USD_CHF'],quote:['EUR_USD','GBP_USD','AUD_USD','NZD_USD']},GBP:{base:['GBP_USD','GBP_AUD','GBP_JPY','GBP_CAD','GBP_CHF'],quote:['EUR_GBP']},AUD:{base:['AUD_USD','AUD_JPY','AUD_CAD','AUD_CHF','AUD_NZD'],quote:['EUR_AUD','GBP_AUD']},CHF:{base:['CHF_JPY'],quote:['EUR_CHF','GBP_CHF','AUD_CHF','USD_CHF','CAD_CHF']},JPY:{base:[],quote:['EUR_JPY','GBP_JPY','AUD_JPY','USD_JPY','CAD_JPY','CHF_JPY','NZD_JPY']},CAD:{base:['CAD_JPY','CAD_CHF'],quote:['EUR_CAD','GBP_CAD','AUD_CAD','USD_CAD']},NZD:{base:['NZD_USD','NZD_CAD','NZD_CHF','NZD_JPY'],quote:['AUD_NZD','EUR_NZD','GBP_NZD']}};
-var CS_TF = {M5:'M5',M15:'M15',H1:'H1',H4:'H4',D:'D'};
 var CS_COUNT = {M5:1000,M15:800,H1:500,H4:300,D:200};
 var CS_VIEW = {M5:160,M15:160,H1:140,H4:96,D:60};
 var csTF = 'H1', csChart = null, csHidden = new Set(), _csRawTimes = [];
@@ -2351,7 +2348,7 @@ function calcRSI(closes) {
 }
 
 async function fetchCandles(instrument, count, tf) {
-    var tfStr = tf || CS_TF[csTF];
+    var tfStr = tf || csTF;
     var url = OANDA_URL + '/instruments/' + instrument + '/candles?granularity=' + tfStr + '&count=' + count + '&price=M';
     try {
         var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + OANDA_KEY } });
@@ -2568,7 +2565,7 @@ async function mobCsLoad() {
     if (el) el.textContent = 'Loading...';
     var pairs = csAllPairs(), results = {};
     await Promise.all(pairs.map(async function(p) {
-        var url = OANDA_URL + '/instruments/' + p + '/candles?granularity=' + CS_TF[mobCsTF] + '&count=' + (CS_COUNT[mobCsTF] + 20) + '&price=M';
+        var url = OANDA_URL + '/instruments/' + p + '/candles?granularity=' + mobCsTF + '&count=' + (CS_COUNT[mobCsTF] + 20) + '&price=M';
         try {
             var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + OANDA_KEY } });
             if (!r.ok) return;
@@ -2912,33 +2909,186 @@ var FXP_PAIRS=['EUR_USD','GBP_USD','AUD_USD','NZD_USD','USD_JPY','USD_CAD','USD_
 var FXP_TF_CONFIG={D:{granularity:'H1',count:25,label:'Today'},W:{granularity:'H4',count:42,label:'1 Week'},M:{granularity:'D',count:22,label:'1 Month'},M3:{granularity:'D',count:65,label:'3 Months'},Y:{granularity:'W',count:52,label:'1 Year'}};
 var fxpTF='D',mobFxpTF='D';
 
-async function fxpFetchPair(pair,tf){var useTF=tf||fxpTF;var cfg=FXP_TF_CONFIG[useTF];var url=OANDA_URL+'/instruments/'+pair+'/candles?granularity='+cfg.granularity+'&count='+cfg.count+'&price=M';try{var r=await fetch(url,{headers:{'Authorization':'Bearer '+OANDA_KEY}});if(!r.ok)return null;var d=await r.json();if(!d.candles||d.candles.length<2)return null;var first=parseFloat(d.candles[0].mid.o),last=parseFloat(d.candles[d.candles.length-1].mid.c);if(!first)return null;return((last-first)/first)*100;}catch(e){return null;}}
-
-async function fxpLoad(){
-    var el=document.getElementById('fxpStatus');if(el)el.textContent='Loading...';
-    var results={};
-    await Promise.all(FXP_PAIRS.map(async function(pair){results[pair]=await fxpFetchPair(pair,fxpTF);}));
-    var curPerf={};
-    FXP_CURRENCIES.forEach(function(cur){var sum=0,cnt=0;FXP_PAIRS.forEach(function(pair){var parts=pair.split('_'),pct=results[pair];if(pct===null||pct===undefined)return;if(parts[0]===cur){sum+=pct;cnt++;}else if(parts[1]===cur){sum-=pct;cnt++;}});curPerf[cur]=cnt>0?sum/cnt:null;});
-    fxpRenderBars(curPerf);fxpRenderHeatmap(results);
-    if(el)el.textContent=fmtTime();
+async function fxpFetchPair(pair, tf) {
+    var useTF = tf || fxpTF;
+    var cfg = FXP_TF_CONFIG[useTF];
+    var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.granularity + '&count=' + cfg.count + '&price=M';
+    try {
+        var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + OANDA_KEY } });
+        if (!r.ok) return null;
+        var d = await r.json();
+        if (!d.candles || d.candles.length < 2) return null;
+        var first = parseFloat(d.candles[0].mid.o), last = parseFloat(d.candles[d.candles.length-1].mid.c);
+        if (!first) return null;
+        return ((last - first) / first) * 100;
+    } catch(e) { return null; }
 }
-function fxpSetTF(tf,btn){fxpTF=tf;document.querySelectorAll('.fxp-tf-btn').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');fxpLoad();}
-function fxpRenderBars(curPerf){var entries=FXP_CURRENCIES.map(function(c){return{cur:c,val:curPerf[c]};}).filter(function(x){return x.val!==null;}).sort(function(a,b){return b.val-a.val;});var maxAbs=Math.max.apply(null,entries.map(function(e){return Math.abs(e.val);}));if(!maxAbs)maxAbs=1;var html='';entries.forEach(function(e){var isPos=e.val>=0,color=isPos?'#C03939':'#2F995F',barWidth=(Math.abs(e.val)/maxAbs*50).toFixed(1),fillClass=isPos?'fxp-bar-fill-pos':'fxp-bar-fill-neg';html+='<div class="fxp-bar-row"><div class="fxp-bar-flag">'+FXP_FLAGS[e.cur]+'</div><div class="fxp-bar-cur" style="color:'+FXP_COLORS[e.cur]+'">'+e.cur+'</div><div class="fxp-bar-track"><div class="fxp-bar-zero"></div><div class="'+fillClass+'" style="width:'+barWidth+'%;background:'+color+'33;border:1px solid '+color+'"></div></div><div class="fxp-bar-val" style="color:'+color+'">'+(isPos?'+':'')+e.val.toFixed(3)+'%</div></div>';});var c=document.getElementById('fxpBarsContainer');if(c)c.innerHTML=html;}
-function fxpRenderHeatmap(results){var lookup={};FXP_PAIRS.forEach(function(pair){var p=pair.split('_'),b=p[0],q=p[1];if(!lookup[b])lookup[b]={};if(!lookup[q])lookup[q]={};var pct=results[pair];lookup[b][q]=pct;lookup[q][b]=pct!==null?-pct:null;});function heatColor(val){if(val===null)return{bg:'#111',fg:'#444'};var intensity=Math.min(Math.abs(val)/1.5,1);if(val>0){var g=Math.round(80+intensity*120);return{bg:'rgba(0,'+g+',60,0.35)',fg:'#'+(val>0.5?'14BC60':'4ddb8a')};}else{var r=Math.round(140+intensity*100);return{bg:'rgba('+r+',30,30,0.35)',fg:'#'+(val<-0.5?'F26666':'ff9090')};}}var curs=FXP_CURRENCIES,html='<table class="fxp-heatmap-table"><thead><tr><th></th>';curs.forEach(function(c){html+='<th>'+FXP_FLAGS[c]+' '+c+'</th>';});html+='</tr></thead><tbody>';curs.forEach(function(base){html+='<tr><td class="fxp-row-label">'+FXP_FLAGS[base]+' '+base+'</td>';curs.forEach(function(quote){if(base===quote){html+='<td class="fxp-diag">—</td>';}else{var val=(lookup[base]&&lookup[base][quote]!==undefined)?lookup[base][quote]:null,col=heatColor(val),display=val!==null?(val>=0?'+':'')+val.toFixed(2)+'%':'—';html+='<td style="background:'+col.bg+';color:'+col.fg+'" title="'+base+'/'+quote+'">'+display+'</td>';}});html+='</tr>';});html+='</tbody></table>';var c=document.getElementById('fxpHeatmapContainer');if(c)c.innerHTML=html;}
 
-async function mobFxpLoad(){
-    var el=document.getElementById('mob-fxpStatus');if(el)el.textContent='Loading...';
-    var results={};
-    await Promise.all(FXP_PAIRS.map(async function(pair){results[pair]=await fxpFetchPair(pair,mobFxpTF);}));
-    var curPerf={};
-    FXP_CURRENCIES.forEach(function(cur){var sum=0,cnt=0;FXP_PAIRS.forEach(function(pair){var parts=pair.split('_'),pct=results[pair];if(pct===null||pct===undefined)return;if(parts[0]===cur){sum+=pct;cnt++;}else if(parts[1]===cur){sum-=pct;cnt++;}});curPerf[cur]=cnt>0?sum/cnt:null;});
-    mobFxpRenderBars(curPerf);mobFxpRenderHeatmap(results);
-    if(el)el.textContent=fmtTime();
+async function fxpLoad() {
+    var el = document.getElementById('fxpStatus'); if (el) el.textContent = 'Loading...';
+    var results = {};
+    await Promise.all(FXP_PAIRS.map(async function(pair){ results[pair] = await fxpFetchPair(pair, fxpTF); }));
+    var curPerf = {};
+    FXP_CURRENCIES.forEach(function(cur) {
+        var sum = 0, cnt = 0;
+        FXP_PAIRS.forEach(function(pair) {
+            var parts = pair.split('_'), pct = results[pair];
+            if (pct === null || pct === undefined) return;
+            if (parts[0] === cur) { sum += pct; cnt++; }
+            else if (parts[1] === cur) { sum -= pct; cnt++; }
+        });
+        curPerf[cur] = cnt > 0 ? sum / cnt : null;
+    });
+    fxpRenderBars(curPerf); fxpRenderHeatmap(results);
+    if (el) el.textContent = fmtTime();
 }
-function mobFxpSetTF(tf,btn){mobFxpTF=tf;document.querySelectorAll('.mob-fxp-tf-btn').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');mobFxpLoad();}
-function mobFxpRenderBars(curPerf){var entries=FXP_CURRENCIES.map(function(c){return{cur:c,val:curPerf[c]};}).filter(function(x){return x.val!==null;}).sort(function(a,b){return b.val-a.val;});var maxAbs=Math.max.apply(null,entries.map(function(e){return Math.abs(e.val);}));if(!maxAbs)maxAbs=1;var html='';entries.forEach(function(e){var isPos=e.val>=0,color=isPos?'#C03939':'#2F995F',barWidth=(Math.abs(e.val)/maxAbs*50).toFixed(1);html+='<div class="mob-bar-row"><div style="font-size:13px;width:20px;flex-shrink:0">'+FXP_FLAGS[e.cur]+'</div><div class="mob-bar-label" style="text-align:left;width:36px;color:'+FXP_COLORS[e.cur]+'">'+e.cur+'</div><div class="mob-bar-track" style="position:relative"><div style="position:absolute;top:0;bottom:0;width:2px;left:50%;background:#333;transform:translateX(-50%);z-index:1"></div>'+(isPos?'<div style="position:absolute;top:0;left:50%;height:100%;border-radius:0 4px 4px 0;background:'+color+'33;border:1px solid '+color+';width:'+barWidth+'%"></div>':'<div style="position:absolute;top:0;right:50%;height:100%;border-radius:4px 0 0 4px;background:'+color+'33;border:1px solid '+color+';width:'+barWidth+'%"></div>')+'</div><div class="fxp-bar-val" style="color:'+color+';width:54px;text-align:right;font-size:11px;font-weight:bold;flex-shrink:0">'+(isPos?'+':'')+e.val.toFixed(3)+'%</div></div>';});var c=document.getElementById('mob-fxpBarsContainer');if(c)c.innerHTML=html;}
-function mobFxpRenderHeatmap(results){var lookup={};FXP_PAIRS.forEach(function(pair){var p=pair.split('_'),b=p[0],q=p[1];if(!lookup[b])lookup[b]={};if(!lookup[q])lookup[q]={};var pct=results[pair];lookup[b][q]=pct;lookup[q][b]=pct!==null?-pct:null;});function heatColor(val){if(val===null)return{bg:'#111',fg:'#444'};var intensity=Math.min(Math.abs(val)/1.5,1);if(val>0){var g=Math.round(80+intensity*120);return{bg:'rgba(0,'+g+',60,0.35)',fg:'#'+(val>0.5?'14BC60':'4ddb8a')};}else{var r=Math.round(140+intensity*100);return{bg:'rgba('+r+',30,30,0.35)',fg:'#'+(val<-0.5?'F26666':'ff9090')};}}var curs=FXP_CURRENCIES;var html='<table style="border-collapse:collapse;font-size:9px;min-width:420px"><thead><tr><th style="padding:5px 3px;color:#666;border:1px solid #1e2230;background:#111"></th>';curs.forEach(function(c){html+='<th style="padding:5px 3px;color:#888;border:1px solid #1e2230;background:#111;font-size:9px">'+c+'</th>';});html+='</tr></thead><tbody>';curs.forEach(function(base){html+='<tr><td style="font-size:10px;font-weight:bold;color:#fff;background:#111;border:1px solid #1e2230;padding:5px 4px">'+base+'</td>';curs.forEach(function(quote){if(base===quote){html+='<td style="background:#111;color:#444;border:1px solid #1e2230;text-align:center;padding:5px 2px">—</td>';}else{var val=(lookup[base]&&lookup[base][quote]!==undefined)?lookup[base][quote]:null,col=heatColor(val),display=val!==null?(val>=0?'+':'')+val.toFixed(1)+'%':'—';html+='<td style="background:'+col.bg+';color:'+col.fg+';border:1px solid #1e2230;text-align:center;padding:5px 2px;font-weight:bold;font-size:9px">'+display+'</td>';}});html+='</tr>';});html+='</tbody></table>';var c=document.getElementById('mob-fxpHeatmapContainer');if(c)c.innerHTML=html;}
+
+function fxpSetTF(tf, btn) {
+    fxpTF = tf;
+    document.querySelectorAll('.fxp-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    fxpLoad();
+}
+
+function fxpRenderBars(curPerf) {
+    var entries = FXP_CURRENCIES.map(function(c){ return { cur:c, val:curPerf[c] }; })
+        .filter(function(x){ return x.val !== null; })
+        .sort(function(a, b){ return b.val - a.val; });
+    var maxAbs = Math.max.apply(null, entries.map(function(e){ return Math.abs(e.val); }));
+    if (!maxAbs) maxAbs = 1;
+    var html = '';
+    entries.forEach(function(e) {
+        var isPos = e.val >= 0, color = isPos ? '#C03939' : '#2F995F';
+        var barWidth = (Math.abs(e.val) / maxAbs * 50).toFixed(1);
+        var fillClass = isPos ? 'fxp-bar-fill-pos' : 'fxp-bar-fill-neg';
+        html += '<div class="fxp-bar-row">' +
+            '<div class="fxp-bar-flag">' + FXP_FLAGS[e.cur] + '</div>' +
+            '<div class="fxp-bar-cur" style="color:' + FXP_COLORS[e.cur] + '">' + e.cur + '</div>' +
+            '<div class="fxp-bar-track"><div class="fxp-bar-zero"></div>' +
+            '<div class="' + fillClass + '" style="width:' + barWidth + '%;background:' + color + '33;border:1px solid ' + color + '"></div></div>' +
+            '<div class="fxp-bar-val" style="color:' + color + '">' + (isPos?'+':'') + e.val.toFixed(3) + '%</div></div>';
+    });
+    var c = document.getElementById('fxpBarsContainer'); if (c) c.innerHTML = html;
+}
+
+function fxpRenderHeatmap(results) {
+    var lookup = {};
+    FXP_PAIRS.forEach(function(pair) {
+        var p = pair.split('_'), b = p[0], q = p[1];
+        if (!lookup[b]) lookup[b] = {}; if (!lookup[q]) lookup[q] = {};
+        var pct = results[pair];
+        lookup[b][q] = pct; lookup[q][b] = pct !== null ? -pct : null;
+    });
+    function heatColor(val) {
+        if (val === null) return { bg:'#111', fg:'#444' };
+        var intensity = Math.min(Math.abs(val) / 1.5, 1);
+        if (val > 0) { var g = Math.round(80 + intensity * 120); return { bg:'rgba(0,'+g+',60,0.35)', fg:'#'+(val>0.5?'14BC60':'4ddb8a') }; }
+        else { var r = Math.round(140 + intensity * 100); return { bg:'rgba('+r+',30,30,0.35)', fg:'#'+(val<-0.5?'F26666':'ff9090') }; }
+    }
+    var curs = FXP_CURRENCIES;
+    var html = '<table class="fxp-heatmap-table"><thead><tr><th></th>';
+    curs.forEach(function(c){ html += '<th>' + FXP_FLAGS[c] + ' ' + c + '</th>'; });
+    html += '</tr></thead><tbody>';
+    curs.forEach(function(base) {
+        html += '<tr><td class="fxp-row-label">' + FXP_FLAGS[base] + ' ' + base + '</td>';
+        curs.forEach(function(quote) {
+            if (base === quote) { html += '<td class="fxp-diag">—</td>'; }
+            else {
+                var val = (lookup[base] && lookup[base][quote] !== undefined) ? lookup[base][quote] : null;
+                var col = heatColor(val), display = val !== null ? (val>=0?'+':'') + val.toFixed(2) + '%' : '—';
+                html += '<td style="background:' + col.bg + ';color:' + col.fg + '" title="' + base + '/' + quote + '">' + display + '</td>';
+            }
+        });
+        html += '</tr>';
+    });
+    html += '</tbody></table>';
+    var c = document.getElementById('fxpHeatmapContainer'); if (c) c.innerHTML = html;
+}
+
+async function mobFxpLoad() {
+    var el = document.getElementById('mob-fxpStatus'); if (el) el.textContent = 'Loading...';
+    var results = {};
+    await Promise.all(FXP_PAIRS.map(async function(pair){ results[pair] = await fxpFetchPair(pair, mobFxpTF); }));
+    var curPerf = {};
+    FXP_CURRENCIES.forEach(function(cur) {
+        var sum = 0, cnt = 0;
+        FXP_PAIRS.forEach(function(pair) {
+            var parts = pair.split('_'), pct = results[pair];
+            if (pct === null || pct === undefined) return;
+            if (parts[0] === cur) { sum += pct; cnt++; }
+            else if (parts[1] === cur) { sum -= pct; cnt++; }
+        });
+        curPerf[cur] = cnt > 0 ? sum / cnt : null;
+    });
+    mobFxpRenderBars(curPerf); mobFxpRenderHeatmap(results);
+    if (el) el.textContent = fmtTime();
+}
+
+function mobFxpSetTF(tf, btn) {
+    mobFxpTF = tf;
+    document.querySelectorAll('.mob-fxp-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    mobFxpLoad();
+}
+
+function mobFxpRenderBars(curPerf) {
+    var entries = FXP_CURRENCIES.map(function(c){ return { cur:c, val:curPerf[c] }; })
+        .filter(function(x){ return x.val !== null; })
+        .sort(function(a, b){ return b.val - a.val; });
+    var maxAbs = Math.max.apply(null, entries.map(function(e){ return Math.abs(e.val); }));
+    if (!maxAbs) maxAbs = 1;
+    var html = '';
+    entries.forEach(function(e) {
+        var isPos = e.val >= 0, color = isPos ? '#C03939' : '#2F995F';
+        var barWidth = (Math.abs(e.val) / maxAbs * 50).toFixed(1);
+        html += '<div class="mob-bar-row">' +
+            '<div style="font-size:13px;width:20px;flex-shrink:0">' + FXP_FLAGS[e.cur] + '</div>' +
+            '<div class="mob-bar-label" style="text-align:left;width:36px;color:' + FXP_COLORS[e.cur] + '">' + e.cur + '</div>' +
+            '<div class="mob-bar-track" style="position:relative">' +
+            '<div style="position:absolute;top:0;bottom:0;width:2px;left:50%;background:#333;transform:translateX(-50%);z-index:1"></div>' +
+            (isPos
+                ? '<div style="position:absolute;top:0;left:50%;height:100%;border-radius:0 4px 4px 0;background:' + color + '33;border:1px solid ' + color + ';width:' + barWidth + '%"></div>'
+                : '<div style="position:absolute;top:0;right:50%;height:100%;border-radius:4px 0 0 4px;background:' + color + '33;border:1px solid ' + color + ';width:' + barWidth + '%"></div>') +
+            '</div>' +
+            '<div class="fxp-bar-val" style="color:' + color + ';width:54px;text-align:right;font-size:11px;font-weight:bold;flex-shrink:0">' + (isPos?'+':'') + e.val.toFixed(3) + '%</div></div>';
+    });
+    var c = document.getElementById('mob-fxpBarsContainer'); if (c) c.innerHTML = html;
+}
+
+function mobFxpRenderHeatmap(results) {
+    var lookup = {};
+    FXP_PAIRS.forEach(function(pair) {
+        var p = pair.split('_'), b = p[0], q = p[1];
+        if (!lookup[b]) lookup[b] = {}; if (!lookup[q]) lookup[q] = {};
+        var pct = results[pair];
+        lookup[b][q] = pct; lookup[q][b] = pct !== null ? -pct : null;
+    });
+    function heatColor(val) {
+        if (val === null) return { bg:'#111', fg:'#444' };
+        var intensity = Math.min(Math.abs(val) / 1.5, 1);
+        if (val > 0) { var g = Math.round(80 + intensity * 120); return { bg:'rgba(0,'+g+',60,0.35)', fg:'#'+(val>0.5?'14BC60':'4ddb8a') }; }
+        else { var r = Math.round(140 + intensity * 100); return { bg:'rgba('+r+',30,30,0.35)', fg:'#'+(val<-0.5?'F26666':'ff9090') }; }
+    }
+    var curs = FXP_CURRENCIES;
+    var html = '<table style="border-collapse:collapse;font-size:9px;min-width:420px"><thead><tr>' +
+        '<th style="padding:5px 3px;color:#666;border:1px solid #1e2230;background:#111"></th>';
+    curs.forEach(function(c){ html += '<th style="padding:5px 3px;color:#888;border:1px solid #1e2230;background:#111;font-size:9px">' + c + '</th>'; });
+    html += '</tr></thead><tbody>';
+    curs.forEach(function(base) {
+        html += '<tr><td style="font-size:10px;font-weight:bold;color:#fff;background:#111;border:1px solid #1e2230;padding:5px 4px">' + base + '</td>';
+        curs.forEach(function(quote) {
+            if (base === quote) { html += '<td style="background:#111;color:#444;border:1px solid #1e2230;text-align:center;padding:5px 2px">—</td>'; }
+            else {
+                var val = (lookup[base] && lookup[base][quote] !== undefined) ? lookup[base][quote] : null;
+                var col = heatColor(val), display = val !== null ? (val>=0?'+':'') + val.toFixed(1) + '%' : '—';
+                html += '<td style="background:' + col.bg + ';color:' + col.fg + ';border:1px solid #1e2230;text-align:center;padding:5px 2px;font-weight:bold;font-size:9px">' + display + '</td>';
+            }
+        });
+        html += '</tr>';
+    });
+    html += '</tbody></table>';
+    var c = document.getElementById('mob-fxpHeatmapContainer'); if (c) c.innerHTML = html;
+}
 
 /* =========================================================
    INTEREST RATES
@@ -2982,27 +3132,38 @@ function renderRates(){
     });
     setTimeout(function(){
         IR_BANKS.forEach(function(b){
-            var ctx3=document.getElementById('irHist_'+b.short);if(!ctx3)return;
-            if(irHistCharts[b.short])irHistCharts[b.short].destroy();
-            var labels=['2017','2018','2019','2020','2021','22 Q1','22 Q3','23 Q1','23 Q3','24 Q1','24 Q2','24 Q3','24 Q4','2025'];
-            irHistCharts[b.short]=new Chart(ctx3,{type:'line',data:{labels:labels.slice(0,b.history.length),datasets:[{label:'Rate',data:b.history,borderColor:b.color,backgroundColor:b.color+'22',borderWidth:2,pointRadius:3,pointBackgroundColor:b.color,fill:true,tension:0.2,stepped:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d0d0d',borderColor:'#1e2230',borderWidth:1,callbacks:{label:function(c){return' '+c.parsed.y.toFixed(2)+'%';}}}},scales:{x:{grid:{color:'#111'},ticks:{color:'#555',font:{size:8},maxTicksLimit:7,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:8},callback:function(v){return v.toFixed(1)+'%';}}}}}}); 
+            var ctx3 = document.getElementById('irHist_'+b.short); if (!ctx3) return;
+            if (irHistCharts[b.short]) irHistCharts[b.short].destroy();
+            var labels = ['2017','2018','2019','2020','2021','22 Q1','22 Q3','23 Q1','23 Q3','24 Q1','24 Q2','24 Q3','24 Q4','2025'];
+            irHistCharts[b.short] = new Chart(ctx3, {
+                type: 'line',
+                data: { labels: labels.slice(0, b.history.length), datasets: [{ label:'Rate', data:b.history, borderColor:b.color, backgroundColor:b.color+'22', borderWidth:2, pointRadius:3, pointBackgroundColor:b.color, fill:true, tension:0.2, stepped:true }] },
+                options: {
+                    responsive:true, maintainAspectRatio:false, animation:false,
+                    plugins: { legend:{display:false}, tooltip:{ backgroundColor:'#0d0d0d', borderColor:'#1e2230', borderWidth:1, callbacks:{ label:function(c){ return ' '+c.parsed.y.toFixed(2)+'%'; } } } },
+                    scales: {
+                        x: { grid:{color:'#111'}, ticks:{color:'#555', font:{size:8}, maxTicksLimit:7, maxRotation:0} },
+                        y: { position:'right', grid:{color:'#1a1a2a'}, ticks:{color:'#555', font:{size:8}, callback:function(v){ return v.toFixed(1)+'%'; } } }
+                    }
+                }
+            });
         });
-    },100);
-    var isel=document.getElementById('irStatus');if(isel)isel.textContent='Updated Apr 17, 2026';
+    }, 100);
+    var isel = document.getElementById('irStatus'); if (isel) isel.textContent = 'Updated Apr 17, 2026';
 }
 
 function mobRenderRates(){
-    var grid=document.getElementById('mob-irCardsGrid');if(!grid)return;grid.innerHTML='';
+    var grid = document.getElementById('mob-irCardsGrid'); if (!grid) return; grid.innerHTML = '';
     IR_BANKS.forEach(function(b){
-        var bpsChg=b.lastChangeBps||0;
-        var changeStr=bpsChg===0?'Unchanged':(bpsChg>0?'▲ +':'▼ ')+Math.abs(bpsChg)+'bps';
-        var changeBg=bpsChg>0?'rgba(20,188,96,0.15)':bpsChg<0?'rgba(242,102,102,0.15)':'rgba(100,100,100,0.15)';
-        var changeCol=bpsChg>0?'#14BC60':bpsChg<0?'#F26666':'#888';
-        var expColor=b.expectationDir>0?'#14BC60':b.expectationDir<0?'#F26666':'#888';
-        var rateDisplay=b.short==='Fed'?'3.50–3.75':b.rate.toFixed(2)+'%';
-        var card=document.createElement('div');
-        card.className='mob-ir-card';
-        card.innerHTML=
+        var bpsChg = b.lastChangeBps || 0;
+        var changeStr = bpsChg===0 ? 'Unchanged' : (bpsChg>0?'▲ +':'▼ ')+Math.abs(bpsChg)+'bps';
+        var changeBg = bpsChg>0 ? 'rgba(20,188,96,0.15)' : bpsChg<0 ? 'rgba(242,102,102,0.15)' : 'rgba(100,100,100,0.15)';
+        var changeCol = bpsChg>0 ? '#14BC60' : bpsChg<0 ? '#F26666' : '#888';
+        var expColor = b.expectationDir>0 ? '#14BC60' : b.expectationDir<0 ? '#F26666' : '#888';
+        var rateDisplay = b.short==='Fed' ? '3.50–3.75' : b.rate.toFixed(2)+'%';
+        var card = document.createElement('div');
+        card.className = 'mob-ir-card';
+        card.innerHTML =
             '<div class="mob-ir-accent-bar" style="background:'+b.color+'"></div>'+
             '<div class="mob-ir-top"><span class="mob-ir-bank">'+b.short+'</span><span class="mob-ir-flag">'+b.flag+'</span></div>'+
             '<div class="mob-ir-rate" style="color:'+b.color+'">'+rateDisplay+'</div>'+
@@ -3016,12 +3177,23 @@ function mobRenderRates(){
     });
     setTimeout(function(){
         IR_BANKS.forEach(function(b){
-            var ctx3=document.getElementById('mob-irHist_'+b.short);if(!ctx3)return;
-            if(mobIrHistCharts[b.short])mobIrHistCharts[b.short].destroy();
-            var labels=['2017','2018','2019','2020','2021','22Q1','22Q3','23Q1','23Q3','24Q1','24Q2','24Q3','24Q4','2025'];
-            mobIrHistCharts[b.short]=new Chart(ctx3,{type:'line',data:{labels:labels.slice(0,b.history.length),datasets:[{label:'Rate',data:b.history,borderColor:b.color,backgroundColor:b.color+'22',borderWidth:1.5,pointRadius:2,pointBackgroundColor:b.color,fill:true,tension:0.2,stepped:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#111'},ticks:{color:'#555',font:{size:7},maxTicksLimit:5,maxRotation:0}},y:{position:'right',grid:{color:'#1a1a2a'},ticks:{color:'#555',font:{size:7},callback:function(v){return v.toFixed(1)+'%';},maxTicksLimit:4}}}}});
+            var ctx3 = document.getElementById('mob-irHist_'+b.short); if (!ctx3) return;
+            if (mobIrHistCharts[b.short]) mobIrHistCharts[b.short].destroy();
+            var labels = ['2017','2018','2019','2020','2021','22Q1','22Q3','23Q1','23Q3','24Q1','24Q2','24Q3','24Q4','2025'];
+            mobIrHistCharts[b.short] = new Chart(ctx3, {
+                type: 'line',
+                data: { labels: labels.slice(0, b.history.length), datasets: [{ label:'Rate', data:b.history, borderColor:b.color, backgroundColor:b.color+'22', borderWidth:1.5, pointRadius:2, pointBackgroundColor:b.color, fill:true, tension:0.2, stepped:true }] },
+                options: {
+                    responsive:true, maintainAspectRatio:false, animation:false,
+                    plugins: { legend:{display:false} },
+                    scales: {
+                        x: { grid:{color:'#111'}, ticks:{color:'#555', font:{size:7}, maxTicksLimit:5, maxRotation:0} },
+                        y: { position:'right', grid:{color:'#1a1a2a'}, ticks:{color:'#555', font:{size:7}, callback:function(v){ return v.toFixed(1)+'%'; }, maxTicksLimit:4} }
+                    }
+                }
+            });
         });
-    },100);
+    }, 100);
 }
 
 /* =========================================================
