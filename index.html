@@ -259,6 +259,19 @@
         .ov-pair-label { font-size:10px; font-weight:bold; text-transform:uppercase; letter-spacing:0.3px; }
 
 
+        /* News page */
+        .news-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:14px 16px; display:flex; flex-direction:column; gap:6px; transition:border-color .15s; }
+        .news-card:hover { border-color:#2a3060; }
+        .news-card-title { font-size:13px; font-weight:bold; color:#e8e8e8; line-height:1.4; }
+        .news-card-title a { color:inherit; text-decoration:none; }
+        .news-card-title a:hover { color:#6090f0; }
+        .news-card-meta { display:flex; align-items:center; gap:10px; font-size:10px; color:#555; }
+        .news-card-source { color:#3a70c0; font-weight:bold; }
+        .news-card-tag { padding:1px 7px; border-radius:10px; font-size:9px; font-weight:bold; text-transform:uppercase; }
+        .news-sum-loading { display:inline-block; width:12px; height:12px; border:2px solid #444; border-top-color:#6090f0; border-radius:50%; animation:spin 0.8s linear infinite; margin-right:6px; vertical-align:middle; }
+        .news-sum-text { white-space:pre-wrap; }
+        .news-sum-currency { font-weight:bold; margin-top:8px; }
+
         /* Legend note */
         .ov-legend-note { font-size:10px; color:#444; text-align:right; padding:0 4px; }
 
@@ -270,9 +283,9 @@
             .mob-ticker { flex-shrink:0; background:#161616; border-bottom:1px solid #1e2230; padding:4px 8px; overflow:hidden; }
             .mob-content { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding:12px 12px 0 12px; padding-bottom:calc(64px + env(safe-area-inset-bottom) + 12px); }
             .mob-nav { position:fixed; bottom:0; left:0; right:0; z-index:100; background:#161616; border-top:1px solid #1e2230; display:flex; align-items:stretch; height:calc(64px + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom); }
-            .mob-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:transparent; border:none; color:#666; font-size:9px; font-weight:600; cursor:pointer; transition:color 0.15s; padding:8px 0; letter-spacing:0.3px; -webkit-tap-highlight-color:transparent; margin-bottom:0; height:64px; align-self:flex-start; }
+            .mob-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; background:transparent; border:none; color:#666; font-size:8px; font-weight:600; cursor:pointer; transition:color 0.15s; padding:6px 0; letter-spacing:0.2px; -webkit-tap-highlight-color:transparent; margin-bottom:0; height:64px; align-self:flex-start; }
             .mob-nav-btn.active { color:#fff; }
-            .mob-nav-btn svg { width:20px; height:20px; }
+            .mob-nav-btn svg { width:18px; height:18px; }
             .mob-nav-btn.active svg path, .mob-nav-btn.active svg rect, .mob-nav-btn.active svg polyline, .mob-nav-btn.active svg circle { stroke:#fff; }
             .mob-nav-indicator { position:absolute; top:0; height:2px; background:#4a8fff; border-radius:0 0 2px 2px; transition:left 0.25s cubic-bezier(.4,0,.2,1), width 0.25s; }
             .mob-page { display:none; }
@@ -311,14 +324,6 @@
             .mob-cs-tf-row { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
             .mob-cs-tf-btn { padding:6px 12px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; font-size:12px; font-weight:bold; flex:1; text-align:center; }
             .mob-cs-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
-            .mob-cs-rank-list { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:10px; margin-bottom:10px; }
-            .mob-cs-rank-row { display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:5px; margin-bottom:2px; }
-            .mob-cs-rank-pos { font-size:10px; color:#555; width:14px; text-align:right; flex-shrink:0; }
-            .mob-cs-rank-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
-            .mob-cs-rank-name { font-weight:bold; font-size:13px; flex:1; }
-            .mob-cs-rank-bar-wrap { flex:2; height:5px; background:#1e2230; border-radius:3px; overflow:hidden; }
-            .mob-cs-rank-bar { height:100%; border-radius:3px; }
-            .mob-cs-rank-val { font-size:12px; font-weight:bold; width:36px; text-align:right; flex-shrink:0; }
             .mob-cs-legend { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; }
             .mob-cs-legend-item { display:flex; align-items:center; gap:4px; font-size:10px; padding:3px 6px; border-radius:4px; border:1px solid #1e2230; }
             .mob-cs-legend-item.hidden { opacity:0.35; }
@@ -387,6 +392,7 @@
         <button class="tab-btn"         onclick="showTab('strength')">Currency Strength</button>
         <button class="tab-btn"         onclick="showTab('ci')">Currency Index</button>
         <button class="tab-btn"         onclick="showTab('macropage')">Macro</button>
+        <button class="tab-btn"         onclick="showTab('news')">News</button>
     </div>
 
     <div class="pairs-modal-overlay" id="pairsModalOverlay" onclick="if(event.target===this)closePairsModal()">
@@ -627,6 +633,45 @@
 </div>
 </div>
 
+    <!-- NEWS PAGE (PC) -->
+    <div class="tab-page" id="page-news">
+        <div class="page-header">
+            <div class="ph-left">
+                <button class="cs-tf-btn active" onclick="newsSetSource('fx',this)">Forex</button>
+                <button class="cs-tf-btn" onclick="newsSetSource('macro',this)">Macro</button>
+                <button class="cs-tf-btn" onclick="newsSetSource('crypto',this)">Crypto</button>
+            </div>
+            <div class="ph-center">Market News</div>
+            <div class="ph-right">
+                <span class="ph-status" id="newsStatus">—</span>
+                <button class="refresh-icon-btn" onclick="newsLoad()">&#8634;</button>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 380px;gap:15px;align-items:start;">
+            <!-- News feed -->
+            <div>
+                <div id="newsFeed" style="display:flex;flex-direction:column;gap:8px;">
+                    <div class="loading">Loading news...</div>
+                </div>
+            </div>
+            <!-- AI Summary -->
+            <div style="position:sticky;top:0;">
+                <div class="cs-chart-wrap" style="padding:16px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                        <div style="font-size:13px;font-weight:bold;color:#fff;">🤖 AI Summary</div>
+                        <button class="cs-tf-btn" onclick="newsSummarize()" id="newsSumBtn" style="padding:5px 14px;">Summarize</button>
+                    </div>
+                    <div id="newsSummary" style="font-size:12px;color:#aaa;line-height:1.7;min-height:120px;">
+                        Click <b style="color:#fff">Summarize</b> to get an AI analysis of the current news.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
 
 <!-- ================================================
      MOBILE LAYOUT
@@ -746,10 +791,6 @@
             <div class="mob-cs-chart-wrap">
                 <div class="mob-cs-chart-inner" id="mobCsChartInner"><canvas id="mob-csChart"></canvas></div>
             </div>
-            <div class="mob-cs-rank-list">
-                <div style="font-size:12px;font-weight:bold;margin-bottom:8px;color:#aaa;text-align:center;">STRENGTH RANKING</div>
-                <div id="mob-csRankBody"><div style="text-align:center;color:#aaa;padding:10px;">Loading...</div></div>
-            </div>
             <div class="mob-section-header" style="margin-top:4px;">
                 <span class="msh-title">FX Performance</span>
                 <div class="msh-right">
@@ -829,6 +870,36 @@
             </div>
         </div>
 
+        <!-- NEWS PAGE (mobile) -->
+        <div class="mob-page" id="mob-page-news">
+            <div class="mob-section-header">
+                <span class="msh-title">Market News</span>
+                <div class="msh-right">
+                    <span class="msh-status" id="mob-newsStatus">—</span>
+                    <button class="refresh-icon-btn" onclick="newsLoad()" style="font-size:18px">&#8634;</button>
+                </div>
+            </div>
+            <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+                <button class="mob-cs-tf-btn active" onclick="newsSetSource('fx',this)">Forex</button>
+                <button class="mob-cs-tf-btn" onclick="newsSetSource('macro',this)">Macro</button>
+                <button class="mob-cs-tf-btn" onclick="newsSetSource('crypto',this)">Crypto</button>
+            </div>
+            <!-- AI Summary -->
+            <div style="background:#161616;border:1px solid #1e2230;border-radius:8px;padding:12px;margin-bottom:10px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <div style="font-size:12px;font-weight:bold;color:#fff;">🤖 AI Summary</div>
+                    <button class="mob-cs-tf-btn" onclick="newsSummarize()" id="mob-newsSumBtn">Summarize</button>
+                </div>
+                <div id="mob-newsSummary" style="font-size:11px;color:#aaa;line-height:1.7;">
+                    Tap <b style="color:#fff">Summarize</b> for AI analysis.
+                </div>
+            </div>
+            <!-- News feed -->
+            <div id="mob-newsFeed" style="display:flex;flex-direction:column;gap:8px;padding-bottom:8px;">
+                <div class="loading">Loading news...</div>
+            </div>
+        </div>
+
     </div><!-- end mob-content -->
 
     <!-- Bottom navigation (5 tabs) -->
@@ -853,6 +924,10 @@
         <button class="mob-nav-btn" onclick="mobShowPage('macro',4,this)" id="mobnav-macro">
             <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             Macro
+        </button>
+        <button class="mob-nav-btn" onclick="mobShowPage('news',5,this)" id="mobnav-news">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+            News
         </button>
     </nav>
 </div>
@@ -1986,7 +2061,8 @@ function mobShowPage(name, idx, btn) {
     btn.classList.add('active'); btn.style.color='#fff';
     var s=btn.querySelector('svg'); if(s)s.style.stroke='#fff';
     var nav = document.getElementById('mobNav');
-    var btnWidth = nav.offsetWidth / 5;
+    var btnCount = nav.querySelectorAll('.mob-nav-btn').length;
+    var btnWidth = nav.offsetWidth / btnCount;
     var ind = document.getElementById('mobNavIndicator');
     ind.style.left = (idx * btnWidth) + 'px';
     ind.style.width = btnWidth + 'px';
@@ -1996,12 +2072,14 @@ function mobShowPage(name, idx, btn) {
     if (name === 'sentiment') actualiserDonnees();
     if (name === 'ci') ciLoad();
     if (name === 'overview') ovRefresh();
+    if (name === 'news') newsLoad();
 }
 
 window.addEventListener('load', function() {
     var nav = document.getElementById('mobNav');
     if (nav) {
-        var btnWidth = nav.offsetWidth / 5;
+        var btnCount = nav.querySelectorAll('.mob-nav-btn').length;
+        var btnWidth = nav.offsetWidth / btnCount;
         var ind = document.getElementById('mobNavIndicator');
         if (ind) { ind.style.left='0'; ind.style.width=btnWidth+'px'; }
     }
@@ -2564,40 +2642,6 @@ function buildCSLegend() {
     });
 }
 
-function renderCSRank(series, bodyId) {
-    var vals = CS_CURRENCIES.map(function(cur) {
-        var s = series[cur], f = s ? s.filter(function(v){ return v !== null; }) : [];
-        return { cur: cur, val: f.length ? f[f.length-1] : null };
-    }).filter(function(x){ return x.val !== null; });
-    vals.sort(function(a, b){ return b.val - a.val; });
-    var body = document.getElementById(bodyId);
-    if (!body) return;
-    body.innerHTML = '';
-    var max = vals.length ? vals[0].val : 100, min = vals.length ? vals[vals.length-1].val : 0;
-    vals.forEach(function(item, i) {
-        var pct = max === min ? 50 : Math.round((item.val - min) / (max - min) * 100);
-        var color = CS_COLORS[item.cur];
-        var row = document.createElement('div');
-        row.className = 'mob-cs-rank-row';
-        row.innerHTML =
-            '<div class="mob-cs-rank-pos">' + (i+1) + '</div>' +
-            '<div class="mob-cs-rank-dot" style="background:' + color + '"></div>' +
-            '<div class="mob-cs-rank-name">' + item.cur + '</div>' +
-            '<div class="mob-cs-rank-bar-wrap"><div class="mob-cs-rank-bar" style="width:' + pct + '%;background:' + color + '"></div></div>' +
-            '<div class="mob-cs-rank-val" style="color:' + color + '">' + item.val.toFixed(1) + '</div>';
-        body.appendChild(row);
-    });
-    var strong = vals.filter(function(x){ return x.val >= 55; }).map(function(x){ return x.cur; });
-    var weak   = vals.filter(function(x){ return x.val <= 45; }).map(function(x){ return x.cur; });
-    if (strong.length || weak.length) {
-        var s = document.createElement('div');
-        s.style.cssText = 'margin-top:8px;padding:8px;border-top:1px solid #1e2230;font-size:11px;color:#aaa;line-height:1.7';
-        s.innerHTML =
-            (strong.length ? '<div><b style="color:#2E832B">Bullish</b>: ' + strong.join(', ') + '</div>' : '') +
-            (weak.length   ? '<div><b style="color:#AD3644">Bearish</b>: ' + weak.join(', ')   + '</div>' : '');
-        body.appendChild(s);
-    }
-}
 function csRefresh() { csLoad(); }
 function csSetTF(tf, btn) {
     csTF = tf;
@@ -2658,7 +2702,6 @@ async function mobCsLoad() {
     _mobCsHoverIdx = -1;
 
     mobRenderCSChart(labels, _mobCsStrengthSeries);
-    renderCSRank(_mobCsStrengthSeries, 'mob-csRankBody');
     mobBuildCSLegend();
     if (el) el.textContent = fmtTime();
 }
@@ -2693,9 +2736,10 @@ function mobRenderCSChart(labels, series) {
             maintainAspectRatio: false,
             animation: false,
             interaction: { mode: 'index', intersect: false },
+            layout: { padding: { right: 36 } },
             plugins: {
                 legend: { display: false },
-                tooltip: { enabled: false }  /* disabled — we use floating labels */
+                tooltip: { enabled: false }
             },
             scales: {
                 x: {
@@ -2708,32 +2752,97 @@ function mobRenderCSChart(labels, series) {
                     position: 'right',
                     min: 15, max: 85,
                     grid: { color:'#1a1a2a' },
-                    ticks: { color:'#555', font:{size:8}, stepSize:10 }
+                    ticks: { display: false },
+                    afterFit: function(axis) { axis.width = 0; }
                 }
             }
         },
         plugins: [
             {
+                id: 'mobCsBefore',
+                beforeDraw: function(ch) {
+                    var c2 = ch.ctx, ca = ch.chartArea; if (!ca) return;
+                    c2.save(); c2.fillStyle = '#111111';
+                    c2.fillRect(ca.right, 0, ch.width - ca.right, ch.height);
+                    c2.restore();
+                }
+            },
+            {
                 id: 'mobCsRefLine',
                 afterDraw: function(ch) {
                     var c2 = ch.ctx, ca = ch.chartArea, y = ch.scales.y;
+                    /* 50 line */
                     var yp = y.getPixelForValue(50);
-                    if (yp < ca.top || yp > ca.bottom) return;
-                    c2.save();
-                    c2.beginPath(); c2.moveTo(ca.left, yp); c2.lineTo(ca.right, yp);
-                    c2.strokeStyle = '#383850'; c2.lineWidth = 1.5; c2.setLineDash([]);
-                    c2.stroke(); c2.restore();
+                    if (yp >= ca.top && yp <= ca.bottom) {
+                        c2.save();
+                        c2.beginPath(); c2.moveTo(ca.left, yp); c2.lineTo(ca.right, yp);
+                        c2.strokeStyle = '#383850'; c2.lineWidth = 1.5; c2.setLineDash([]);
+                        c2.stroke(); c2.restore();
+                    }
+                    /* Y-axis tick labels */
+                    var ticks = y.ticks || [];
+                    c2.save(); c2.font = '8px Arial'; c2.fillStyle = '#555';
+                    c2.textAlign = 'left'; c2.textBaseline = 'middle';
+                    ticks.forEach(function(tick) {
+                        var tyPx = y.getPixelForValue(tick.value);
+                        if (tyPx < ca.top || tyPx > ca.bottom) return;
+                        c2.fillText(tick.value, ca.right + 3, tyPx);
+                    });
+                    c2.restore();
+                    /* End-of-line value badges */
+                    var xMax = ch.options.scales.x.max;
+                    var items = [];
+                    ch.data.datasets.forEach(function(ds) {
+                        if (ds.hidden) return;
+                        var val = null, maxIdx = Math.min(Math.round(xMax), ds.data.length - 1);
+                        for (var k = maxIdx; k >= 0; k--) {
+                            if (ds.data[k] !== null && ds.data[k] !== undefined) { val = ds.data[k]; break; }
+                        }
+                        if (val === null) return;
+                        var yPx = y.getPixelForValue(val);
+                        if (yPx < ca.top || yPx > ca.bottom) return;
+                        items.push({ color: ds.borderColor, val: val, yp: yPx });
+                    });
+                    items.sort(function(a, b) { return a.yp - b.yp; });
+                    var BH = 14, gap = 2;
+                    for (var pass = 0; pass < 10; pass++) {
+                        for (var ii = 1; ii < items.length; ii++) {
+                            if (items[ii].yp - items[ii-1].yp < BH + gap) {
+                                var mid = (items[ii].yp + items[ii-1].yp) / 2;
+                                items[ii-1].yp = mid - (BH + gap) / 2;
+                                items[ii].yp   = mid + (BH + gap) / 2;
+                            }
+                        }
+                    }
+                    var BW = 30, bx = ch.width - BW - 1;
+                    items.forEach(function(item) {
+                        var text = item.val.toFixed(1);
+                        var by = item.yp - BH / 2;
+                        by = Math.max(ca.top, Math.min(ca.bottom - BH, by));
+                        c2.save(); c2.fillStyle = item.color;
+                        var r = 3;
+                        c2.beginPath();
+                        c2.moveTo(bx + r, by); c2.lineTo(bx + BW - r, by);
+                        c2.arcTo(bx + BW, by, bx + BW, by + BH, r);
+                        c2.lineTo(bx + BW, by + BH - r);
+                        c2.arcTo(bx + BW, by + BH, bx + BW - r, by + BH, r);
+                        c2.lineTo(bx + r, by + BH);
+                        c2.arcTo(bx, by + BH, bx, by + BH - r, r);
+                        c2.lineTo(bx, by + r);
+                        c2.arcTo(bx, by, bx + r, by, r);
+                        c2.closePath(); c2.fill();
+                        c2.fillStyle = '#fff'; c2.font = 'bold 8px Arial';
+                        c2.textAlign = 'center'; c2.textBaseline = 'middle';
+                        c2.fillText(text, bx + BW / 2, by + BH / 2);
+                        c2.restore();
+                    });
                 }
             },
             {
                 id: 'mobCsFloatingLabels',
                 afterDraw: function(chart) {
-                    /* Draw CI-style floating labels for the mobile CS chart */
                     drawFloatingLabels(
-                        chart,
-                        _mobCsHoverIdx,
-                        _mobCsRawTimes,
-                        mobCsTF,
+                        chart, _mobCsHoverIdx, _mobCsRawTimes, mobCsTF,
                         function(label, val) { return label + ' ' + val.toFixed(1); }
                     );
                 }
@@ -3050,6 +3159,211 @@ window.addEventListener('load', function() {
     setInterval(function(){ if(!IS_MOBILE)renderRates(); else mobRenderRates(); }, 60*60*1000);
 });
 
+/* =========================================================
+   NEWS — RSS fetch + AI summarize
+   ========================================================= */
+var _newsSource = 'fx';
+var _newsItems = [];
+
+var NEWS_SOURCES = {
+    fx: [
+        'https://api.rss2json.com/v1/api.json?rss_url=https://www.forexlive.com/feed/news',
+        'https://api.rss2json.com/v1/api.json?rss_url=https://www.fxstreet.com/rss/news',
+    ],
+    macro: [
+        'https://api.rss2json.com/v1/api.json?rss_url=https://feeds.content.dowjones.io/public/rss/mw_realtimeheadlines',
+        'https://api.rss2json.com/v1/api.json?rss_url=https://www.investing.com/rss/news_25.rss',
+    ],
+    crypto: [
+        'https://api.rss2json.com/v1/api.json?rss_url=https://cointelegraph.com/rss',
+        'https://api.rss2json.com/v1/api.json?rss_url=https://coindesk.com/arc/outboundfeeds/rss/',
+    ]
+};
+
+var NEWS_TAG_COLORS = {
+    fx:     { bg:'rgba(28,121,179,0.2)',  color:'#4a9fdf', label:'FX' },
+    macro:  { bg:'rgba(136,87,19,0.2)',   color:'#c4892a', label:'Macro' },
+    crypto: { bg:'rgba(110,60,100,0.2)',  color:'#b07ac0', label:'Crypto' }
+};
+
+function newsSetSource(src, btn) {
+    _newsSource = src;
+    document.querySelectorAll('#page-news .cs-tf-btn, .mob-cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    newsLoad();
+}
+
+async function newsLoad() {
+    _newsItems = [];
+    var feeds = NEWS_SOURCES[_newsSource] || NEWS_SOURCES.fx;
+    var tag = NEWS_TAG_COLORS[_newsSource] || NEWS_TAG_COLORS.fx;
+
+    ['newsFeed','mob-newsFeed'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) el.innerHTML = '<div class="loading">Loading news...</div>';
+    });
+    ['newsStatus','mob-newsStatus'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) el.textContent = 'Loading...';
+    });
+
+    /* Reset summary */
+    ['newsSummary','mob-newsSummary'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) el.innerHTML = 'Click <b style="color:#fff">Summarize</b> to get an AI analysis of the current news.';
+    });
+
+    try {
+        var allItems = [];
+        await Promise.all(feeds.map(async function(url) {
+            try {
+                var r = await fetch(url);
+                var d = await r.json();
+                if (d.items && d.items.length) {
+                    d.items.forEach(function(item) {
+                        allItems.push({
+                            title:   item.title || '',
+                            link:    item.link  || item.url || '#',
+                            source:  d.feed ? (d.feed.title || '') : '',
+                            pubDate: item.pubDate || item.published || '',
+                        });
+                    });
+                }
+            } catch(e) {}
+        }));
+
+        /* Sort by date desc, dedupe by title */
+        allItems.sort(function(a, b){ return new Date(b.pubDate) - new Date(a.pubDate); });
+        var seen = new Set();
+        allItems = allItems.filter(function(item) {
+            var key = item.title.trim().toLowerCase().slice(0, 60);
+            if (seen.has(key)) return false;
+            seen.add(key); return true;
+        });
+        _newsItems = allItems.slice(0, 30);
+
+        var now = fmtTime();
+        ['newsStatus','mob-newsStatus'].forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) el.textContent = now;
+        });
+
+        newsRenderFeed();
+
+    } catch(e) {
+        ['newsFeed','mob-newsFeed'].forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) el.innerHTML = '<div style="color:#F26666;padding:20px;text-align:center;">Failed to load news. Try again.</div>';
+        });
+    }
+}
+
+function newsRenderFeed() {
+    var tag = NEWS_TAG_COLORS[_newsSource] || NEWS_TAG_COLORS.fx;
+    var html = '';
+    if (!_newsItems.length) {
+        html = '<div style="color:#555;padding:20px;text-align:center;">No news found.</div>';
+    } else {
+        _newsItems.forEach(function(item) {
+            var dateStr = '';
+            if (item.pubDate) {
+                try {
+                    var dt = new Date(item.pubDate);
+                    dateStr = dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) + ' &mdash; ' +
+                              dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
+                } catch(e) {}
+            }
+            html +=
+                '<div class="news-card">' +
+                '<div class="news-card-title"><a href="' + item.link + '" target="_blank" rel="noopener">' + item.title + '</a></div>' +
+                '<div class="news-card-meta">' +
+                (item.source ? '<span class="news-card-source">' + item.source + '</span>' : '') +
+                (dateStr ? '<span>' + dateStr + '</span>' : '') +
+                '<span class="news-card-tag" style="background:' + tag.bg + ';color:' + tag.color + '">' + tag.label + '</span>' +
+                '</div>' +
+                '</div>';
+        });
+    }
+    ['newsFeed','mob-newsFeed'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+    });
+}
+
+async function newsSummarize() {
+    if (!_newsItems.length) { newsLoad(); return; }
+
+    var btnIds = ['newsSumBtn','mob-newsSumBtn'];
+    var sumIds = ['newsSummary','mob-newsSummary'];
+
+    btnIds.forEach(function(id){
+        var b = document.getElementById(id);
+        if (b) { b.disabled = true; b.textContent = '...'; }
+    });
+    sumIds.forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) el.innerHTML = '<span class="news-sum-loading"></span> Analyzing ' + _newsItems.length + ' headlines...';
+    });
+
+    var headlines = _newsItems.slice(0, 20).map(function(item, i){
+        return (i+1) + '. ' + item.title;
+    }).join('\n');
+
+    var prompt =
+        'You are a professional FX market analyst. Below are the latest ' + _newsSource + ' news headlines.\n\n' +
+        'Headlines:\n' + headlines + '\n\n' +
+        'Write a concise market summary in this exact format:\n\n' +
+        '📊 MARKET OVERVIEW\n' +
+        '[2-3 sentence overall market tone]\n\n' +
+        '🔑 KEY THEMES\n' +
+        '• [theme 1]\n• [theme 2]\n• [theme 3]\n\n' +
+        '💱 CURRENCY IMPACT\n' +
+        'USD: [brief]\nEUR: [brief]\nGBP: [brief]\nJPY: [brief]\nOther: [brief]\n\n' +
+        '⚡ WATCH\n' +
+        '[1-2 key events/data to watch]\n\n' +
+        'Be concise, factual, and forex-focused. No disclaimers.';
+
+    try {
+        var response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 1000,
+                messages: [{ role: 'user', content: prompt }]
+            })
+        });
+        var data = await response.json();
+        var text = data.content && data.content[0] ? data.content[0].text : 'No response.';
+
+        /* Format with colors */
+        var formatted = text
+            .replace(/📊 MARKET OVERVIEW/g, '<div style="color:#6090f0;font-weight:bold;margin-bottom:4px;">📊 MARKET OVERVIEW</div>')
+            .replace(/🔑 KEY THEMES/g,      '<div style="color:#6090f0;font-weight:bold;margin-top:10px;margin-bottom:4px;">🔑 KEY THEMES</div>')
+            .replace(/💱 CURRENCY IMPACT/g, '<div style="color:#6090f0;font-weight:bold;margin-top:10px;margin-bottom:4px;">💱 CURRENCY IMPACT</div>')
+            .replace(/⚡ WATCH/g,            '<div style="color:#f0a040;font-weight:bold;margin-top:10px;margin-bottom:4px;">⚡ WATCH</div>')
+            .replace(/^(USD|EUR|GBP|JPY|AUD|CAD|CHF|NZD|Other):/mg, '<b style="color:#ccc;">$1:</b>')
+            .replace(/^• /mg, '<span style="color:#4a9fdf">•</span> ')
+            .split('\n').join('<br>');
+
+        sumIds.forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) el.innerHTML = '<div class="news-sum-text">' + formatted + '</div>';
+        });
+
+    } catch(e) {
+        sumIds.forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) el.innerHTML = '<span style="color:#F26666">Failed to get AI summary. Please try again.</span>';
+        });
+    }
+
+    btnIds.forEach(function(id){
+        var b = document.getElementById(id);
+        if (b) { b.disabled = false; b.textContent = 'Summarize'; }
+    });
+}
+
 function showTab(name){
     document.querySelectorAll('.tab-page').forEach(function(p){ p.classList.remove('active'); });
     document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
@@ -3060,6 +3374,7 @@ function showTab(name){
     if(name==='sentiment') actualiserDonnees();
     if(name==='ci') ciLoad();
     if(name==='overview') ovRefresh();
+    if(name==='news') newsLoad();
 }
 
 /* =========================================================
