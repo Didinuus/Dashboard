@@ -1432,13 +1432,13 @@ function renderCICombinedChart(labels) {
                     c2.save();
                     c2.font = '9px Arial';
                     c2.fillStyle = '#555';
-                    c2.textAlign = 'left';
+                    c2.textAlign = 'center';
                     c2.textBaseline = 'middle';
                     ticks.forEach(function(tick) {
                         var tyPx = y.getPixelForValue(tick.value);
                         if (tyPx < ca.top || tyPx > ca.bottom) return;
                         var lbl = (tick.value >= 0 ? '+' : '') + (tick.value * 100).toFixed(2) + '%';
-                        c2.fillText(lbl, ca.right + 3, tyPx);
+                        c2.fillText(lbl, ca.right + (chart.width - ca.right) / 2, tyPx);
                     });
                     c2.restore();
 
@@ -2421,11 +2421,11 @@ function renderCSChart(labels,series){
                     var yp=y.getPixelForValue(50);
                     if(yp>=ca.top&&yp<=ca.bottom){c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([]);c2.stroke();c2.restore();}
                     var ticks=y.ticks||[];
-                    c2.save();c2.font='9px Arial';c2.fillStyle='#555';c2.textAlign='left';c2.textBaseline='middle';
+                    c2.save();c2.font='9px Arial';c2.fillStyle='#555';c2.textAlign='center';c2.textBaseline='middle';
                     ticks.forEach(function(tick){
                         var tyPx=y.getPixelForValue(tick.value);
                         if(tyPx<ca.top||tyPx>ca.bottom)return;
-                        c2.fillText(tick.value,ca.right+3,tyPx);
+                        c2.fillText(tick.value, ca.right+(chart.width-ca.right)/2, tyPx);
                     });
                     c2.restore();
                     var xMax=chart.options.scales.x.max;
@@ -2655,11 +2655,11 @@ function mobRenderCSChart(labels, series) {
                     }
                     var ticks = y.ticks || [];
                     c2.save(); c2.font = '8px Arial'; c2.fillStyle = '#555';
-                    c2.textAlign = 'left'; c2.textBaseline = 'middle';
+                    c2.textAlign = 'center'; c2.textBaseline = 'middle';
                     ticks.forEach(function(tick) {
                         var tyPx = y.getPixelForValue(tick.value);
                         if (tyPx < ca.top || tyPx > ca.bottom) return;
-                        c2.fillText(tick.value, ca.right + 3, tyPx);
+                        c2.fillText(tick.value, ca.right + (ch.width - ca.right) / 2, tyPx);
                     });
                     c2.restore();
                     var xMax = ch.options.scales.x.max;
