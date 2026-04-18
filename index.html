@@ -7,8 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
-        body { font-family:'JetBrains Mono',monospace; background:#111111; color:#fff; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family:'Inter',sans-serif; background:#111111; color:#fff; }
 
         .pc-only { display:block; }
         .mobile-only { display:none; }
@@ -1283,7 +1283,7 @@ function drawFloatingLabels(chart, hoverIdx, rawTimes, tf, valueFormatter) {
 
         /* Label text */
         c2.fillStyle = '#fff';
-        c2.font = 'bold 10px Arial';
+        c2.font = 'bold 10px Inter,sans-serif';
         c2.textAlign = 'left';
         c2.textBaseline = 'middle';
         c2.fillText(text, bx + pad, by + boxH / 2);
@@ -1334,7 +1334,7 @@ function drawFloatingLabels(chart, hoverIdx, rawTimes, tf, valueFormatter) {
         c2.fill();
         c2.stroke();
         c2.fillStyle = '#c8d4f0';
-        c2.font = 'bold 10px Arial';
+        c2.font = 'bold 10px Inter,sans-serif';
         c2.textAlign = 'center';
         c2.textBaseline = 'middle';
         c2.fillText(dateStr, dtX + dtBoxW / 2, dtY + dtBoxH / 2);
@@ -1431,7 +1431,7 @@ function renderCICombinedChart(labels) {
                     /* Draw y-axis tick labels manually */
                     var ticks = y.ticks || [];
                     c2.save();
-                    c2.font = '9px Arial';
+                    c2.font = '9px Inter,sans-serif';
                     c2.fillStyle = '#555';
                     c2.textAlign = 'center';
                     c2.textBaseline = 'middle';
@@ -1491,7 +1491,7 @@ function renderCICombinedChart(labels) {
                         c2.lineTo(bx, by + r);
                         c2.arcTo(bx, by, bx + r, by, r);
                         c2.closePath(); c2.fill();
-                        c2.fillStyle = '#fff'; c2.font = 'bold 9px Arial';
+                        c2.fillStyle = '#fff'; c2.font = 'bold 9px Inter,sans-serif';
                         c2.textAlign = 'center'; c2.textBaseline = 'middle';
                         c2.fillText(text, bx + BW / 2, by + BH / 2);
                         c2.restore();
@@ -1921,7 +1921,7 @@ function openCiModal(cur, labels) {
                     var c2=ch.ctx;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);
                     c2.strokeStyle='#4a4a6a';c2.lineWidth=1.5;c2.setLineDash([4,4]);c2.stroke();c2.restore();
                     c2.save();c2.fillStyle='rgba(56,56,80,0.8)';c2.fillRect(ca.right+2,yp-9,28,16);
-                    c2.fillStyle='#888';c2.font='bold 10px Arial';c2.textAlign='center';c2.textBaseline='middle';
+                    c2.fillStyle='#888';c2.font='bold 10px Inter,sans-serif';c2.textAlign='center';c2.textBaseline='middle';
                     c2.fillText('0%',ca.right+16,yp);c2.restore();
                 }
             }]
@@ -2422,7 +2422,7 @@ function renderCSChart(labels,series){
                     var yp=y.getPixelForValue(50);
                     if(yp>=ca.top&&yp<=ca.bottom){c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([]);c2.stroke();c2.restore();}
                     var ticks=y.ticks||[];
-                    c2.save();c2.font='9px Arial';c2.fillStyle='#555';c2.textAlign='center';c2.textBaseline='middle';
+                    c2.save();c2.font='9px Inter,sans-serif';c2.fillStyle='#555';c2.textAlign='center';c2.textBaseline='middle';
                     ticks.forEach(function(tick){
                         var tyPx=y.getPixelForValue(tick.value);
                         if(tyPx<ca.top||tyPx>ca.bottom)return;
@@ -2451,7 +2451,7 @@ function renderCSChart(labels,series){
                         c2.save();c2.fillStyle=item.color;
                         var r=3;
                         c2.beginPath();c2.moveTo(bx+r,by);c2.lineTo(bx+BW-r,by);c2.arcTo(bx+BW,by,bx+BW,by+BH,r);c2.lineTo(bx+BW,by+BH-r);c2.arcTo(bx+BW,by+BH,bx+BW-r,by+BH,r);c2.lineTo(bx+r,by+BH);c2.arcTo(bx,by+BH,bx,by+BH-r,r);c2.lineTo(bx,by+r);c2.arcTo(bx,by,bx+r,by,r);c2.closePath();c2.fill();
-                        c2.fillStyle='#fff';c2.font='bold 9px Arial';c2.textAlign='center';c2.textBaseline='middle';
+                        c2.fillStyle='#fff';c2.font='bold 9px Inter,sans-serif';c2.textAlign='center';c2.textBaseline='middle';
                         c2.fillText(text,bx+BW/2,by+BH/2);
                         c2.restore();
                     });
@@ -2469,8 +2469,8 @@ function renderCSChart(labels,series){
                     chart.data.datasets.forEach(function(ds){if(ds.hidden)return;var val=ds.data[idx];if(val===null||val===undefined)return;var yp2=yScale.getPixelForValue(val);if(yp2<ca.top||yp2>ca.bottom)return;items.push({label:ds.label,color:ds.borderColor,val:val,yp:yp2});});
                     items.sort(function(a,b){return a.yp-b.yp;});
                     var LH=17;for(var pass=0;pass<5;pass++){for(var ii=1;ii<items.length;ii++){if(items[ii].yp-items[ii-1].yp<LH){var mid=(items[ii].yp+items[ii-1].yp)/2;items[ii-1].yp=mid-LH/2;items[ii].yp=mid+LH/2;}}}
-                    items.forEach(function(item){var text=item.label+' '+item.val.toFixed(1),isRight=(xp>ca.left+(ca.right-ca.left)*0.75),boxW=72,boxH=15,pad=5,bx=isRight?xp-boxW-6:xp+6,by=item.yp-boxH/2;by=Math.max(ca.top,Math.min(ca.bottom-boxH,by));c2.save();c2.fillStyle=item.color;c2.globalAlpha=0.92;var r2=4;c2.beginPath();c2.moveTo(bx+r2,by);c2.lineTo(bx+boxW-r2,by);c2.arcTo(bx+boxW,by,bx+boxW,by+boxH,r2);c2.lineTo(bx+boxW,by+boxH-r2);c2.arcTo(bx+boxW,by+boxH,bx+boxW-r2,by+boxH,r2);c2.lineTo(bx+r2,by+boxH);c2.arcTo(bx,by+boxH,bx,by+boxH-r2,r2);c2.lineTo(bx,by+r2);c2.arcTo(bx,by,bx+r2,by,r2);c2.closePath();c2.fill();c2.globalAlpha=1;c2.fillStyle='#fff';c2.font='bold 10px Arial';c2.textAlign='left';c2.textBaseline='middle';c2.fillText(text,bx+pad,by+boxH/2);c2.restore();c2.save();c2.beginPath();c2.arc(xp,item.yp,3.5,0,Math.PI*2);c2.fillStyle=item.color;c2.fill();c2.strokeStyle='#fff';c2.lineWidth=1.2;c2.stroke();c2.restore();});
-                    if(_csRawTimes[idx]){var dt=new Date(_csRawTimes[idx]),dateStr;if(csTF==='D'){dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}else{dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+'  '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}var dtBoxW=c2.measureText(dateStr).width+20,dtBoxH=18,dtX=xp-dtBoxW/2,dtY=ca.bottom+4;dtX=Math.max(ca.left,Math.min(ca.right-dtBoxW,dtX));c2.save();c2.fillStyle='rgba(30,34,48,0.95)';c2.strokeStyle='rgba(140,160,220,0.5)';c2.lineWidth=1;var br=4;c2.beginPath();c2.moveTo(dtX+br,dtY);c2.lineTo(dtX+dtBoxW-br,dtY);c2.arcTo(dtX+dtBoxW,dtY,dtX+dtBoxW,dtY+dtBoxH,br);c2.lineTo(dtX+dtBoxW,dtY+dtBoxH-br);c2.arcTo(dtX+dtBoxW,dtY+dtBoxH,dtX+dtBoxW-br,dtY+dtBoxH,br);c2.lineTo(dtX+br,dtY+dtBoxH);c2.arcTo(dtX,dtY+dtBoxH,dtX,dtY+dtBoxH-br,br);c2.lineTo(dtX,dtY+br);c2.arcTo(dtX,dtY,dtX+br,dtY,br);c2.closePath();c2.fill();c2.stroke();c2.fillStyle='#c8d4f0';c2.font='bold 10px Arial';c2.textAlign='center';c2.textBaseline='middle';c2.fillText(dateStr,dtX+dtBoxW/2,dtY+dtBoxH/2);c2.restore();}
+                    items.forEach(function(item){var text=item.label+' '+item.val.toFixed(1),isRight=(xp>ca.left+(ca.right-ca.left)*0.75),boxW=72,boxH=15,pad=5,bx=isRight?xp-boxW-6:xp+6,by=item.yp-boxH/2;by=Math.max(ca.top,Math.min(ca.bottom-boxH,by));c2.save();c2.fillStyle=item.color;c2.globalAlpha=0.92;var r2=4;c2.beginPath();c2.moveTo(bx+r2,by);c2.lineTo(bx+boxW-r2,by);c2.arcTo(bx+boxW,by,bx+boxW,by+boxH,r2);c2.lineTo(bx+boxW,by+boxH-r2);c2.arcTo(bx+boxW,by+boxH,bx+boxW-r2,by+boxH,r2);c2.lineTo(bx+r2,by+boxH);c2.arcTo(bx,by+boxH,bx,by+boxH-r2,r2);c2.lineTo(bx,by+r2);c2.arcTo(bx,by,bx+r2,by,r2);c2.closePath();c2.fill();c2.globalAlpha=1;c2.fillStyle='#fff';c2.font='bold 10px Inter,sans-serif';c2.textAlign='left';c2.textBaseline='middle';c2.fillText(text,bx+pad,by+boxH/2);c2.restore();c2.save();c2.beginPath();c2.arc(xp,item.yp,3.5,0,Math.PI*2);c2.fillStyle=item.color;c2.fill();c2.strokeStyle='#fff';c2.lineWidth=1.2;c2.stroke();c2.restore();});
+                    if(_csRawTimes[idx]){var dt=new Date(_csRawTimes[idx]),dateStr;if(csTF==='D'){dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}else{dateStr=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+'  '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}var dtBoxW=c2.measureText(dateStr).width+20,dtBoxH=18,dtX=xp-dtBoxW/2,dtY=ca.bottom+4;dtX=Math.max(ca.left,Math.min(ca.right-dtBoxW,dtX));c2.save();c2.fillStyle='rgba(30,34,48,0.95)';c2.strokeStyle='rgba(140,160,220,0.5)';c2.lineWidth=1;var br=4;c2.beginPath();c2.moveTo(dtX+br,dtY);c2.lineTo(dtX+dtBoxW-br,dtY);c2.arcTo(dtX+dtBoxW,dtY,dtX+dtBoxW,dtY+dtBoxH,br);c2.lineTo(dtX+dtBoxW,dtY+dtBoxH-br);c2.arcTo(dtX+dtBoxW,dtY+dtBoxH,dtX+dtBoxW-br,dtY+dtBoxH,br);c2.lineTo(dtX+br,dtY+dtBoxH);c2.arcTo(dtX,dtY+dtBoxH,dtX,dtY+dtBoxH-br,br);c2.lineTo(dtX,dtY+br);c2.arcTo(dtX,dtY,dtX+br,dtY,br);c2.closePath();c2.fill();c2.stroke();c2.fillStyle='#c8d4f0';c2.font='bold 10px Inter,sans-serif';c2.textAlign='center';c2.textBaseline='middle';c2.fillText(dateStr,dtX+dtBoxW/2,dtY+dtBoxH/2);c2.restore();}
                 }
             }
         ]
@@ -2655,7 +2655,7 @@ function mobRenderCSChart(labels, series) {
                         c2.strokeStyle = '#383850'; c2.lineWidth = 1.5; c2.setLineDash([]); c2.stroke(); c2.restore();
                     }
                     var ticks = y.ticks || [];
-                    c2.save(); c2.font = '8px Arial'; c2.fillStyle = '#555';
+                    c2.save(); c2.font = '8px Inter,sans-serif'; c2.fillStyle = '#555';
                     c2.textAlign = 'center'; c2.textBaseline = 'middle';
                     ticks.forEach(function(tick) {
                         var tyPx = y.getPixelForValue(tick.value);
@@ -2700,7 +2700,7 @@ function mobRenderCSChart(labels, series) {
                         c2.arcTo(bx+BW,by+BH,bx+BW-r,by+BH,r); c2.lineTo(bx+r,by+BH);
                         c2.arcTo(bx,by+BH,bx,by+BH-r,r); c2.lineTo(bx,by+r);
                         c2.arcTo(bx,by,bx+r,by,r); c2.closePath(); c2.fill();
-                        c2.fillStyle = '#fff'; c2.font = 'bold 8px Arial';
+                        c2.fillStyle = '#fff'; c2.font = 'bold 8px Inter,sans-serif';
                         c2.textAlign = 'center'; c2.textBaseline = 'middle';
                         c2.fillText(text, bx + BW / 2, by + BH / 2);
                         c2.restore();
