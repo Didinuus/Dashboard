@@ -515,7 +515,7 @@
                 <div class="cs-chart-inner"><canvas id="csChart"></canvas></div>
             </div>
             <div style="margin-top:15px;">
-                <div class="page-header">
+                <div class="page-header" style="position:relative;">
                     <div class="ph-left">
                         <div style="display:flex;gap:6px;">
                             <button class="fxp-tf-btn active" onclick="fxpSetTF('D',this)">Today</button>
@@ -525,7 +525,7 @@
                             <button class="fxp-tf-btn" onclick="fxpSetTF('Y',this)">1Y</button>
                         </div>
                     </div>
-                    <div class="ph-center">FX Performance</div>
+                    <div style="position:absolute;left:50%;transform:translateX(-50%);font-size:14px;font-weight:bold;color:#fff;">FX Performance</div>
                     <div class="ph-right">
                         <span class="ph-status" id="fxpStatus">&mdash;</span>
                         <button class="refresh-icon-btn" onclick="fxpLoad()">&#8634;</button>
