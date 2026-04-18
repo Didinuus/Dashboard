@@ -2475,7 +2475,7 @@ function renderCSChart(labels,series){
                     items.sort(function(a,b){return a.yp-b.yp;});
                     var BH=16,gap=2;
                     for(var pass=0;pass<10;pass++){for(var ii=1;ii<items.length;ii++){if(items[ii].yp-items[ii-1].yp<BH+gap){var mid=(items[ii].yp+items[ii-1].yp)/2;items[ii-1].yp=mid-(BH+gap)/2;items[ii].yp=mid+(BH+gap)/2;}}}
-                    var BW=32, bx=chart.width-BW-1;
+                    var BW=28, bx=chart.width-BW-1;
                     items.forEach(function(item){
                         var text = item.val.toFixed(1);
                         var by=item.yp-BH/2;
@@ -2724,7 +2724,7 @@ function mobRenderCSChart(labels, series) {
                             }
                         }
                     }
-                    var BW = 30, bx = ch.width - BW - 1;
+                    var BW = 26, bx = ch.width - BW - 1;
                     items.forEach(function(item) {
                         var text = item.val.toFixed(1);
                         var by = item.yp - BH / 2;
