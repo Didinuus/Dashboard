@@ -2031,7 +2031,8 @@ async function actualiserDonnees() {
         if (sd.error||!sd.symbols) throw new Error('data');
         _sentimentMap = {};
         sd.symbols.forEach(function(s){ _sentimentMap[s.name] = s; });
-        _sentimentMapCache = _sentimentMap; /* save for fallback */
+        _sentimentMapCache = _sentimentMap;
+        try { localStorage.setItem('sentimentCache', JSON.stringify(_sentimentMap)); } catch(e) {}
         if (!IS_MOBILE) { afficherTableau(_sentimentMap); afficherGraphique(_sentimentMap); }
         mobAfficherTableau(_sentimentMap);
         mobRenderSentBars();
@@ -2040,12 +2041,17 @@ async function actualiserDonnees() {
         if (el2) el2.textContent = t;
         setTimeout(syncScrollbarPlaceholder, 50);
     } catch(e) {
-        if (_sentimentMapCache && Object.keys(_sentimentMapCache).length) {
-            /* Restore last known data silently */
-            if (!IS_MOBILE) { afficherTableau(_sentimentMapCache); afficherGraphique(_sentimentMapCache); }
-            mobAfficherTableau(_sentimentMapCache);
+        /* Try memory cache first, then localStorage */
+        var fallback = (_sentimentMapCache && Object.keys(_sentimentMapCache).length) ? _sentimentMapCache : null;
+        if (!fallback) {
+            try { var stored = localStorage.getItem('sentimentCache'); if (stored) fallback = JSON.parse(stored); } catch(e2) {}
+        }
+        if (fallback && Object.keys(fallback).length) {
+            _sentimentMap = fallback;
+            if (!IS_MOBILE) { afficherTableau(fallback); afficherGraphique(fallback); }
+            mobAfficherTableau(fallback);
             mobRenderSentBars();
-            if (el1) el1.textContent = 'cached ' + fmtTime();
+            if (el1) el1.textContent = 'cached';
             if (el2) el2.textContent = 'cached';
         } else {
             if (el1) el1.textContent = 'Erreur';
