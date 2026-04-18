@@ -1382,7 +1382,7 @@ function renderCICombinedChart(labels) {
                 maintainAspectRatio: false,
                 animation: false,
                 interaction: { mode: 'index', intersect: false },
-                layout: { padding: { right: 48 } },
+                layout: { padding: { right: 0 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: { enabled: false }
@@ -1398,17 +1398,16 @@ function renderCICombinedChart(labels) {
                         ticks: {
                             color: '#444', font:{size:9},
                             callback: function(v){ return (v>=0?'+':'') + (v*100).toFixed(2) + '%'; }
-                        },
-                        afterFit: function(axis) { axis.width = 0; }
+                        }
                     }
                 }
             },
             plugins: [{
                 id: 'ciCombinedPlugin',
                 beforeDraw: function(chart) {
+                    /* Fill right axis zone with chart background so badges blend in */
                     var c2 = chart.ctx, ca = chart.chartArea;
                     if (!ca) return;
-                    /* Fill entire right padding zone with chart background */
                     c2.save();
                     c2.fillStyle = '#101010';
                     c2.fillRect(ca.right, 0, chart.width - ca.right, chart.height);
@@ -1428,22 +1427,7 @@ function renderCICombinedChart(labels) {
                         c2.stroke(); c2.restore();
                     }
 
-                    /* Draw y-axis tick labels manually in the padding zone */
-                    var ticks = y.ticks || [];
-                    c2.save();
-                    c2.font = '9px Arial';
-                    c2.fillStyle = '#555';
-                    c2.textAlign = 'left';
-                    c2.textBaseline = 'middle';
-                    ticks.forEach(function(tick) {
-                        var tyPx = y.getPixelForValue(tick.value);
-                        if (tyPx < ca.top || tyPx > ca.bottom) return;
-                        var lbl = (tick.value >= 0 ? '+' : '') + (tick.value * 100).toFixed(2) + '%';
-                        c2.fillText(lbl, ca.right + 3, tyPx);
-                    });
-                    c2.restore();
-
-                    /* End-of-line badges flush to right edge of canvas */
+                    /* End-of-line badges — exact same width as native y-axis */
                     var xMax = chart.options.scales.x.max;
                     var items = [];
                     chart.data.datasets.forEach(function(ds) {
@@ -1471,8 +1455,9 @@ function renderCICombinedChart(labels) {
                         }
                     }
 
-                    var BW = chart.canvas.id === 'ciCombinedChart' ? 44 : 38;
-                    var bx = ca.right + 2;
+                    /* Badge covers the full y-axis zone */
+                    var bx = ca.right;
+                    var BW = chart.width - ca.right;
 
                     items.forEach(function(item) {
                         var pct = (item.val * 100).toFixed(2);
@@ -2400,13 +2385,12 @@ function renderCSChart(labels,series){
         options:{
             responsive:true, maintainAspectRatio:false, animation:false,
             interaction:{mode:'index',intersect:false},
-            layout:{ padding:{ right:36 } },
+            layout:{ padding:{ right:0 } },
             plugins:{ legend:{display:false}, tooltip:{enabled:false} },
             scales:{
                 x:{ grid:{color:'#161616'}, ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12,color:'#444',font:{size:9}} },
                 y:{ position:'right', min:15, max:85, grid:{color:'#1a1a2a'},
-                    ticks:{ display:false },
-                    afterFit:function(axis){ axis.width=0; }
+                    ticks:{ color:'#555', font:{size:9}, stepSize:10 }
                 }
             }
         },
@@ -2428,16 +2412,7 @@ function renderCSChart(labels,series){
                     /* 50 reference line */
                     var yp=y.getPixelForValue(50);
                     if(yp>=ca.top&&yp<=ca.bottom){c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);c2.strokeStyle='#383850';c2.lineWidth=1.5;c2.setLineDash([]);c2.stroke();c2.restore();}
-                    /* Y-axis tick labels */
-                    var ticks=y.ticks||[];
-                    c2.save();c2.font='9px Arial';c2.fillStyle='#555';c2.textAlign='left';c2.textBaseline='middle';
-                    ticks.forEach(function(tick){
-                        var tyPx=y.getPixelForValue(tick.value);
-                        if(tyPx<ca.top||tyPx>ca.bottom)return;
-                        c2.fillText(tick.value,ca.right+3,tyPx);
-                    });
-                    c2.restore();
-                    /* End-of-line value badges */
+                    /* End-of-line value badges — full axis width */
                     var xMax=chart.options.scales.x.max;
                     var items=[];
                     chart.data.datasets.forEach(function(ds){
@@ -2452,9 +2427,9 @@ function renderCSChart(labels,series){
                     items.sort(function(a,b){return a.yp-b.yp;});
                     var BH=16,gap=2;
                     for(var pass=0;pass<10;pass++){for(var ii=1;ii<items.length;ii++){if(items[ii].yp-items[ii-1].yp<BH+gap){var mid=(items[ii].yp+items[ii-1].yp)/2;items[ii-1].yp=mid-(BH+gap)/2;items[ii].yp=mid+(BH+gap)/2;}}}
-                    var BW=28, bx=ca.right+2;
+                    var bx=ca.right, BW=chart.width-ca.right;
                     items.forEach(function(item){
-                        var text = item.val.toFixed(1);
+                        var text=item.val.toFixed(1);
                         var by=item.yp-BH/2;
                         by=Math.max(ca.top,Math.min(ca.bottom-BH,by));
                         c2.save();c2.fillStyle=item.color;
@@ -2623,7 +2598,7 @@ function mobRenderCSChart(labels, series) {
             maintainAspectRatio: false,
             animation: false,
             interaction: { mode: 'index', intersect: false },
-            layout: { padding: { right: 36 } },
+            layout: { padding: { right: 0 } },
             plugins: {
                 legend: { display: false },
                 tooltip: { enabled: false }
@@ -2639,8 +2614,7 @@ function mobRenderCSChart(labels, series) {
                     position: 'right',
                     min: 15, max: 85,
                     grid: { color:'#1a1a2a' },
-                    ticks: { display: false },
-                    afterFit: function(axis) { axis.width = 0; }
+                    ticks: { color:'#555', font:{size:8}, stepSize:10 }
                 }
             }
         },
@@ -2666,17 +2640,7 @@ function mobRenderCSChart(labels, series) {
                         c2.strokeStyle = '#383850'; c2.lineWidth = 1.5; c2.setLineDash([]);
                         c2.stroke(); c2.restore();
                     }
-                    /* Y-axis tick labels */
-                    var ticks = y.ticks || [];
-                    c2.save(); c2.font = '8px Arial'; c2.fillStyle = '#555';
-                    c2.textAlign = 'left'; c2.textBaseline = 'middle';
-                    ticks.forEach(function(tick) {
-                        var tyPx = y.getPixelForValue(tick.value);
-                        if (tyPx < ca.top || tyPx > ca.bottom) return;
-                        c2.fillText(tick.value, ca.right + 3, tyPx);
-                    });
-                    c2.restore();
-                    /* End-of-line value badges */
+                    /* End-of-line value badges — full axis width */
                     var xMax = ch.options.scales.x.max;
                     var items = [];
                     ch.data.datasets.forEach(function(ds) {
@@ -2701,7 +2665,7 @@ function mobRenderCSChart(labels, series) {
                             }
                         }
                     }
-                    var BW = 26, bx = ca.right + 2;
+                    var bx = ca.right, BW = ch.width - ca.right;
                     items.forEach(function(item) {
                         var text = item.val.toFixed(1);
                         var by = item.yp - BH / 2;
