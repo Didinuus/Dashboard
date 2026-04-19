@@ -3789,12 +3789,6 @@ function renderSessions() {
 
         /* Overlap indicator */
         var openSessions = OV_SESSIONS.filter(isSessionOpen);
-        if (openSessions.length >= 2) {
-            var overlap = document.createElement('div');
-            overlap.style.cssText = 'display:flex;align-items:center;padding:0 10px;font-size:10px;color:#f0c040;font-weight:bold;white-space:nowrap;';
-            overlap.textContent = '⚡ ' + openSessions.map(function(s){ return s.name; }).join(' + ');
-            el.appendChild(overlap);
-        }
     });
 }
 
