@@ -3503,75 +3503,134 @@ function openBiasModal(cur) {
     var series = _ciIndexSeries && _ciIndexSeries[cur];
     if (!series || !series.length) return;
     var color = CS_COLORS[cur];
-    /* Set title */
     var lbl = _ovLastBias && _ovLastBias[cur] ? ovGetLabel(_ovLastBias[cur].score) : null;
+
+    /* Title */
     var titleEl = document.getElementById('biasModalTitle');
-    if (titleEl) titleEl.innerHTML = '<span style="color:' + color + ';font-weight:900">' + cur + '</span>' +
+    if (titleEl) titleEl.innerHTML =
+        '<span style="color:' + color + ';font-weight:900">' + cur + '</span>' +
         (lbl ? ' &nbsp;<span style="font-size:11px;color:' + lbl.color + '">' + lbl.label + '</span>' : '') +
         ' &nbsp;<span style="font-size:11px;color:#555">— CI Score History</span>';
-    /* Open overlay */
+
     document.getElementById('biasModalOverlay').classList.add('open');
-    /* Draw full chart after layout */
+
     setTimeout(function() {
-        var canvas = document.getElementById('biasModalCanvas');
-        if (!canvas) return;
-        var W = canvas.parentElement.offsetWidth;
-        var H = canvas.parentElement.offsetHeight;
-        canvas.width = W; canvas.height = H;
-        var raw = series.filter(function(v){ return v !== null; });
-        if (raw.length < 2) return;
-        var mn = Math.min.apply(null, raw), mx = Math.max.apply(null, raw);
-        var rng = mx - mn || 0.0001;
-        var pad = { top:16, right:16, bottom:24, left:50 };
-        var cw = W - pad.left - pad.right, ch = H - pad.top - pad.bottom;
-        var ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, W, H);
-        function xOf(i){ return pad.left + (i / (raw.length - 1)) * cw; }
-        function yOf(v){ return pad.top + ch - ((v - mn) / rng) * ch; }
-        /* Grid lines + y labels */
-        var ticks = 5;
-        ctx.font = '10px JetBrains Mono,monospace';
-        ctx.fillStyle = '#555'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-        for (var t = 0; t <= ticks; t++) {
-            var val = mn + (rng / ticks) * t;
-            var yp = yOf(val);
-            ctx.save(); ctx.strokeStyle = '#1e2230'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
-            ctx.beginPath(); ctx.moveTo(pad.left, yp); ctx.lineTo(W - pad.right, yp); ctx.stroke();
-            ctx.restore();
-            ctx.fillText((val * 100).toFixed(1) + '%', pad.left - 6, yp);
-        }
-        /* Zero line */
-        var zeroY = yOf(0);
-        if (zeroY >= pad.top && zeroY <= pad.top + ch) {
-            ctx.save(); ctx.strokeStyle = '#4a4a6a'; ctx.lineWidth = 1.5; ctx.setLineDash([4,4]);
-            ctx.beginPath(); ctx.moveTo(pad.left, zeroY); ctx.lineTo(W - pad.right, zeroY); ctx.stroke();
-            ctx.restore();
-        }
-        /* X axis labels — show every N points */
-        var step = Math.max(1, Math.floor(raw.length / 8));
-        ctx.fillStyle = '#444'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-        for (var i = 0; i < raw.length; i += step) {
-            ctx.fillText(i, xOf(i), pad.top + ch + 6);
-        }
-        /* Gradient fill */
-        var grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + ch);
-        grad.addColorStop(0, color + '40'); grad.addColorStop(1, color + '00');
-        ctx.save();
-        ctx.beginPath();
-        raw.forEach(function(v, i){ i === 0 ? ctx.moveTo(xOf(i), yOf(v)) : ctx.lineTo(xOf(i), yOf(v)); });
-        ctx.lineTo(xOf(raw.length - 1), zeroY >= pad.top && zeroY <= pad.top + ch ? zeroY : pad.top + ch);
-        ctx.lineTo(xOf(0), zeroY >= pad.top && zeroY <= pad.top + ch ? zeroY : pad.top + ch);
-        ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
-        /* Line */
-        ctx.beginPath();
-        raw.forEach(function(v, i){ i === 0 ? ctx.moveTo(xOf(i), yOf(v)) : ctx.lineTo(xOf(i), yOf(v)); });
-        ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.setLineDash([]); ctx.stroke();
-        /* End dot */
-        var lastVal = raw[raw.length - 1];
-        ctx.beginPath(); ctx.arc(xOf(raw.length - 1), yOf(lastVal), 4, 0, Math.PI * 2);
-        ctx.fillStyle = color; ctx.fill();
-        ctx.restore();
-    }, 30);
+        var c = document.getElementById('biasModalCanvas');
+        if (!c) return;
+        if (_biasModalChart) { _biasModalChart.destroy(); _biasModalChart = null; }
+
+        /* Use existing CI labels if available, else generate indices */
+        var labels = (_ciTimes && _ciTimes.length === series.length)
+            ? _ciTimes.map(function(t) {
+                if (!t) return '';
+                var d = new Date(t);
+                return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}) + ' ' +
+                       d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+              })
+            : series.map(function(_,i){ return i; });
+
+        var pctSeries = series.map(function(v){ return v !== null ? parseFloat((v * 100).toFixed(4)) : null; });
+        var viewCount = Math.min(series.length, 200);
+
+        _biasModalChart = new Chart(c, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: cur + ' CI',
+                    data: pctSeries,
+                    borderColor: color,
+                    backgroundColor: function(ctx2) {
+                        var gc = ctx2.chart.ctx.createLinearGradient(0, 0, 0, 300);
+                        gc.addColorStop(0, color + '44'); gc.addColorStop(1, color + '00');
+                        return gc;
+                    },
+                    borderWidth: 2, pointRadius: 0, tension: 0.2, fill: true
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, animation: false,
+                interaction: { mode:'index', intersect:false },
+                layout: { padding: { right: 0 } },
+                scales: {
+                    x: {
+                        min: Math.max(0, series.length - viewCount),
+                        max: series.length - 1,
+                        grid: { color:'#1a1a2a' },
+                        ticks: { maxRotation:0, autoSkip:true, maxTicksLimit:10, color:'#444', font:{size:9} }
+                    },
+                    y: {
+                        position: 'right',
+                        grid: { color:'#1a1a2a' },
+                        ticks: { color:'#555', font:{size:9}, callback:function(v){ return (v>=0?'+':'')+v.toFixed(2)+'%'; } }
+                    }
+                },
+                plugins: {
+                    legend: { display:false },
+                    tooltip: {
+                        backgroundColor:'rgba(16,16,24,0.97)', borderColor:'#1e2230', borderWidth:1,
+                        callbacks: {
+                            label: function(c2){ var v=c2.parsed.y; return ' ' + cur + ': '+(v>=0?'+':'')+v.toFixed(4)+'%'; }
+                        }
+                    }
+                }
+            },
+            plugins: [{
+                id: 'biasRef0',
+                afterDraw: function(ch) {
+                    var y = ch.scales.y, ca = ch.chartArea; if (!y||!ca) return;
+                    var yp = y.getPixelForValue(0); if (yp < ca.top || yp > ca.bottom) return;
+                    var c2 = ch.ctx;
+                    c2.save(); c2.beginPath(); c2.moveTo(ca.left, yp); c2.lineTo(ca.right, yp);
+                    c2.strokeStyle='#4a4a6a'; c2.lineWidth=1.5; c2.setLineDash([4,4]); c2.stroke();
+                    c2.save(); c2.fillStyle='rgba(56,56,80,0.8)';
+                    c2.fillRect(ca.right+2, yp-9, 28, 16);
+                    c2.fillStyle='#888'; c2.font='bold 10px JetBrains Mono,monospace';
+                    c2.textAlign='center'; c2.textBaseline='middle';
+                    c2.fillText('0%', ca.right+16, yp); c2.restore();
+                }
+            }]
+        });
+
+        /* Same mouse interactions as CI modal */
+        c.style.cursor = 'crosshair';
+        var drag = null;
+        c.onmousedown = function(e) {
+            if (e.button!==0) return;
+            drag = { startX:e.clientX, startMin:_biasModalChart.options.scales.x.min, startMax:_biasModalChart.options.scales.x.max };
+            c.style.cursor = 'grabbing'; e.preventDefault();
+        };
+        c.onmousemove = function(e) {
+            if (!_biasModalChart) return;
+            var rect = c.getBoundingClientRect(), mx = e.clientX - rect.left;
+            var ca = _biasModalChart.chartArea, xScale = _biasModalChart.scales.x;
+            if (drag) {
+                var dx = e.clientX - drag.startX;
+                var range = drag.startMax - drag.startMin;
+                var shift = -(dx / (ca ? ca.right - ca.left : 1)) * range;
+                var total = _biasModalChart.data.labels.length;
+                _biasModalChart.options.scales.x.min = Math.max(0, drag.startMin + shift);
+                _biasModalChart.options.scales.x.max = Math.min(total - 1, drag.startMax + shift);
+                _biasModalChart.update('none'); return;
+            }
+        };
+        c.onmouseleave = function() { drag = null; c.style.cursor = 'crosshair'; };
+        c.onwheel = function(e) {
+            if (!_biasModalChart) return; e.preventDefault();
+            var rect = c.getBoundingClientRect(), mx = e.clientX - rect.left;
+            var ca = _biasModalChart.chartArea;
+            var curMin = _biasModalChart.options.scales.x.min, curMax = _biasModalChart.options.scales.x.max;
+            var range = curMax - curMin;
+            var factor = e.deltaY > 0 ? 1.15 : 0.87;
+            var newRange = Math.max(20, Math.min(_biasModalChart.data.labels.length, range * factor));
+            var ratio = ca && ca.width > 0 ? (mx - ca.left) / ca.width : 0.5;
+            ratio = Math.max(0, Math.min(1, ratio));
+            var anchor = curMin + ratio * range;
+            _biasModalChart.options.scales.x.min = Math.max(0, anchor - ratio * newRange);
+            _biasModalChart.options.scales.x.max = Math.min(_biasModalChart.data.labels.length - 1, anchor + (1 - ratio) * newRange);
+            _biasModalChart.update('none');
+        };
+    }, 50);
 }
 
 function closeBiasModal() {
