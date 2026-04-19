@@ -31,15 +31,18 @@
 
         .main-section { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px; height:95vh; border-radius:8px; }
         .table-container { display:flex; flex-direction:column; height:100%; border-radius:8px; background:#161616; border:1px solid #1e2230; overflow:hidden; }
-        .table-head-fixed { flex-shrink:0; background:#161616; overflow:hidden; }
+        .table-head-fixed { flex-shrink:0; background:#1a1a2a; overflow:hidden; border-bottom:1px solid #1e2230; }
         .table-head-fixed table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
-        .table-scroll { overflow-y:scroll; overflow-x:hidden; flex:1; scrollbar-width:thin; scrollbar-color:#888 #1e2230; background:#161616; }
+        .table-scroll { overflow-y:scroll; overflow-x:hidden; flex:1; scrollbar-width:thin; scrollbar-color:#2a2a3a #111; background:#161616; }
         .table-scroll table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
         table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
-        th, td { padding:6px 8px; text-align:center; border:1px solid #1e2230; }
-        th { background:#161616; font-weight:bold; color:#fff; }
-        td { background:#161616; color:#fff; }
-        .table-head-fixed th:last-child { padding-right:calc(8px + 8px); box-sizing:border-box; }
+        th, td { text-align:center; }
+        th { background:#1a1a2a; font-weight:bold; color:#888; padding:10px 8px; border:none; border-right:1px solid #1e2230; font-size:10px; letter-spacing:0.5px; text-transform:uppercase; }
+        td { background:#161616; color:#fff; padding:9px 8px; border:none; border-bottom:1px solid #111; border-right:1px solid #1a1a1a; font-size:12px; }
+        .table-head-fixed th:last-child { padding-right:calc(8px + 8px); box-sizing:border-box; border-right:none; }
+        th:last-child, td:last-child { border-right:none; }
+        .table-scroll table tbody tr:hover td { background:#1a1a24; }
+        .table-scroll table tbody tr:last-child td { border-bottom:none; }
         .chart-sentiment { background:#161616; padding:15px; border:1px solid #1e2230; border-radius:8px; height:100%; display:flex; flex-direction:column; }
         .chart-sentiment-wrapper { flex:1; position:relative; }
         #sentimentChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
@@ -2129,7 +2132,21 @@ window.addEventListener('resize',syncScrollbarPlaceholder);
 function afficherTableau(map) {
     var PAIRS=getActivePairs(),tbody=document.getElementById('sentimentBody');
     if(!tbody)return; tbody.innerHTML='';
-    PAIRS.forEach(function(pair){var d=map[pair];if(!d)return;var sp=d.shortPercentage,lp=d.longPercentage;var row=document.createElement('tr');row.innerHTML='<td style="font-weight:bold;background:#161616">'+pair+'</td><td class="short-cell" style="background:'+gc(sp,1)+';color:#fff">'+sp+'%</td><td class="long-cell" style="background:'+gc(lp,0)+';color:#fff">'+lp+'%</td><td style="background:#161616">'+d.shortVolume.toLocaleString()+'</td><td style="background:#161616">'+d.longVolume.toLocaleString()+'</td><td style="background:#161616">'+d.shortPositions.toLocaleString()+'</td><td style="background:#161616">'+d.longPositions.toLocaleString()+'</td><td style="background:#161616">'+d.totalPositions.toLocaleString()+'</td>';tbody.appendChild(row);});
+    PAIRS.forEach(function(pair){
+        var d=map[pair]; if(!d) return;
+        var sp=d.shortPercentage, lp=d.longPercentage;
+        var row=document.createElement('tr');
+        row.innerHTML=
+            '<td style="font-weight:bold;text-align:left;padding-left:12px;">'+pair+'</td>'+
+            '<td style="background:'+gc(sp,1)+';color:#fff;font-weight:bold">'+sp+'%</td>'+
+            '<td style="background:'+gc(lp,0)+';color:#fff;font-weight:bold">'+lp+'%</td>'+
+            '<td>'+d.shortVolume.toLocaleString()+'</td>'+
+            '<td>'+d.longVolume.toLocaleString()+'</td>'+
+            '<td>'+d.shortPositions.toLocaleString()+'</td>'+
+            '<td>'+d.longPositions.toLocaleString()+'</td>'+
+            '<td>'+d.totalPositions.toLocaleString()+'</td>';
+        tbody.appendChild(row);
+    });
     setTimeout(syncScrollbarPlaceholder,50);
 }
 
