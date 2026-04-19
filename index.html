@@ -217,17 +217,17 @@
            OVERVIEW / BIAS
            ============================================= */
         .ov-layout { display:flex; flex-direction:column; gap:18px; }
-        .ov-sessions { background:#161616; border:1px solid #1e2230; border-left:3px solid #2a4a8a; border-radius:8px; display:flex; align-items:stretch; height:46px; overflow:hidden; }
-        .ov-session-item { flex:1; display:flex; align-items:center; justify-content:center; gap:10px; padding:0 16px; }
+        .ov-sessions { background:#161616; border:1px solid #1e2230; border-left:3px solid #2a4a8a; border-radius:8px; display:flex; align-items:stretch; height:64px; overflow:hidden; }
+        .ov-session-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:0 16px; }
         .ov-session-item + .ov-session-item { border-left:1px solid #1e2230; }
         .ov-session-item.active { background:#161e2e; }
-        .ov-session-name { font-size:10px; font-weight:bold; color:#555; text-transform:uppercase; letter-spacing:0.5px; }
+        .ov-session-name { font-size:12px; font-weight:bold; color:#555; text-transform:uppercase; letter-spacing:0.5px; }
         .ov-session-item.active .ov-session-name { color:#fff; }
-        .ov-session-status { font-size:10px; font-weight:bold; }
+        .ov-session-status { font-size:11px; font-weight:bold; }
         .ov-session-status.open { color:#14BC60; }
         .ov-session-status.closed { color:#444; }
-        .ov-session-time { font-size:9px; color:#444; }
-        .ov-session-pairs { font-size:9px; color:#444; }
+        .ov-session-sub { font-size:10px; color:#444; }
+        .ov-session-sub.active-sub { color:#666; }
         .ov-top-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
         .ov-cur-card {
             background:#161616; border:1px solid #1e2230; border-radius:10px;
@@ -3780,10 +3780,8 @@ function renderSessions() {
             var openStr  = getSessionLocalTime(s.open);
             var closeStr = getSessionLocalTime(s.close);
             item.innerHTML =
-                '<div class="ov-session-name" style="' + (open ? 'color:' + s.color : '') + '">' + s.name + '</div>' +
-                '<div class="ov-session-status ' + (open ? 'open' : 'closed') + '">' + (open ? '● OPEN' : '○ Closed') + '</div>' +
-                '<div class="ov-session-time">' + openStr + '–' + closeStr + '</div>' +
-                '<div class="ov-session-pairs">' + s.pairs + '</div>';
+                '<div class="ov-session-name" style="' + (open ? 'color:' + s.color : '') + '">' + s.name + ' <span class="ov-session-status ' + (open ? 'open' : 'closed') + '">' + (open ? '● OPEN' : '○') + '</span></div>' +
+                '<div class="ov-session-sub ' + (open ? 'active-sub' : '') + '">' + openStr + '–' + closeStr + ' &nbsp;·&nbsp; ' + s.pairs + '</div>';
             el.appendChild(item);
         });
 
