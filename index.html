@@ -2155,7 +2155,7 @@ function afficherGraphique(map) {
     if(!ctx)return; if(sentimentChart)sentimentChart.destroy();
     var lb=[],sD=[],lD=[];
     PAIRS.forEach(function(p){var d=map[p];if(d){lb.push(p);sD.push(d.shortPercentage);lD.push(d.longPercentage);}});
-    sentimentChart=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{label:'Short',data:sD,backgroundColor:'#C03939',borderWidth:0},{label:'Long',data:lD,backgroundColor:'#2F995F',borderWidth:0}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.x+'%';}}}},scales:{x:{stacked:true,max:100,display:false},y:{stacked:true,ticks:{font:{size:10},color:'#fff'},grid:{color:'#1e2230'}}},datasets:{bar:{barThickness:20}}}});
+    sentimentChart=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{label:'Short',data:sD,backgroundColor:'#C03939',borderWidth:0},{label:'Long',data:lD,backgroundColor:'#2F995F',borderWidth:0}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.x+'%';}}}},scales:{x:{stacked:true,max:100,display:false},y:{stacked:true,ticks:{font:{size:10},color:'#fff'},grid:{color:'#1e2230'}}},datasets:{bar:{barThickness:16}}}});
 }
 
 function mobAfficherTableau(map) {
