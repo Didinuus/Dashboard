@@ -50,10 +50,10 @@
         #sentimentChart { position:relative; width:100%!important; }
 
         .cot-container { display:flex; flex-direction:column; border-radius:8px; overflow:hidden; background:#161616; border:1px solid #1e2230; }
-        .cot-header { background:#161616; padding:12px; text-align:center; font-weight:bold; font-size:14px; color:#fff; border-bottom:1px solid #1e2230; border-left:3px solid #2a4a8a; }
+        ; color:#fff; border-bottom:1px solid #1e2230; border-left:3px solid #2a4a8a; }
         .cot-scroll { overflow-y:auto; overflow-x:hidden; scrollbar-width:none; }
         .cot-chart-wrap { background:#161616; padding:15px; border:1px solid #1e2230; border-radius:8px; display:flex; flex-direction:column; }
-        .cot-chart-wrap h3 { text-align:center; margin-bottom:10px; font-size:14px; color:#fff; font-weight:bold; }
+        .cot-chart-wrap h3 { text-align:center; margin-bottom:10px; font-size:13px; color:#fff; font-weight:bold; }
 
 
         .cot-pies { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px; }
@@ -61,7 +61,7 @@
         .cot-pie-item canvas { width:80px!important; height:80px!important; }
 
         .tabs { display:flex; background:#161616; border:1px solid #1e2230; border-left:3px solid #2a4a8a; border-radius:8px; margin-bottom:20px; overflow:hidden; height:52px; }
-        .tab-btn { flex:1; padding:0 16px; background:transparent; color:#555; border:none; cursor:pointer; font-weight:bold; font-size:12px; font-family:inherit; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px; letter-spacing:0.3px; position:relative; }
+        .tab-btn { flex:1; padding:0 16px; background:transparent; color:#555; border:none; cursor:pointer; font-weight:bold; font-size:13px; font-family:inherit; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px; letter-spacing:0.3px; position:relative; }
         .tab-btn + .tab-btn::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); height:55%; width:1px; background:#1e2230; }
         .tab-btn:hover { color:#aaa; background:#191929; }
         .tab-btn.active { color:#fff; background:#1e2230; }
@@ -73,7 +73,7 @@
         .short-cell, .long-cell { font-weight:bold; }
 
         .page-header {
-            background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:14px; color:#fff;
+            background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:13px; color:#fff;
             border:1px solid #1e2230; border-left:3px solid #2a4a8a; border-radius:8px; margin-bottom:12px; display:flex;
             justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0;
         }
@@ -118,7 +118,7 @@
         .ir-accent-bar { position:absolute; left:0; top:0; bottom:0; width:3px; }
 
         .macro-page-section { margin-bottom:30px; }
-        .macro-page-section-title { background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:14px; color:#fff; border:1px solid #1e2230; border-left:3px solid #2a4a8a; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0; }
+        .macro-page-section-title { background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:13px; color:#fff; border:1px solid #1e2230; border-left:3px solid #2a4a8a; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0; }
         .macro-page-section-title .section-title-text { flex:1; text-align:center; }
         .macro-page-section-title .section-right { display:flex; align-items:center; gap:8px; width:160px; justify-content:flex-end; }
         .macro-page-section-title .section-left { width:160px; }
@@ -447,7 +447,7 @@
             </div>
             <!-- Title absolutely centered over the whole header -->
             <div style="position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
-                <span style="font-size:14px;font-weight:bold;color:#fff;">Market Bias Overview</span>
+                <span style="font-size:13px;font-weight:bold;color:#fff;">Market Bias Overview</span>
             </div>
             <div class="ph-right" style="flex-shrink:0;z-index:1;">
                 <span class="ph-status" id="ovStatus">Loading...</span>
@@ -543,7 +543,7 @@
                         <button class="cs-tf-btn" onclick="csRefresh()" style="margin-left:4px">&#8634;</button>
                         <span class="ph-status" id="csStatus" style="margin-left:8px;font-size:10px;color:#aaa;">Loading...</span>
                     </div>
-                    <div style="font-size:14px;font-weight:bold;color:#fff;position:absolute;left:50%;transform:translateX(-50%);">Currency Strength Index</div>
+                    <div style="font-size:13px;font-weight:bold;color:#fff;position:absolute;left:50%;transform:translateX(-50%);">Currency Strength Index</div>
                     <div class="cs-legend" id="csLegend"></div>
                 </div>
                 <div class="cs-chart-inner"><canvas id="csChart"></canvas></div>
@@ -559,7 +559,7 @@
                             <button class="fxp-tf-btn" onclick="fxpSetTF('Y',this)">1Y</button>
                         </div>
                     </div>
-                    <div style="position:absolute;left:50%;transform:translateX(-50%);font-size:14px;font-weight:bold;color:#fff;">FX Performance</div>
+                    <div style="position:absolute;left:50%;transform:translateX(-50%);font-size:13px;font-weight:bold;color:#fff;">FX Performance</div>
                     <div class="ph-right">
                         <span class="ph-status" id="fxpStatus">&mdash;</span>
                         <button class="cs-tf-btn" onclick="fxpLoad()">&#8634;</button>
@@ -590,7 +590,7 @@
                             <button class="cs-tf-btn" onclick="ciLoad()" style="margin-left:4px;">&#8634;</button>
                             <span class="ph-status" id="ciStatus" style="margin-left:8px;font-size:10px;color:#aaa;">Loading...</span>
                         </div>
-                        <div style="font-size:14px;font-weight:bold;color:#fff;position:absolute;left:50%;transform:translateX(-50%);">Currency Index</div>
+                        <div style="font-size:13px;font-weight:bold;color:#fff;position:absolute;left:50%;transform:translateX(-50%);">Currency Index</div>
                         <div class="ci-combined-legend" id="ciCombinedLegend"></div>
                     </div>
                     <div class="ci-combined-chart"><canvas id="ciCombinedChart"></canvas></div>
