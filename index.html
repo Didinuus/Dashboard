@@ -31,15 +31,15 @@
 
         .main-section { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px; height:95vh; border-radius:8px; }
         .table-container { display:flex; flex-direction:column; height:100%; border-radius:8px; background:#161616; border:1px solid #1e2230; overflow:hidden; }
-        .table-head-fixed { flex-shrink:0; background:#1a1a2a; overflow:hidden; border-bottom:1px solid #1e2230; }
+        .table-head-fixed { flex-shrink:0; background:#1a1a2a; border-bottom:1px solid #1e2230; overflow:hidden; }
         .table-head-fixed table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
-        .table-scroll { overflow-y:scroll; overflow-x:hidden; flex:1; scrollbar-width:thin; scrollbar-color:#2a2a3a #111; background:#161616; }
+        .table-scroll { overflow-y:auto; overflow-x:hidden; flex:1; scrollbar-width:thin; scrollbar-color:#2a2a3a #161616; background:#161616; }
         .table-scroll table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
         table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
         th, td { text-align:center; }
         th { background:#1a1a2a; font-weight:bold; color:#888; padding:10px 8px; border:none; border-right:1px solid #1e2230; font-size:10px; letter-spacing:0.5px; text-transform:uppercase; }
         td { background:#161616; color:#fff; padding:0 8px; height:34px; border:none; border-bottom:1px solid #111; border-right:1px solid #1a1a1a; font-size:12px; }
-        .table-head-fixed th:last-child { padding-right:calc(8px + 8px); box-sizing:border-box; border-right:none; }
+        .table-head-fixed th:last-child { border-right:none; }
         th:last-child, td:last-child { border-right:none; }
         .table-scroll table tbody tr:hover td { background:#1a1a24; }
         .table-scroll table tbody tr:last-child td { border-bottom:none; }
@@ -170,9 +170,6 @@
         .fxp-heatmap-table .fxp-diag { background:#111; color:#555; }
         .fxp-loading { text-align:center; padding:40px; color:#555; font-size:13px; }
 
-        .table-head-fixed-inner { display: flex; align-items: stretch; }
-        .table-head-fixed-inner table { flex: 1; min-width: 0; }
-        .scrollbar-placeholder { width: 10px; flex-shrink: 0; background: #161616; border-bottom: 1px solid #1e2230; }
 
         /* =============================================
            CURRENCY INDEX PAGE
@@ -497,10 +494,7 @@
         <div class="main-section">
             <div class="table-container">
                 <div class="table-head-fixed">
-                    <div class="table-head-fixed-inner">
-                        <table><thead><tr><th>Pair</th><th>% Short</th><th>% Long</th><th>Short Volume</th><th>Long Volume</th><th>Short Positions</th><th>Long Positions</th><th>Total Positions</th></tr></thead></table>
-                        <div class="scrollbar-placeholder" id="scrollbarPlaceholder"></div>
-                    </div>
+                    <table><thead><tr><th>Pair</th><th>% Short</th><th>% Long</th><th>Short Volume</th><th>Long Volume</th><th>Short Positions</th><th>Long Positions</th><th>Total Positions</th></tr></thead></table>
                 </div>
                 <div class="table-scroll" id="sentimentScroll">
                     <table><tbody id="sentimentBody"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody></table>
@@ -2099,7 +2093,7 @@ async function actualiserDonnees() {
         var t = fmtTime();
         if (el1) el1.textContent = t;
         if (el2) el2.textContent = t;
-        setTimeout(syncScrollbarPlaceholder, 50);
+
     } catch(e) {
         /* Try memory cache first, then localStorage */
         var fallback = (_sentimentMapCache && Object.keys(_sentimentMapCache).length) ? _sentimentMapCache : null;
@@ -2126,13 +2120,6 @@ function gc(p, s) {
     else return 'rgb('+~~(bg+(47-bg)*i)+','+~~(bg+(153-bg)*i)+','+~~(bg+(95-bg)*i)+')';
 }
 
-function syncScrollbarPlaceholder() {
-    var scroll=document.getElementById('sentimentScroll'),placeholder=document.getElementById('scrollbarPlaceholder');
-    if(!scroll||!placeholder)return;
-    placeholder.style.width=Math.max(scroll.offsetWidth-scroll.clientWidth,10)+'px';
-}
-window.addEventListener('resize',syncScrollbarPlaceholder);
-
 function afficherTableau(map) {
     var PAIRS=getActivePairs(),tbody=document.getElementById('sentimentBody');
     if(!tbody)return; tbody.innerHTML='';
@@ -2151,7 +2138,7 @@ function afficherTableau(map) {
             '<td>'+d.totalPositions.toLocaleString()+'</td>';
         tbody.appendChild(row);
     });
-    setTimeout(syncScrollbarPlaceholder,50);
+
 }
 
 function afficherGraphique(map) {
@@ -3362,7 +3349,7 @@ window.addEventListener('load', function() {
     chargerCOT();
     if (!IS_MOBILE) {
         renderRates();
-        setTimeout(syncScrollbarPlaceholder, 200);
+
     } else {
         mobRenderRates();
     }
