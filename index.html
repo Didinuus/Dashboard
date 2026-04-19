@@ -345,8 +345,12 @@
             .pairs-modal { width:95vw; max-height:80vh; padding:16px; }
             .ov-top-row { grid-template-columns:1fr 1fr; gap:8px; }
             .ov-pairs-grid { grid-template-columns:repeat(2,1fr); gap:6px; }
-            .ov-cur-card { padding:10px 12px; }
-            .ov-score-num { font-size:20px; }
+            .ov-cur-card { padding:12px 14px; }
+            .ov-score-num { font-size:28px; }
+            .ov-cur-name { font-size:15px; }
+            .ov-sessions { height:60px; }
+            .ov-session-name { font-size:10px; }
+            .ov-session-sub { font-size:9px; }
             .pairs-grid { grid-template-columns:repeat(3,1fr); }
             .mob-edit-pairs-btn { padding:6px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px; color:#aaa; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; }
 
@@ -641,7 +645,7 @@
                 </div>
             </div>
             <!-- Market Sessions -->
-            <div id="mob-ovSessions" style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;"></div>
+            <div id="mob-ovSessions" class="ov-sessions" style="margin-bottom:10px;"></div>
             <!-- Summary strip -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
                 <div style="background:#161616;border:1px solid #1e2230;border-radius:8px;padding:10px;text-align:center">
@@ -3776,7 +3780,6 @@ function renderSessions() {
             var open = isSessionOpen(s);
             var item = document.createElement('div');
             item.className = 'ov-session-item' + (open ? ' active' : '');
-            if (isMob) item.style.cssText = 'min-width:70px;flex-shrink:0;';
             var openStr  = getSessionLocalTime(s.open);
             var closeStr = getSessionLocalTime(s.close);
             item.innerHTML =
