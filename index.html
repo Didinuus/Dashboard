@@ -217,16 +217,17 @@
            OVERVIEW / BIAS
            ============================================= */
         .ov-layout { display:flex; flex-direction:column; gap:18px; }
-        .ov-sessions { display:flex; gap:10px; }
-        .ov-session-card { flex:1; background:#161616; border:1px solid #1e2230; border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:4px; transition:border-color .3s; }
-        .ov-session-card.active { border-color:#2a4a8a; background:#161e2e; }
-        .ov-session-name { font-size:11px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:0.5px; }
-        .ov-session-card.active .ov-session-name { color:#fff; }
-        .ov-session-time { font-size:10px; color:#555; }
+        .ov-sessions { background:#161616; border:1px solid #1e2230; border-left:3px solid #2a4a8a; border-radius:8px; display:flex; align-items:stretch; height:46px; overflow:hidden; }
+        .ov-session-item { flex:1; display:flex; align-items:center; justify-content:center; gap:10px; padding:0 16px; }
+        .ov-session-item + .ov-session-item { border-left:1px solid #1e2230; }
+        .ov-session-item.active { background:#161e2e; }
+        .ov-session-name { font-size:10px; font-weight:bold; color:#555; text-transform:uppercase; letter-spacing:0.5px; }
+        .ov-session-item.active .ov-session-name { color:#fff; }
         .ov-session-status { font-size:10px; font-weight:bold; }
         .ov-session-status.open { color:#14BC60; }
-        .ov-session-status.closed { color:#555; }
-        .ov-session-pairs { font-size:9px; color:#555; margin-top:2px; }
+        .ov-session-status.closed { color:#444; }
+        .ov-session-time { font-size:9px; color:#444; }
+        .ov-session-pairs { font-size:9px; color:#444; }
         .ov-top-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
         .ov-cur-card {
             background:#161616; border:1px solid #1e2230; border-radius:10px;
@@ -3773,18 +3774,17 @@ function renderSessions() {
         el.innerHTML = '';
         OV_SESSIONS.forEach(function(s) {
             var open = isSessionOpen(s);
-            /* Count overlap (how many other sessions are also open) */
-            var card = document.createElement('div');
-            card.className = 'ov-session-card' + (open ? ' active' : '');
-            if (isMob) card.style.cssText = 'min-width:80px;flex-shrink:0;';
+            var item = document.createElement('div');
+            item.className = 'ov-session-item' + (open ? ' active' : '');
+            if (isMob) item.style.cssText = 'min-width:70px;flex-shrink:0;';
             var openStr  = getSessionLocalTime(s.open);
             var closeStr = getSessionLocalTime(s.close);
-            card.innerHTML =
+            item.innerHTML =
                 '<div class="ov-session-name" style="' + (open ? 'color:' + s.color : '') + '">' + s.name + '</div>' +
                 '<div class="ov-session-status ' + (open ? 'open' : 'closed') + '">' + (open ? '● OPEN' : '○ Closed') + '</div>' +
-                '<div class="ov-session-time">' + openStr + ' – ' + closeStr + '</div>' +
+                '<div class="ov-session-time">' + openStr + '–' + closeStr + '</div>' +
                 '<div class="ov-session-pairs">' + s.pairs + '</div>';
-            el.appendChild(card);
+            el.appendChild(item);
         });
 
         /* Overlap indicator */
