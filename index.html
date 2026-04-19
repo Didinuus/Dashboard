@@ -710,6 +710,7 @@
                 <span class="msh-title">Currency Strength</span>
                 <div class="msh-right">
                     <span class="msh-status" id="mob-csStatus">...</span>
+                    <button class="cs-tf-btn" onclick="mobStrengthRefresh()" style="font-size:18px">&#8634;</button>
                 </div>
             </div>
             <!-- Sub-tabs -->
@@ -757,13 +758,6 @@
 
             <!-- Sub-page: Currency Index -->
             <div id="mob-str-sub-ci" style="display:none;">
-                <div class="mob-section-header">
-                    <span class="msh-title">Currency Index</span>
-                    <div class="msh-right">
-                        <span class="msh-status" id="mob-ciStatus">...</span>
-                        <button class="refresh-icon-btn" onclick="ciLoad()" style="font-size:18px">&#8634;</button>
-                    </div>
-                </div>
                 <div class="mob-ci-tf-row">
                     <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('M5',this)">5M</button>
                     <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('M15',this)">15M</button>
@@ -1980,6 +1974,15 @@ window.addEventListener('load', function() {
 /* =========================================================
    MOBILE SUB-TABS
    ========================================================= */
+function mobStrengthRefresh() {
+    var ciVisible = document.getElementById('mob-str-sub-ci');
+    if (ciVisible && ciVisible.style.display !== 'none') {
+        ciLoad();
+    } else {
+        mobCsLoad(); setTimeout(mobFxpLoad, 800);
+    }
+}
+
 function mobShowStrengthSub(name, btn) {
     ['cs','ci'].forEach(function(n) {
         var el = document.getElementById('mob-str-sub-'+n);
