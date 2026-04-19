@@ -710,66 +710,77 @@
                 <span class="msh-title">Currency Strength</span>
                 <div class="msh-right">
                     <span class="msh-status" id="mob-csStatus">...</span>
-                    <button class="refresh-icon-btn" onclick="mobCsRefresh()" style="font-size:18px">&#8634;</button>
                 </div>
             </div>
-            <div class="mob-cs-tf-row">
-                <button class="mob-cs-tf-btn" onclick="mobCsSetTF('M5',this)">5M</button>
-                <button class="mob-cs-tf-btn" onclick="mobCsSetTF('M15',this)">15M</button>
-                <button class="mob-cs-tf-btn active" onclick="mobCsSetTF('H1',this)">1H</button>
-                <button class="mob-cs-tf-btn" onclick="mobCsSetTF('H4',this)">4H</button>
-                <button class="mob-cs-tf-btn" onclick="mobCsSetTF('D',this)">D</button>
+            <!-- Sub-tabs -->
+            <div style="display:flex;gap:0;margin-bottom:10px;border:1px solid #1e2230;border-radius:8px;overflow:hidden;">
+                <button class="mob-str-subtab-btn active" onclick="mobShowStrengthSub('cs',this)" style="flex:1;padding:10px;background:#1e2230;color:#fff;border:none;font-size:12px;font-weight:bold;cursor:pointer;font-family:inherit;">Currency Strength</button>
+                <button class="mob-str-subtab-btn" onclick="mobShowStrengthSub('ci',this)" style="flex:1;padding:10px;background:#161616;color:#888;border:none;border-left:1px solid #1e2230;font-size:12px;font-weight:bold;cursor:pointer;font-family:inherit;">Currency Index</button>
             </div>
-            <div class="mob-cs-legend" id="mob-csLegend"></div>
-            <div class="mob-cs-chart-wrap">
-                <div class="mob-cs-chart-inner" id="mobCsChartInner"><canvas id="mob-csChart"></canvas></div>
-            </div>
-            <div class="mob-section-header" style="margin-top:4px;">
-                <span class="msh-title">FX Performance</span>
-                <div class="msh-right">
-                    <span class="msh-status" id="mob-fxpStatus">...</span>
-                    <button class="refresh-icon-btn" onclick="mobFxpLoad()" style="font-size:18px">&#8634;</button>
+
+            <!-- Sub-page: Currency Strength + FX Performance -->
+            <div id="mob-str-sub-cs">
+                <div class="mob-cs-tf-row">
+                    <button class="mob-cs-tf-btn" onclick="mobCsSetTF('M5',this)">5M</button>
+                    <button class="mob-cs-tf-btn" onclick="mobCsSetTF('M15',this)">15M</button>
+                    <button class="mob-cs-tf-btn active" onclick="mobCsSetTF('H1',this)">1H</button>
+                    <button class="mob-cs-tf-btn" onclick="mobCsSetTF('H4',this)">4H</button>
+                    <button class="mob-cs-tf-btn" onclick="mobCsSetTF('D',this)">D</button>
+                </div>
+                <div class="mob-cs-legend" id="mob-csLegend"></div>
+                <div class="mob-cs-chart-wrap">
+                    <div class="mob-cs-chart-inner" id="mobCsChartInner"><canvas id="mob-csChart"></canvas></div>
+                </div>
+                <div class="mob-section-header" style="margin-top:4px;">
+                    <span class="msh-title">FX Performance</span>
+                    <div class="msh-right">
+                        <span class="msh-status" id="mob-fxpStatus">...</span>
+                        <button class="refresh-icon-btn" onclick="mobFxpLoad()" style="font-size:18px">&#8634;</button>
+                    </div>
+                </div>
+                <div class="mob-fxp-tf-row">
+                    <button class="mob-fxp-tf-btn active" onclick="mobFxpSetTF('D',this)">Today</button>
+                    <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('W',this)">1W</button>
+                    <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('M',this)">1M</button>
+                    <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('M3',this)">3M</button>
+                    <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('Y',this)">1Y</button>
+                </div>
+                <div class="mob-chart-card">
+                    <div class="mob-chart-title">CURRENCY PERFORMANCE</div>
+                    <div id="mob-fxpBarsContainer"><div style="text-align:center;color:#aaa;padding:14px;">Loading...</div></div>
+                </div>
+                <div class="mob-chart-card" style="overflow-x:auto;">
+                    <div class="mob-chart-title">PAIR PERFORMANCE HEATMAP</div>
+                    <div id="mob-fxpHeatmapContainer" style="overflow-x:auto;"></div>
                 </div>
             </div>
-            <div class="mob-fxp-tf-row">
-                <button class="mob-fxp-tf-btn active" onclick="mobFxpSetTF('D',this)">Today</button>
-                <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('W',this)">1W</button>
-                <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('M',this)">1M</button>
-                <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('M3',this)">3M</button>
-                <button class="mob-fxp-tf-btn" onclick="mobFxpSetTF('Y',this)">1Y</button>
-            </div>
-            <div class="mob-chart-card">
-                <div class="mob-chart-title">CURRENCY PERFORMANCE</div>
-                <div id="mob-fxpBarsContainer"><div style="text-align:center;color:#aaa;padding:14px;">Loading...</div></div>
-            </div>
-            <div class="mob-chart-card" style="overflow-x:auto;">
-                <div class="mob-chart-title">PAIR PERFORMANCE HEATMAP</div>
-                <div id="mob-fxpHeatmapContainer" style="overflow-x:auto;"></div>
-            </div>
-            <!-- Currency Index section (mobile) — inside strength page -->
-            <div class="mob-section-header" style="margin-top:8px;">
-                <span class="msh-title">Currency Index</span>
-                <div class="msh-right">
-                    <span class="msh-status" id="mob-ciStatus">...</span>
-                    <button class="refresh-icon-btn" onclick="ciLoad()" style="font-size:18px">&#8634;</button>
+
+            <!-- Sub-page: Currency Index -->
+            <div id="mob-str-sub-ci" style="display:none;">
+                <div class="mob-section-header">
+                    <span class="msh-title">Currency Index</span>
+                    <div class="msh-right">
+                        <span class="msh-status" id="mob-ciStatus">...</span>
+                        <button class="refresh-icon-btn" onclick="ciLoad()" style="font-size:18px">&#8634;</button>
+                    </div>
                 </div>
-            </div>
-            <div class="mob-ci-tf-row">
-                <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('M5',this)">5M</button>
-                <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('M15',this)">15M</button>
-                <button class="mob-ci-tf-btn active" style="cursor:pointer" onclick="ciSetTF('H1',this)">1H</button>
-                <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('H4',this)">4H</button>
-                <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('D',this)">D</button>
-                <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('W',this)">W</button>
-            </div>
-            <div class="mob-cs-legend" id="mob-ciCombinedLegend"></div>
-            <div class="mob-cs-chart-wrap">
-                <div class="mob-cs-chart-inner" id="mobCiChartInner">
-                    <canvas id="mob-ciCombinedChart"></canvas>
+                <div class="mob-ci-tf-row">
+                    <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('M5',this)">5M</button>
+                    <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('M15',this)">15M</button>
+                    <button class="mob-ci-tf-btn active" style="cursor:pointer" onclick="ciSetTF('H1',this)">1H</button>
+                    <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('H4',this)">4H</button>
+                    <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('D',this)">D</button>
+                    <button class="mob-ci-tf-btn" style="cursor:pointer" onclick="ciSetTF('W',this)">W</button>
                 </div>
-            </div>
-            <div class="ci-grid" id="mob-ciGrid">
-                <div style="grid-column:1/-1;text-align:center;padding:20px;color:#555;">Loading...</div>
+                <div class="mob-cs-legend" id="mob-ciCombinedLegend"></div>
+                <div class="mob-cs-chart-wrap">
+                    <div class="mob-cs-chart-inner" id="mobCiChartInner">
+                        <canvas id="mob-ciCombinedChart"></canvas>
+                    </div>
+                </div>
+                <div class="ci-grid" id="mob-ciGrid">
+                    <div style="grid-column:1/-1;text-align:center;padding:20px;color:#555;">Loading...</div>
+                </div>
             </div>
         </div>
 
@@ -1951,7 +1962,7 @@ function mobShowPage(name, idx, btn) {
     ind.style.left = (idx * btnWidth) + 'px';
     ind.style.width = btnWidth + 'px';
     document.getElementById('mobContent').scrollTop = 0;
-    if (name === 'strength') { mobCsLoad(); setTimeout(mobFxpLoad, 800); setTimeout(ciLoad, 1500); }
+    if (name === 'strength') { mobCsLoad(); setTimeout(mobFxpLoad, 800); }
     if (name === 'macro') mobRenderRates();
     if (name === 'sentiment') actualiserDonnees();
     if (name === 'overview') ovRefresh();
@@ -1969,6 +1980,18 @@ window.addEventListener('load', function() {
 /* =========================================================
    MOBILE SUB-TABS
    ========================================================= */
+function mobShowStrengthSub(name, btn) {
+    ['cs','ci'].forEach(function(n) {
+        var el = document.getElementById('mob-str-sub-'+n);
+        if (el) el.style.display = n === name ? 'block' : 'none';
+    });
+    document.querySelectorAll('.mob-str-subtab-btn').forEach(function(b) {
+        b.style.background = '#161616'; b.style.color = '#888';
+    });
+    btn.style.background = '#1e2230'; btn.style.color = '#fff';
+    if (name === 'ci') ciLoad();
+}
+
 function mobShowSub(name, btn) {
     ['table','chart','cot'].forEach(function(n) {
         var el = document.getElementById('mob-sub-'+n);
