@@ -736,7 +736,6 @@
                     <span class="msh-title">FX Performance</span>
                     <div class="msh-right">
                         <span class="msh-status" id="mob-fxpStatus">...</span>
-                        <button class="refresh-icon-btn" onclick="mobFxpLoad()" style="font-size:18px">&#8634;</button>
                     </div>
                 </div>
                 <div class="mob-fxp-tf-row">
@@ -1975,12 +1974,9 @@ window.addEventListener('load', function() {
    MOBILE SUB-TABS
    ========================================================= */
 function mobStrengthRefresh() {
-    var ciVisible = document.getElementById('mob-str-sub-ci');
-    if (ciVisible && ciVisible.style.display !== 'none') {
-        ciLoad();
-    } else {
-        mobCsLoad(); setTimeout(mobFxpLoad, 800);
-    }
+    mobCsLoad();
+    setTimeout(mobFxpLoad, 800);
+    setTimeout(ciLoad, 1500);
 }
 
 function mobShowStrengthSub(name, btn) {
