@@ -245,20 +245,7 @@
             font-size:9px; font-weight:600; padding:2px 7px; border-radius:4px;
             letter-spacing:0.3px; text-transform:uppercase; opacity:0.85;
         }
-        .ov-score-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-        .ov-score-num { font-size:32px; font-weight:900; line-height:1; min-width:60px; }
-        .ov-sparkline-wrap { height:32px; margin:4px 0; cursor:pointer; border-radius:4px; overflow:hidden; }
-        .ov-sparkline { width:100% !important; height:32px !important; display:block; }
-        /* Bias history modal */
-        .bias-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; }
-        .bias-modal-overlay.open { display:flex; }
-        .bias-modal { background:#161616; border:1px solid #1e2230; border-radius:12px; padding:20px; width:700px; max-width:94vw; height:440px; display:flex; flex-direction:column; gap:12px; }
-        .bias-modal-header { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
-        .bias-modal-title { font-size:16px; font-weight:bold; }
-        .bias-modal-close { background:transparent; border:none; color:#aaa; font-size:22px; cursor:pointer; line-height:1; }
-        .bias-modal-close:hover { color:#fff; }
-        .bias-modal-chart { flex:1; position:relative; background:#101010; border-radius:6px; overflow:hidden; min-height:0; }
-        .bias-modal-chart canvas { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
+        .ov-score-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
         .ov-score-num { font-size:32px; font-weight:900; line-height:1; min-width:60px; }
         .ov-gauge-wrap { flex:1; height:6px; background:#111; border-radius:4px; overflow:hidden; position:relative; }
         .ov-gauge-fill { height:100%; border-radius:4px; transition:width .6s ease; position:absolute; }
@@ -391,17 +378,6 @@
             <button class="ci-modal-close" onclick="closeCiModal()">&#10005;</button>
         </div>
         <div class="ci-modal-chart"><canvas id="ciModalChart"></canvas></div>
-    </div>
-</div>
-
-<!-- BIAS HISTORY MODAL -->
-<div class="bias-modal-overlay" id="biasModalOverlay" onclick="if(event.target===this)closeBiasModal()">
-    <div class="bias-modal">
-        <div class="bias-modal-header">
-            <div class="bias-modal-title" id="biasModalTitle">Score History</div>
-            <button class="bias-modal-close" onclick="closeBiasModal()">&#10005;</button>
-        </div>
-        <div class="bias-modal-chart"><canvas id="biasModalCanvas"></canvas></div>
     </div>
 </div>
 
@@ -3357,10 +3333,6 @@ function mobRenderRates(){
 /* =========================================================
    INIT
    ========================================================= */
-window.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') { closeBiasModal(); closeCiModal(); }
-});
-
 window.addEventListener('load', function() {
     IS_MOBILE = window.innerWidth <= 768;
     actualiserDonnees();
@@ -3436,207 +3408,6 @@ var OV_LABEL_CONFIG = [
 /* Sort state: true = bull→bear (desc), false = bear→bull (asc) */
 var _ovSortDesc = null;  /* null=alpha, true=bull→bear, false=bear→bull */
 var _ovLastBias = null;
-
-/* =========================================================
-   SPARKLINES + BIAS HISTORY MODAL
-   ========================================================= */
-var _biasModalChart = null;
-
-function drawSparkline(canvas, series, color) {
-    var raw = series.filter(function(v){ return v !== null; });
-    if (raw.length < 2) return;
-    var W = canvas.offsetWidth || 120;
-    var H = 32;
-    canvas.width = W * (window.devicePixelRatio || 1);
-    canvas.height = H * (window.devicePixelRatio || 1);
-    canvas.style.width = W + 'px';
-    canvas.style.height = H + 'px';
-    var ctx = canvas.getContext('2d');
-    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
-    ctx.clearRect(0, 0, W, H);
-    var mn = Math.min.apply(null, raw), mx = Math.max.apply(null, raw);
-    var rng = mx - mn || 0.0001;
-    /* Zero line */
-    var zeroY = H - ((0 - mn) / rng) * (H - 6) - 3;
-    zeroY = Math.max(1, Math.min(H - 1, zeroY));
-    ctx.save();
-    ctx.strokeStyle = '#2a2a3a'; ctx.lineWidth = 1; ctx.setLineDash([2,3]);
-    ctx.beginPath(); ctx.moveTo(0, zeroY); ctx.lineTo(W, zeroY); ctx.stroke();
-    ctx.restore();
-    /* Gradient fill */
-    var grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, color + '40'); grad.addColorStop(1, color + '00');
-    function xOf(i){ return (i / (raw.length - 1)) * W; }
-    function yOf(v){ return H - ((v - mn) / rng) * (H - 6) - 3; }
-    ctx.save();
-    ctx.beginPath();
-    raw.forEach(function(v, i){ i === 0 ? ctx.moveTo(xOf(i), yOf(v)) : ctx.lineTo(xOf(i), yOf(v)); });
-    ctx.lineTo(W, zeroY); ctx.lineTo(0, zeroY); ctx.closePath();
-    ctx.fillStyle = grad; ctx.fill();
-    /* Line */
-    ctx.beginPath();
-    raw.forEach(function(v, i){ i === 0 ? ctx.moveTo(xOf(i), yOf(v)) : ctx.lineTo(xOf(i), yOf(v)); });
-    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.setLineDash([]); ctx.stroke();
-    /* End dot */
-    var last = raw[raw.length - 1];
-    ctx.beginPath(); ctx.arc(W - 2, yOf(last), 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = color; ctx.fill();
-    ctx.restore();
-}
-
-function renderSparklines() {
-    /* Use last ~168 points from CI index series (≈7 days H1) as proxy for score trend */
-    var POINTS = 168;
-    ['ovCurCards', 'mob-ovCurCards'].forEach(function(gridId) {
-        CS_CURRENCIES.forEach(function(cur) {
-            var canvas = document.getElementById('ov-spark-' + gridId + '-' + cur);
-            if (!canvas) return;
-            var series = _ciIndexSeries && _ciIndexSeries[cur];
-            if (!series || !series.length) return;
-            var raw = series.slice(-POINTS);
-            drawSparkline(canvas, raw, CS_COLORS[cur]);
-        });
-    });
-}
-
-function openBiasModal(cur) {
-    var series = _ciIndexSeries && _ciIndexSeries[cur];
-    if (!series || !series.length) return;
-    var color = CS_COLORS[cur];
-    var lbl = _ovLastBias && _ovLastBias[cur] ? ovGetLabel(_ovLastBias[cur].score) : null;
-
-    /* Title */
-    var titleEl = document.getElementById('biasModalTitle');
-    if (titleEl) titleEl.innerHTML =
-        '<span style="color:' + color + ';font-weight:900">' + cur + '</span>' +
-        (lbl ? ' &nbsp;<span style="font-size:11px;color:' + lbl.color + '">' + lbl.label + '</span>' : '') +
-        ' &nbsp;<span style="font-size:11px;color:#555">— CI Score History</span>';
-
-    document.getElementById('biasModalOverlay').classList.add('open');
-
-    setTimeout(function() {
-        var c = document.getElementById('biasModalCanvas');
-        if (!c) return;
-        if (_biasModalChart) { _biasModalChart.destroy(); _biasModalChart = null; }
-
-        /* Use existing CI labels if available, else generate indices */
-        var labels = (_ciTimes && _ciTimes.length === series.length)
-            ? _ciTimes.map(function(t) {
-                if (!t) return '';
-                var d = new Date(t);
-                return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}) + ' ' +
-                       d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-              })
-            : series.map(function(_,i){ return i; });
-
-        var pctSeries = series.map(function(v){ return v !== null ? parseFloat((v * 100).toFixed(4)) : null; });
-        var viewCount = Math.min(series.length, 200);
-
-        _biasModalChart = new Chart(c, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: cur + ' CI',
-                    data: pctSeries,
-                    borderColor: color,
-                    backgroundColor: function(ctx2) {
-                        var gc = ctx2.chart.ctx.createLinearGradient(0, 0, 0, 300);
-                        gc.addColorStop(0, color + '44'); gc.addColorStop(1, color + '00');
-                        return gc;
-                    },
-                    borderWidth: 2, pointRadius: 0, tension: 0.2, fill: true
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, animation: false,
-                interaction: { mode:'index', intersect:false },
-                layout: { padding: { right: 0 } },
-                scales: {
-                    x: {
-                        min: Math.max(0, series.length - viewCount),
-                        max: series.length - 1,
-                        grid: { color:'#1a1a2a' },
-                        ticks: { maxRotation:0, autoSkip:true, maxTicksLimit:10, color:'#444', font:{size:9} }
-                    },
-                    y: {
-                        position: 'right',
-                        grid: { color:'#1a1a2a' },
-                        ticks: { color:'#555', font:{size:9}, callback:function(v){ return (v>=0?'+':'')+v.toFixed(2)+'%'; } }
-                    }
-                },
-                plugins: {
-                    legend: { display:false },
-                    tooltip: {
-                        backgroundColor:'rgba(16,16,24,0.97)', borderColor:'#1e2230', borderWidth:1,
-                        callbacks: {
-                            label: function(c2){ var v=c2.parsed.y; return ' ' + cur + ': '+(v>=0?'+':'')+v.toFixed(4)+'%'; }
-                        }
-                    }
-                }
-            },
-            plugins: [{
-                id: 'biasRef0',
-                afterDraw: function(ch) {
-                    var y = ch.scales.y, ca = ch.chartArea; if (!y||!ca) return;
-                    var yp = y.getPixelForValue(0); if (yp < ca.top || yp > ca.bottom) return;
-                    var c2 = ch.ctx;
-                    c2.save(); c2.beginPath(); c2.moveTo(ca.left, yp); c2.lineTo(ca.right, yp);
-                    c2.strokeStyle='#4a4a6a'; c2.lineWidth=1.5; c2.setLineDash([4,4]); c2.stroke();
-                    c2.save(); c2.fillStyle='rgba(56,56,80,0.8)';
-                    c2.fillRect(ca.right+2, yp-9, 28, 16);
-                    c2.fillStyle='#888'; c2.font='bold 10px JetBrains Mono,monospace';
-                    c2.textAlign='center'; c2.textBaseline='middle';
-                    c2.fillText('0%', ca.right+16, yp); c2.restore();
-                }
-            }]
-        });
-
-        /* Same mouse interactions as CI modal */
-        c.style.cursor = 'crosshair';
-        var drag = null;
-        c.onmousedown = function(e) {
-            if (e.button!==0) return;
-            drag = { startX:e.clientX, startMin:_biasModalChart.options.scales.x.min, startMax:_biasModalChart.options.scales.x.max };
-            c.style.cursor = 'grabbing'; e.preventDefault();
-        };
-        c.onmousemove = function(e) {
-            if (!_biasModalChart) return;
-            var rect = c.getBoundingClientRect(), mx = e.clientX - rect.left;
-            var ca = _biasModalChart.chartArea, xScale = _biasModalChart.scales.x;
-            if (drag) {
-                var dx = e.clientX - drag.startX;
-                var range = drag.startMax - drag.startMin;
-                var shift = -(dx / (ca ? ca.right - ca.left : 1)) * range;
-                var total = _biasModalChart.data.labels.length;
-                _biasModalChart.options.scales.x.min = Math.max(0, drag.startMin + shift);
-                _biasModalChart.options.scales.x.max = Math.min(total - 1, drag.startMax + shift);
-                _biasModalChart.update('none'); return;
-            }
-        };
-        c.onmouseleave = function() { drag = null; c.style.cursor = 'crosshair'; };
-        c.onwheel = function(e) {
-            if (!_biasModalChart) return; e.preventDefault();
-            var rect = c.getBoundingClientRect(), mx = e.clientX - rect.left;
-            var ca = _biasModalChart.chartArea;
-            var curMin = _biasModalChart.options.scales.x.min, curMax = _biasModalChart.options.scales.x.max;
-            var range = curMax - curMin;
-            var factor = e.deltaY > 0 ? 1.15 : 0.87;
-            var newRange = Math.max(20, Math.min(_biasModalChart.data.labels.length, range * factor));
-            var ratio = ca && ca.width > 0 ? (mx - ca.left) / ca.width : 0.5;
-            ratio = Math.max(0, Math.min(1, ratio));
-            var anchor = curMin + ratio * range;
-            _biasModalChart.options.scales.x.min = Math.max(0, anchor - ratio * newRange);
-            _biasModalChart.options.scales.x.max = Math.min(_biasModalChart.data.labels.length - 1, anchor + (1 - ratio) * newRange);
-            _biasModalChart.update('none');
-        };
-    }, 50);
-}
-
-function closeBiasModal() {
-    document.getElementById('biasModalOverlay').classList.remove('open');
-    if (_biasModalChart) { _biasModalChart.destroy(); _biasModalChart = null; }
-}
 
 function ovGetLabel(score) {
     /* score >= 0 → Bullish family, score < 0 → Bearish family */
@@ -3864,7 +3635,6 @@ function renderOverview(bias) {
 
             var card = document.createElement('div');
             card.className = 'ov-cur-card';
-            var sparkId = 'ov-spark-' + gridId + '-' + cur;
             card.innerHTML =
                 '<div class="ov-accent" style="background:'+color+'"></div>' +
                 '<div class="ov-card-top">' +
@@ -3878,7 +3648,6 @@ function renderOverview(bias) {
                         '<div class="ov-gauge-fill" style="width:'+gaugeW+'%;'+(gaugePos?'left:50%':'right:50%')+';background:'+lbl.color+'"></div>' +
                     '</div>' +
                 '</div>' +
-                '<div class="ov-sparkline-wrap" onclick="openBiasModal(\''+cur+'\')" title="Click for score history"><canvas class="ov-sparkline" id="'+sparkId+'"></canvas></div>' +
                 '<div class="ov-signals">'+sigsHTML+'</div>';
             grid.appendChild(card);
         });
@@ -3887,7 +3656,6 @@ function renderOverview(bias) {
     /* ---- Pair bias grid (shared) ---- */
     _ovLastBias = bias;
     ovRenderPairsGrid(pairBiases);
-    setTimeout(renderSparklines, 60);
 }
 
 function ovSortedPairs(pairBiases) {
