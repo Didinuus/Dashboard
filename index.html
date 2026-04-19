@@ -3784,7 +3784,7 @@ function renderSessions() {
             var closeStr = getSessionLocalTime(s.close);
             item.innerHTML =
                 '<div class="ov-session-name" style="' + (open ? 'color:' + s.color : '') + '">' + s.name + ' <span class="ov-session-status ' + (open ? 'open' : 'closed') + '">' + (open ? '● OPEN' : '○') + '</span></div>' +
-                '<div class="ov-session-sub ' + (open ? 'active-sub' : '') + '">' + openStr + '–' + closeStr + ' &nbsp;·&nbsp; ' + s.pairs + '</div>';
+                '<div class="ov-session-sub ' + (open ? 'active-sub' : '') + '">' + openStr + '–' + closeStr + '</div>';
             el.appendChild(item);
         });
 
