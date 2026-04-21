@@ -506,7 +506,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><line x1="12" y1="20" x2="12" y2="4"/><line x1="5" y1="13" x2="19" y2="13"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="16" r="2"/></svg>
                     Weights
                 </button>
-                <button class="cs-tf-btn" onclick="ovRefresh()">&#8634;</button>
+                <button class="cs-tf-btn" onclick="ovRefresh()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
             </div>
         </div>
         <div class="ov-layout">
@@ -539,7 +539,7 @@
                 <div class="ph-center">Traders Sentiment</div>
                 <div class="ph-right">
                     <span class="ph-status" id="lastUpdate">Loading...</span>
-                    <button class="cs-tf-btn" onclick="actualiserDonnees()">&#8634;</button>
+                    <button class="cs-tf-btn" onclick="actualiserDonnees()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                 </div>
             </div>
             <div class="page-header">
@@ -595,7 +595,7 @@
                         <button class="cs-tf-btn active" onclick="csSetTF('H1',this)">Hourly</button>
                         <button class="cs-tf-btn" onclick="csSetTF('H4',this)">4H</button>
                         <button class="cs-tf-btn" onclick="csSetTF('D',this)">Daily</button>
-                        <button class="cs-tf-btn" onclick="csRefresh()" style="margin-left:4px">&#8634;</button>
+                        <button class="cs-tf-btn" onclick="csRefresh()" style="margin-left:4px;display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                         <span class="ph-status" id="csStatus" style="margin-left:8px;font-size:10px;color:#aaa;">Loading...</span>
                     </div>
                     <div style="font-size:13px;font-weight:bold;color:#fff;position:absolute;left:50%;transform:translateX(-50%);">Currency Strength Index</div>
@@ -617,7 +617,7 @@
                     <div style="position:absolute;left:50%;transform:translateX(-50%);font-size:13px;font-weight:bold;color:#fff;">FX Performance</div>
                     <div class="ph-right">
                         <span class="ph-status" id="fxpStatus">&mdash;</span>
-                        <button class="cs-tf-btn" onclick="fxpLoad()">&#8634;</button>
+                        <button class="cs-tf-btn" onclick="fxpLoad()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:420px 1fr;gap:15px;align-items:stretch;">
@@ -642,7 +642,7 @@
                             <button class="cs-tf-btn" onclick="ciSetTF('H4',this)">4H</button>
                             <button class="cs-tf-btn" onclick="ciSetTF('D',this)">Daily</button>
                             <button class="cs-tf-btn" onclick="ciSetTF('W',this)">Weekly</button>
-                            <button class="cs-tf-btn" onclick="ciLoad()" style="margin-left:4px;">&#8634;</button>
+                            <button class="cs-tf-btn" onclick="ciLoad()" style="margin-left:4px;display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                             <span class="ph-status" id="ciStatus" style="margin-left:8px;font-size:10px;color:#aaa;">Loading...</span>
                         </div>
                         <div style="font-size:13px;font-weight:bold;color:#fff;position:absolute;left:50%;transform:translateX(-50%);">Currency Index</div>
@@ -666,7 +666,7 @@
                 <div class="section-right">
                     <span class="source-badge">Static + verified</span>
                     <span style="color:#aaa;font-size:10px" id="irStatus">&mdash;</span>
-                    <button class="refresh-icon-btn" onclick="renderRates()">&#8634;</button>
+                    <button class="refresh-icon-btn" onclick="renderRates()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                 </div>
             </div>
             <div class="ir-layout">
@@ -712,8 +712,12 @@
                 <span class="msh-title">Market Bias</span>
                 <div class="msh-right">
                     <span class="msh-status" id="mob-ovStatus">...</span>
-                    <button class="cs-tf-btn" onclick="openWeightsModal()" style="font-size:18px;line-height:1;padding:5px 12px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:middle;"><line x1="12" y1="20" x2="12" y2="4"/><line x1="5" y1="13" x2="19" y2="13"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="16" r="2"/></svg></button>
-                    <button class="cs-tf-btn" onclick="ovRefresh()" style="font-size:18px">&#8634;</button>
+                    <button class="cs-tf-btn" onclick="openWeightsModal()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><line x1="12" y1="20" x2="12" y2="4"/><line x1="5" y1="13" x2="19" y2="13"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="16" r="2"/></svg>
+                    </button>
+                    <button class="cs-tf-btn" onclick="ovRefresh()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    </button>
                 </div>
             </div>
             <!-- Market Sessions -->
@@ -751,7 +755,7 @@
                 <span class="msh-title">Traders Sentiment</span>
                 <div class="msh-right">
                     <span class="msh-status" id="mob-lastUpdate">...</span>
-                    <button class="cs-tf-btn" onclick="actualiserDonnees()" style="font-size:18px">&#8634;</button>
+                    <button class="cs-tf-btn" onclick="actualiserDonnees()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                 </div>
             </div>
             <div style="display:flex;gap:0;margin-bottom:10px;border:1px solid #1e2230;border-radius:8px;overflow:hidden;">
@@ -801,7 +805,7 @@
                 <span class="msh-title">Currency Strength</span>
                 <div class="msh-right">
                     <span class="msh-status" id="mob-csStatus">...</span>
-                    <button class="cs-tf-btn" onclick="mobStrengthRefresh()" style="font-size:18px">&#8634;</button>
+                    <button class="cs-tf-btn" onclick="mobStrengthRefresh()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                 </div>
             </div>
             <!-- Sub-tabs -->
@@ -874,7 +878,7 @@
                 <span class="msh-title">Central Bank Rates</span>
                 <div class="msh-right">
                     <span class="msh-status" id="mob-irStatus">Apr 6, 2026</span>
-                    <button class="refresh-icon-btn" onclick="mobRenderRates()" style="font-size:18px">&#8634;</button>
+                    <button class="refresh-icon-btn" onclick="mobRenderRates()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                 </div>
             </div>
             <div class="mob-ir-cards-grid" id="mob-irCardsGrid"></div>
