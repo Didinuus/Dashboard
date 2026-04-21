@@ -13,7 +13,7 @@
         .pc-only { display:block; }
         .mobile-only { display:none; }
 
-        .pc-layout { padding:30px; width:100%; }
+        .pc-layout { padding:10px 30px 30px 30px; width:100%; }
 
         .ticker-section { margin-bottom:20px; overflow:hidden; border-radius:8px; border:1px solid #1e2230; background:#161616; padding:4px 8px; }
 
@@ -62,7 +62,7 @@
         .cot-pie-item canvas { width:80px!important; height:80px!important; }
 
         .tabs { display:flex; background:#161616; border:1px solid #1e2230; border-radius:8px; margin-bottom:20px; overflow:hidden; height:52px; }
-        .tab-btn { flex:1; padding:0 16px; background:transparent; color:#555; border:none; cursor:pointer; font-weight:bold; font-size:13px; font-family:inherit; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px; letter-spacing:0.3px; position:relative; }
+        .tab-btn { flex:1; padding:0 16px; background:transparent; color:#555; border:none; cursor:pointer; font-weight:bold; font-size:14px; font-family:inherit; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px; letter-spacing:0.3px; position:relative; }
         .tab-btn + .tab-btn::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); height:55%; width:1px; background:#1e2230; }
         .tab-btn:hover { color:#aaa; background:#191929; }
         .tab-btn.active { color:#fff; background:#1e2230; }
@@ -369,6 +369,75 @@
             .mob-ci-tf-btn { flex:1; padding:7px 4px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; font-size:11px; font-weight:bold; text-align:center; cursor:pointer; -webkit-tap-highlight-color:transparent; }
             .mob-ci-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
         }
+        /* =============================================
+           WEIGHTS PANEL
+           ============================================= */
+        .weights-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
+        .weights-modal-overlay.open { display:flex; }
+        .weights-modal { background:#161616; border:1px solid #1e2230; border-radius:12px; padding:24px; width:420px; max-width:95vw; display:flex; flex-direction:column; gap:16px; }
+        .weights-modal-header { display:flex; align-items:center; justify-content:space-between; }
+        .weights-modal-header h3 { font-size:15px; font-weight:bold; color:#fff; }
+        .weights-modal-close { background:transparent; border:none; color:#aaa; font-size:20px; cursor:pointer; line-height:1; }
+        .weights-modal-close:hover { color:#fff; }
+        .weights-total-bar { background:#111; border:1px solid #1e2230; border-radius:6px; padding:8px 14px; display:flex; align-items:center; justify-content:space-between; font-size:12px; }
+        .weights-total-val { font-weight:bold; font-size:14px; }
+        .weights-row { display:flex; flex-direction:column; gap:6px; }
+        .weights-row-header { display:flex; align-items:center; justify-content:space-between; }
+        .weights-row-label { font-size:12px; font-weight:bold; color:#aaa; }
+        .weights-row-pct { font-size:13px; font-weight:bold; color:#fff; min-width:38px; text-align:right; }
+        .weights-slider { -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:#1e2230; outline:none; cursor:pointer; }
+        .weights-slider::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:#4a8fff; cursor:pointer; }
+        .weights-slider::-moz-range-thumb { width:16px; height:16px; border-radius:50%; background:#4a8fff; cursor:pointer; border:none; }
+        .weights-actions { display:flex; gap:8px; justify-content:flex-end; border-top:1px solid #1e2230; padding-top:14px; }
+        .weights-reset-btn { padding:8px 16px; background:transparent; border:1px solid #1e2230; border-radius:6px; color:#aaa; font-size:12px; font-weight:bold; cursor:pointer; font-family:inherit; }
+        .weights-reset-btn:hover { background:#1e2230; color:#fff; }
+        .weights-apply-btn { padding:8px 20px; background:#2a3060; color:#fff; border:1px solid #3a4080; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer; font-family:inherit; }
+        .weights-apply-btn:hover { background:#3a4080; }
+        .weights-warn { color:#F26666; font-size:11px; }
+
+        /* =============================================
+           FOCUS PAIR PANEL
+           ============================================= */
+        .fp-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:900; }
+        .fp-overlay.open { display:block; }
+        .fp-panel {
+            position:fixed; top:0; right:0; bottom:0; width:380px; max-width:95vw;
+            background:#161616; border-left:1px solid #1e2230;
+            z-index:950; display:flex; flex-direction:column;
+            transform:translateX(100%); transition:transform .25s cubic-bezier(.4,0,.2,1);
+        }
+        .fp-panel.open { transform:translateX(0); }
+        .fp-header { padding:18px 20px 14px; border-bottom:1px solid #1e2230; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+        .fp-title { font-size:20px; font-weight:900; letter-spacing:1px; }
+        .fp-close { background:transparent; border:none; color:#aaa; font-size:22px; cursor:pointer; line-height:1; }
+        .fp-close:hover { color:#fff; }
+        .fp-body { flex:1; overflow-y:auto; padding:18px 20px; display:flex; flex-direction:column; gap:16px; scrollbar-width:thin; scrollbar-color:#2a2a3a #161616; }
+        .fp-score-block { background:#111; border:1px solid #1e2230; border-radius:10px; padding:16px; }
+        .fp-score-label { font-size:10px; color:#555; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+        .fp-score-big { font-size:52px; font-weight:900; line-height:1; }
+        .fp-score-badge { display:inline-flex; padding:4px 12px; border-radius:6px; font-size:12px; font-weight:bold; margin-top:6px; text-transform:uppercase; letter-spacing:0.5px; }
+        .fp-bias-bar-wrap { height:8px; background:#1e2230; border-radius:4px; overflow:hidden; position:relative; margin-top:12px; }
+        .fp-bias-bar-fill { height:100%; border-radius:4px; position:absolute; transition:width .6s ease; }
+        .fp-bias-bar-mid { position:absolute; top:0; bottom:0; left:50%; width:2px; background:#2a2a3a; }
+        .fp-section-title { font-size:10px; font-weight:bold; color:#555; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:10px; }
+        .fp-signals-card { background:#111; border:1px solid #1e2230; border-radius:10px; padding:16px; }
+        .fp-sig-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+        .fp-sig-row:last-child { margin-bottom:0; }
+        .fp-sig-name { font-size:11px; font-weight:bold; color:#888; width:60px; flex-shrink:0; }
+        .fp-sig-bar-wrap { flex:1; height:8px; background:#1e2230; border-radius:4px; overflow:hidden; position:relative; }
+        .fp-sig-bar-fill { height:100%; border-radius:4px; position:absolute; }
+        .fp-sig-bar-mid { position:absolute; top:0; bottom:0; left:50%; width:1px; background:#2a2a3a; }
+        .fp-sig-val { font-size:12px; font-weight:bold; width:42px; text-align:right; flex-shrink:0; }
+        .fp-sig-weight { font-size:10px; color:#444; width:28px; text-align:right; flex-shrink:0; }
+        .fp-cur-row { display:flex; gap:10px; }
+        .fp-cur-card { flex:1; background:#111; border:1px solid #1e2230; border-radius:10px; padding:14px; }
+        .fp-cur-name { font-size:18px; font-weight:900; margin-bottom:4px; }
+        .fp-cur-score-label { font-size:10px; color:#555; text-transform:uppercase; letter-spacing:0.5px; }
+        .fp-cur-score-val { font-size:28px; font-weight:900; }
+        .fp-cur-badge { font-size:10px; font-weight:bold; padding:2px 8px; border-radius:4px; margin-top:4px; display:inline-block; text-transform:uppercase; }
+        .fp-footer { padding:14px 20px; border-top:1px solid #1e2230; flex-shrink:0; }
+        .fp-formula { font-size:10px; color:#444; text-align:center; line-height:1.6; }
+        .ov-pair-row { cursor:pointer; }
     </style>
 </head>
 <body>
@@ -391,7 +460,7 @@
 <div class="pc-layout">
     <div class="ticker-section">
         <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js"></script>
-        <tv-ticker-tape symbols="FX:AUDUSD,FX:EURUSD,OANDA:GBPUSD,FX:NZDUSD,FX:USDCAD,FX:USDCHF,FX:USDJPY,FX:AUDCAD,FX:AUDCHF,FX:AUDJPY,FX:AUDNZD,FX:CADCHF,FX:CADJPY,FX:CHFJPY,FX:EURAUD,FX:EURCAD,FX:EURCHF,FX:EURGBP,FX:EURJPY,FX:EURNZD,FX:GBPAUD,FX:GBPCAD,FX:GBPCHF,FX:GBPJPY,FX:GBPNZD,FX:NZDCAD,FX:NZDCHF,FX:NZDJPY" theme="dark" transparent></tv-ticker-tape>
+        <tv-ticker-tape symbols="FX:AUDUSD,FX:EURUSD,OANDA:GBPUSD,FX:NZDUSD,FX:USDCAD,FX:USDCHF,FX:USDJPY,FX:AUDCAD,FX:AUDCHF,FX:AUDJPY,FX:AUDNZD,FX:CADCHF,FX:CADJPY,FX:CHFJPY,FX:EURAUD,FX:EURCAD,FX:EURCHF,FX:EURGBP,FX:EURJPY,FX:EURNZD,FX:GBPAUD,FX:GBPCAD,FX:GBPCHF,FX:GBPJPY,FX:GBPNZD,FX:NZDCAD,FX:NZDCHF,FX:NZDJPY" theme="dark" transparent item-size="compact"></tv-ticker-tape>
     </div>
 
     <div class="tabs">
@@ -433,6 +502,10 @@
             </div>
             <div class="ph-right" style="flex-shrink:0;z-index:1;">
                 <span class="ph-status" id="ovStatus">Loading...</span>
+                <button class="cs-tf-btn" onclick="openWeightsModal()" title="Adjust signal weights" style="margin-right:4px;display:flex;align-items:center;gap:5px;padding:5px 10px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><line x1="12" y1="20" x2="12" y2="4"/><line x1="5" y1="13" x2="19" y2="13"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="16" r="2"/></svg>
+                    Weights
+                </button>
                 <button class="cs-tf-btn" onclick="ovRefresh()">&#8634;</button>
             </div>
         </div>
@@ -452,7 +525,7 @@
                 </div>
                 <div class="ov-pairs-grid" id="ovPairsGrid"></div>
             </div>
-            <div class="ov-legend-note">Score = RSI ×25% + CI ×20% + COT ×25% + Sentiment Contrarian ×30% &nbsp;|&nbsp; Range −100 to +100 &nbsp;|&nbsp; Sessions in UTC local time</div>
+            <div class="ov-legend-note" id="ovLegendNote">Score = RSI ×25% + CI ×20% + COT ×25% + Sentiment Contrarian ×30% &nbsp;|&nbsp; Range −100 to +100 &nbsp;|&nbsp; Sessions in UTC local time</div>
         </div>
     </div>
 
@@ -639,6 +712,7 @@
                 <span class="msh-title">Market Bias</span>
                 <div class="msh-right">
                     <span class="msh-status" id="mob-ovStatus">...</span>
+                    <button class="cs-tf-btn" onclick="openWeightsModal()" style="font-size:18px;line-height:1;padding:5px 12px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:middle;"><line x1="12" y1="20" x2="12" y2="4"/><line x1="5" y1="13" x2="19" y2="13"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="16" r="2"/></svg></button>
                     <button class="cs-tf-btn" onclick="ovRefresh()" style="font-size:18px">&#8634;</button>
                 </div>
             </div>
@@ -667,7 +741,7 @@
                 </div>
                 <div class="ov-pairs-grid" id="mob-ovPairsGrid"></div>
             </div>
-            <div style="font-size:9px;color:#333;text-align:right;padding:6px 2px;">RSI×25 + CI×20 + COT×25 + Sentiment×30 | Range −100 to +100</div>
+            <div id="mob-ovLegendNote" style="font-size:9px;color:#333;text-align:right;padding:6px 2px;">RSI×25 + CI×20 + COT×25 + Sentiment×30 | Range −100 to +100</div>
         </div>
 
         <!-- SENTIMENT PAGE -->
@@ -3553,6 +3627,9 @@ var OV_PAIRS_DISPLAY = [
 /* Alphabetical display order for currency cards */
 var OV_CUR_ORDER = ['AUD','CAD','CHF','EUR','GBP','JPY','NZD','USD'];
 
+/* Adjustable signal weights — user can modify via the weight panel */
+var OV_WEIGHTS = { rsi: 0.25, ci: 0.20, cot: 0.25, sentiment: 0.30 };
+
 var OV_LABEL_CONFIG = [
     { min:  60, max: 100, label:'Strong Bull', bg:'rgba(20,188,96,0.10)',  color:'#14BC60' },
     { min:   0, max:  60, label:'Bullish',      bg:'rgba(47,153,95,0.10)',  color:'#2F995F' },
@@ -3664,10 +3741,10 @@ function computeBias() {
         /* Weighted composite — skip missing sources, re-normalise weights */
         var weights = [];
         var vals    = [];
-        if (rsi  !== null) { weights.push(0.25); vals.push(rsi);  }
-        if (ci   !== null) { weights.push(0.20); vals.push(ci);   }
-        if (cot  !== null) { weights.push(0.25); vals.push(cot);  }
-        if (sent !== null) { weights.push(0.30); vals.push(sent); }
+        if (rsi  !== null) { weights.push(OV_WEIGHTS.rsi);       vals.push(rsi);  }
+        if (ci   !== null) { weights.push(OV_WEIGHTS.ci);        vals.push(ci);   }
+        if (cot  !== null) { weights.push(OV_WEIGHTS.cot);       vals.push(cot);  }
+        if (sent !== null) { weights.push(OV_WEIGHTS.sentiment); vals.push(sent); }
 
         var score = null;
         if (vals.length) {
@@ -3857,6 +3934,10 @@ function ovRenderPairsGrid(pairBiases) {
 
             var div = document.createElement('div');
             div.className = 'ov-pair-row';
+            div.title = 'Click for details';
+            div.onclick = (function(pd) {
+                return function() { if (_ovLastBias) openFocusPair(pd, _ovLastBias); };
+            })(p);
             div.innerHTML =
                 '<div style="display:flex;align-items:center;justify-content:space-between">' +
                     '<div class="ov-pair-name">' +
@@ -3988,6 +4069,175 @@ async function ovRefresh() {
     var bias = computeBias();
     renderOverview(bias);
 }
+
+/* =========================================================
+   WEIGHTS PANEL
+   ========================================================= */
+function openWeightsModal() {
+    /* Sync sliders to current weights */
+    document.getElementById('wSliderRsi').value  = Math.round(OV_WEIGHTS.rsi * 100);
+    document.getElementById('wSliderCi').value   = Math.round(OV_WEIGHTS.ci * 100);
+    document.getElementById('wSliderCot').value  = Math.round(OV_WEIGHTS.cot * 100);
+    document.getElementById('wSliderSent').value = Math.round(OV_WEIGHTS.sentiment * 100);
+    updateWeightDisplay();
+    document.getElementById('weightsModalOverlay').classList.add('open');
+}
+function closeWeightsModal() {
+    document.getElementById('weightsModalOverlay').classList.remove('open');
+}
+function updateWeightDisplay() {
+    var keys = ['rsi','ci','cot','sentiment'];
+    var ids  = ['wSliderRsi','wSliderCi','wSliderCot','wSliderSent'];
+    var pids = ['wPctRsi','wPctCi','wPctCot','wPctSent'];
+    var total = 0;
+    keys.forEach(function(k, i) {
+        var v = parseInt(document.getElementById(ids[i]).value);
+        total += v;
+        document.getElementById(pids[i]).textContent = v + '%';
+    });
+    var totalEl = document.getElementById('weightsTotalVal');
+    totalEl.textContent = total + '%';
+    totalEl.style.color = (total === 100) ? '#14BC60' : '#F26666';
+}
+function onWeightSlider(key, val) {
+    updateWeightDisplay();
+}
+function resetWeights() {
+    document.getElementById('wSliderRsi').value  = 25;
+    document.getElementById('wSliderCi').value   = 20;
+    document.getElementById('wSliderCot').value  = 25;
+    document.getElementById('wSliderSent').value = 30;
+    updateWeightDisplay();
+}
+function applyWeights() {
+    var total = ['wSliderRsi','wSliderCi','wSliderCot','wSliderSent']
+        .reduce(function(s, id){ return s + parseInt(document.getElementById(id).value); }, 0);
+    if (total === 0) { alert('Total must be > 0'); return; }
+    OV_WEIGHTS.rsi       = parseInt(document.getElementById('wSliderRsi').value)  / 100;
+    OV_WEIGHTS.ci        = parseInt(document.getElementById('wSliderCi').value)   / 100;
+    OV_WEIGHTS.cot       = parseInt(document.getElementById('wSliderCot').value)  / 100;
+    OV_WEIGHTS.sentiment = parseInt(document.getElementById('wSliderSent').value) / 100;
+    closeWeightsModal();
+    /* Update legend notes */
+    var note = document.getElementById('ovLegendNote');
+    if (note) note.textContent = 'Score = RSI ×'+(OV_WEIGHTS.rsi*100|0)+'% + CI ×'+(OV_WEIGHTS.ci*100|0)+'% + COT ×'+(OV_WEIGHTS.cot*100|0)+'% + Sentiment ×'+(OV_WEIGHTS.sentiment*100|0)+'%  |  Range −100 to +100  |  Sessions in UTC local time';
+    var mobNote = document.getElementById('mob-ovLegendNote');
+    if (mobNote) mobNote.textContent = 'RSI×'+(OV_WEIGHTS.rsi*100|0)+' + CI×'+(OV_WEIGHTS.ci*100|0)+' + COT×'+(OV_WEIGHTS.cot*100|0)+' + Sentiment×'+(OV_WEIGHTS.sentiment*100|0)+' | Range −100 to +100';
+    /* Re-run bias with new weights */
+    var bias = computeBias();
+    renderOverview(bias);
+}
+
+/* =========================================================
+   FOCUS PAIR PANEL
+   ========================================================= */
+function openFocusPair(pairData, fullBias) {
+    var pair = pairData.pair;
+    var b = pair.substring(0, 3), q = pair.substring(3, 6);
+    var bColor = CS_COLORS[b] || '#888';
+    var qColor = CS_COLORS[q] || '#888';
+    var lbl = pairData.score !== null ? ovGetLabel(pairData.score) : { label:'—', color:'#555', bg:'#111' };
+    var score = pairData.score;
+    var scoreDisp = score !== null ? (score >= 0 ? '+' : '') + score : '—';
+    var barW = score !== null ? (Math.abs(score)/100*50).toFixed(1) : '0';
+    var barPos = (score !== null && score >= 0) ? 'left:50%' : 'right:50%';
+
+    /* Title */
+    document.getElementById('fpPairTitle').innerHTML =
+        '<span style="color:'+bColor+'">'+b+'</span>' +
+        '<span style="color:#333">/</span>' +
+        '<span style="color:'+qColor+'">'+q+'</span>';
+
+    /* Build body */
+    var bd = fullBias[b] || {};
+    var qd = fullBias[q] || {};
+
+    var signals = [
+        { name:'RSI',      bVal: bd.rsi,       qVal: qd.rsi,       weight: OV_WEIGHTS.rsi },
+        { name:'CI',       bVal: bd.ci,        qVal: qd.ci,        weight: OV_WEIGHTS.ci  },
+        { name:'COT',      bVal: bd.cot,       qVal: qd.cot,       weight: OV_WEIGHTS.cot },
+        { name:'Sentiment',bVal: bd.sentiment, qVal: qd.sentiment, weight: OV_WEIGHTS.sentiment }
+    ];
+
+    function sigBar(val) {
+        if (val === null || val === undefined) return '<div class="fp-sig-bar-wrap"><div class="fp-sig-bar-mid"></div></div>';
+        var col = val >= 0 ? '#2F995F' : '#C03939';
+        var w = (Math.abs(val)/100*50).toFixed(1);
+        var pos = val >= 0 ? 'left:50%' : 'right:50%';
+        return '<div class="fp-sig-bar-wrap"><div class="fp-sig-bar-mid"></div><div class="fp-sig-bar-fill" style="width:'+w+'%;background:'+col+';position:absolute;'+pos+'"></div></div>';
+    }
+    function sigVal(val) {
+        if (val === null || val === undefined) return '<span style="color:#444">—</span>';
+        var col = val >= 0 ? '#2F995F' : '#C03939';
+        return '<span style="color:'+col+'">'+(val>=0?'+':'')+val+'</span>';
+    }
+
+    var sigsHtml = signals.map(function(s) {
+        return '<div class="fp-sig-row">' +
+            '<div class="fp-sig-name">'+s.name+'</div>' +
+            '<div style="flex:1;display:flex;flex-direction:column;gap:4px;">' +
+                '<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#555;margin-bottom:2px;">' +
+                    '<span style="width:24px;font-weight:bold;color:'+bColor+'">'+b+'</span>' +
+                    sigBar(s.bVal) +
+                    '<span class="fp-sig-val" style="width:38px;text-align:right">'+sigVal(s.bVal)+'</span>' +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#555;">' +
+                    '<span style="width:24px;font-weight:bold;color:'+qColor+'">'+q+'</span>' +
+                    sigBar(s.qVal) +
+                    '<span class="fp-sig-val" style="width:38px;text-align:right">'+sigVal(s.qVal)+'</span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="fp-sig-weight">'+Math.round(s.weight*100)+'%</div>' +
+        '</div>';
+    }).join('');
+
+    function curMiniCard(cur, data, color) {
+        if (!data || data.score === null) return '<div class="fp-cur-card"><div class="fp-cur-name" style="color:'+color+'">'+cur+'</div><div class="fp-cur-score-val" style="color:#555">—</div></div>';
+        var cl = ovGetLabel(data.score);
+        return '<div class="fp-cur-card" style="border-left:3px solid '+color+'">' +
+            '<div class="fp-cur-name" style="color:'+color+'">'+cur+'</div>' +
+            '<div class="fp-cur-score-label">Score</div>' +
+            '<div class="fp-cur-score-val" style="color:'+cl.color+'">'+(data.score>=0?'+':'')+data.score+'</div>' +
+            '<div class="fp-cur-badge" style="background:'+cl.bg+';color:'+cl.color+'">'+cl.label+'</div>' +
+        '</div>';
+    }
+
+    var html =
+        /* Big score block */
+        '<div class="fp-score-block">' +
+            '<div class="fp-score-label">Pair Directional Bias</div>' +
+            '<div class="fp-score-big" style="color:'+lbl.color+'">'+scoreDisp+'</div>' +
+            '<div><span class="fp-score-badge" style="background:'+lbl.bg+';color:'+lbl.color+'">'+lbl.label+'</span></div>' +
+            '<div class="fp-bias-bar-wrap">' +
+                '<div class="fp-bias-bar-mid"></div>' +
+                (score !== null ? '<div class="fp-bias-bar-fill" style="width:'+barW+'%;background:'+lbl.color+';'+barPos+'"></div>' : '') +
+            '</div>' +
+        '</div>' +
+        /* Currency cards */
+        '<div>' +
+            '<div class="fp-section-title">Currency Scores</div>' +
+            '<div class="fp-cur-row">'+curMiniCard(b, fullBias[b], bColor)+curMiniCard(q, fullBias[q], qColor)+'</div>' +
+        '</div>' +
+        /* Signal breakdown */
+        '<div class="fp-signals-card">' +
+            '<div class="fp-section-title" style="margin-bottom:14px">Signal Breakdown (Base vs Quote)</div>' +
+            sigsHtml +
+        '</div>';
+
+    document.getElementById('fpBody').innerHTML = html;
+
+    /* Formula footer */
+    document.getElementById('fpFormula').textContent =
+        'RSI×'+(OV_WEIGHTS.rsi*100|0)+'% · CI×'+(OV_WEIGHTS.ci*100|0)+'% · COT×'+(OV_WEIGHTS.cot*100|0)+'% · Sent×'+(OV_WEIGHTS.sentiment*100|0)+'% · Score = (Base − Quote) ÷ 2';
+
+    document.getElementById('fpOverlay').classList.add('open');
+    document.getElementById('fpPanel').classList.add('open');
+}
+
+function closeFocusPair() {
+    document.getElementById('fpOverlay').classList.remove('open');
+    document.getElementById('fpPanel').classList.remove('open');
+}
 </script>
 
 <!-- PAIRS MODAL — outside pc-only so it works on mobile too -->
@@ -4009,5 +4259,58 @@ async function ovRefresh() {
         </div>
     </div>
 </div>
+
+<!-- WEIGHTS MODAL -->
+<div class="weights-modal-overlay" id="weightsModalOverlay" onclick="if(event.target===this)closeWeightsModal()">
+    <div class="weights-modal">
+        <div class="weights-modal-header">
+            <h3 style="display:flex;align-items:center;gap:8px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><line x1="12" y1="20" x2="12" y2="4"/><line x1="5" y1="13" x2="19" y2="13"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="16" r="2"/></svg>
+                Adjust Signal Weights
+            </h3>
+            <button class="weights-modal-close" onclick="closeWeightsModal()">&#10005;</button>
+        </div>
+        <div class="weights-total-bar">
+            <span style="color:#888">Total weight</span>
+            <span class="weights-total-val" id="weightsTotalVal">100%</span>
+        </div>
+        <div class="weights-row">
+            <div class="weights-row-header"><span class="weights-row-label">RSI (Currency Strength)</span><span class="weights-row-pct" id="wPctRsi">25%</span></div>
+            <input type="range" class="weights-slider" id="wSliderRsi" min="0" max="100" value="25" oninput="onWeightSlider('rsi',this.value)">
+        </div>
+        <div class="weights-row">
+            <div class="weights-row-header"><span class="weights-row-label">CI (Currency Index)</span><span class="weights-row-pct" id="wPctCi">20%</span></div>
+            <input type="range" class="weights-slider" id="wSliderCi" min="0" max="100" value="20" oninput="onWeightSlider('ci',this.value)">
+        </div>
+        <div class="weights-row">
+            <div class="weights-row-header"><span class="weights-row-label">COT (Commitments of Traders)</span><span class="weights-row-pct" id="wPctCot">25%</span></div>
+            <input type="range" class="weights-slider" id="wSliderCot" min="0" max="100" value="25" oninput="onWeightSlider('cot',this.value)">
+        </div>
+        <div class="weights-row">
+            <div class="weights-row-header"><span class="weights-row-label">Sentiment (Contrarian)</span><span class="weights-row-pct" id="wPctSent">30%</span></div>
+            <input type="range" class="weights-slider" id="wSliderSent" min="0" max="100" value="30" oninput="onWeightSlider('sentiment',this.value)">
+        </div>
+        <div class="weights-actions">
+            <button class="weights-reset-btn" onclick="resetWeights()">Reset to Default</button>
+            <button class="weights-apply-btn" onclick="applyWeights()">Apply &amp; Recalculate</button>
+        </div>
+    </div>
+</div>
+
+<!-- FOCUS PAIR OVERLAY -->
+<div class="fp-overlay" id="fpOverlay" onclick="closeFocusPair()"></div>
+
+<!-- FOCUS PAIR PANEL -->
+<div class="fp-panel" id="fpPanel">
+    <div class="fp-header">
+        <div class="fp-title" id="fpPairTitle">EURUSD</div>
+        <button class="fp-close" onclick="closeFocusPair()">&#10005;</button>
+    </div>
+    <div class="fp-body" id="fpBody"></div>
+    <div class="fp-footer">
+        <div class="fp-formula" id="fpFormula"></div>
+    </div>
+</div>
+
 </body>
 </html>
