@@ -6,8 +6,8 @@
     <title>FX Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'JetBrains Mono',monospace; background:#0d0d0d; color:#fff; }
 
         .pc-only { display:block; }
@@ -17,13 +17,6 @@
 
         .ticker-section { margin-bottom:20px; overflow:hidden; border-radius:8px; border:1px solid #1e2230; background:#161616; padding:4px 8px; }
 
-        .refresh-icon-btn {
-            background: transparent; border: none; color: #aaa; cursor: pointer;
-            font-size: 16px; padding: 0 5px; transition: color 0.2s;
-            display: flex; align-items: center;
-        }
-        .refresh-icon-btn:hover { color: #fff; }
-        .refresh-icon-btn.spinning { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .sentiment-headers { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:12px; }
@@ -34,7 +27,6 @@
         .sentiment-table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
         .sentiment-table thead tr { position:sticky; top:0; z-index:2; }
         table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
-        th, td { text-align:center; }
         .sentiment-table th { background:#1a1a2a; font-weight:bold; color:#888; padding:10px 8px; border:none; border-right:1px solid #1a1a1a; font-size:10px; letter-spacing:0.5px; text-transform:uppercase; }
         .sentiment-table th:last-child { border-right:none; }
         .sentiment-table thead tr { background:#1a1a2a; }
@@ -55,7 +47,6 @@
         .cot-scroll thead th { background:#1a1a2a; color:#888; font-size:10px; letter-spacing:0.5px; text-transform:uppercase; border-color:#1a1a1a; }
         .cot-chart-wrap { background:#161616; padding:15px; border:1px solid #1e2230; border-radius:8px; display:flex; flex-direction:column; }
         .cot-chart-wrap h3 { text-align:center; margin-bottom:10px; font-size:13px; color:#fff; font-weight:bold; }
-
 
         .cot-pies { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px; }
         .cot-pie-item { display:flex; flex-direction:column; align-items:center; gap:4px; }
@@ -119,11 +110,6 @@
         .ir-accent-bar { position:absolute; left:0; top:0; bottom:0; width:3px; }
 
         .macro-page-section { margin-bottom:30px; }
-        .macro-page-section-title { background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:13px; color:#fff; border:1px solid #1e2230; border-left:3px solid #2a4a8a; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; height:46px; min-height:46px; box-sizing:border-box; flex-shrink:0; }
-        .macro-page-section-title .section-title-text { flex:1; text-align:center; }
-        .macro-page-section-title .section-right { display:flex; align-items:center; gap:8px; width:160px; justify-content:flex-end; }
-        .macro-page-section-title .section-left { width:160px; }
-
         .source-badge { font-size:9px; color:#555; padding:2px 6px; border:1px solid #222; border-radius:4px; }
 
         .pairs-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
@@ -148,10 +134,6 @@
         .pairs-edit-btn { padding:5px 12px; background:transparent; border:1px solid #1e2230; border-radius:5px; color:#aaa; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; }
         .pairs-edit-btn:hover { background:#1e2230; color:#fff; }
 
-        .fxp-tf-btn { padding:6px 16px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; font-family:inherit; transition:all .15s; }
-        .fxp-tf-btn:hover { background:#1e2230; color:#fff; }
-        .fxp-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
-
         .fxp-bars-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
         .fxp-bars-title { font-size:12px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
         .fxp-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
@@ -172,7 +154,6 @@
         .fxp-heatmap-table .fxp-row-label { font-size:12px; font-weight:bold; color:#fff; background:#111; }
         .fxp-heatmap-table .fxp-diag { background:#111; color:#555; }
         .fxp-loading { text-align:center; padding:40px; color:#555; font-size:13px; }
-
 
         /* =============================================
            CURRENCY INDEX PAGE
@@ -275,7 +256,6 @@
         .ov-pair-bias-fill { height:100%; border-radius:3px; position:absolute; }
         .ov-pair-score { font-size:11px; font-weight:bold; }
         .ov-pair-label { font-size:10px; font-weight:bold; text-transform:uppercase; letter-spacing:0.3px; }
-
 
         /* Legend note */
         .ov-legend-note { font-size:10px; color:#444; text-align:right; padding:0 4px; }
@@ -607,11 +587,11 @@
                 <div class="page-header" style="position:relative;">
                     <div class="ph-left">
                         <div style="display:flex;gap:6px;">
-                            <button class="fxp-tf-btn active" onclick="fxpSetTF('D',this)">Today</button>
-                            <button class="fxp-tf-btn" onclick="fxpSetTF('W',this)">1W</button>
-                            <button class="fxp-tf-btn" onclick="fxpSetTF('M',this)">1M</button>
-                            <button class="fxp-tf-btn" onclick="fxpSetTF('M3',this)">3M</button>
-                            <button class="fxp-tf-btn" onclick="fxpSetTF('Y',this)">1Y</button>
+                            <button class="cs-tf-btn active" onclick="fxpSetTF('D',this)">Today</button>
+                            <button class="cs-tf-btn" onclick="fxpSetTF('W',this)">1W</button>
+                            <button class="cs-tf-btn" onclick="fxpSetTF('M',this)">1M</button>
+                            <button class="cs-tf-btn" onclick="fxpSetTF('M3',this)">3M</button>
+                            <button class="cs-tf-btn" onclick="fxpSetTF('Y',this)">1Y</button>
                         </div>
                     </div>
                     <div style="position:absolute;left:50%;transform:translateX(-50%);font-size:13px;font-weight:bold;color:#fff;">FX Performance</div>
@@ -660,24 +640,24 @@
     <!-- MACRO PAGE -->
     <div class="tab-page" id="page-macropage">
         <div class="macro-page-section">
-            <div class="macro-page-section-title">
-                <div class="section-left"></div>
-                <span class="section-title-text">Central Bank Interest Rates</span>
-                <div class="section-right">
+            <div class="page-header">
+                <div class="ph-left">
                     <span class="source-badge">Static + verified</span>
                     <span style="color:#aaa;font-size:10px" id="irStatus">&mdash;</span>
-                    <button class="refresh-icon-btn" onclick="renderRates()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                    <button class="cs-tf-btn" onclick="renderRates()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                 </div>
+                <div class="ph-center">Central Bank Interest Rates</div>
+                <div class="ph-right"></div>
             </div>
             <div class="ir-layout">
                 <div class="ir-cards-grid" id="irCardsGrid"></div>
             </div>
             <!-- Economic Calendar embedded at bottom of macro -->
             <div class="macro-page-section" style="margin-top:20px;">
-                <div class="macro-page-section-title">
-                    <div class="section-left"></div>
-                    <span class="section-title-text">Economic Calendar</span>
-                    <div class="section-right"></div>
+                <div class="page-header">
+                    <div class="ph-left"></div>
+                    <div class="ph-center">Economic Calendar</div>
+                    <div class="ph-right"></div>
                 </div>
                 <div class="calendar-section">
                     <div class="tradingview-widget-container" style="flex:1;min-height:0;">
@@ -692,7 +672,6 @@
     </div>
 </div>
 </div>
-
 
 <!-- ================================================
      MOBILE LAYOUT
@@ -878,7 +857,7 @@
                 <span class="msh-title">Central Bank Rates</span>
                 <div class="msh-right">
                     <span class="msh-status" id="mob-irStatus">Apr 6, 2026</span>
-                    <button class="refresh-icon-btn" onclick="mobRenderRates()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                    <button class="cs-tf-btn" onclick="mobRenderRates()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                 </div>
             </div>
             <div class="mob-ir-cards-grid" id="mob-irCardsGrid"></div>
@@ -921,7 +900,6 @@
 </div>
 </div>
 
-
 <script>
 /* =========================================================
    SHARED CONFIG
@@ -940,7 +918,6 @@ var CS_VIEW = {M5:160,M15:160,H1:140,H4:96,D:60};
 var csTF = 'H1', csChart = null, csHidden = new Set(), _csRawTimes = [];
 var mobCsTF = 'H1', mobCsChart = null, mobCsHidden = new Set(), _mobCsRawTimes = [], _mobCsStrengthSeries = {};
 
-/* *** NEW: hover index for mobile CS chart (mirrors CI pattern) *** */
 var _mobCsHoverIdx = -1;
 
 function fmtTime(){ return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
@@ -3312,7 +3289,7 @@ async function fxpLoad() {
 
 function fxpSetTF(tf, btn) {
     fxpTF = tf;
-    document.querySelectorAll('.fxp-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (btn && btn.parentNode) btn.parentNode.querySelectorAll('.cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
     if (btn) btn.classList.add('active');
     fxpLoad();
 }
@@ -3567,7 +3544,6 @@ function mobRenderRates(){
    INIT
    ========================================================= */
 window.addEventListener('load', function() {
-    IS_MOBILE = window.innerWidth <= 1000;
     actualiserDonnees();
     chargerCOT();
     if (!IS_MOBILE) {
