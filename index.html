@@ -13,7 +13,7 @@
         .pc-only { display:block; }
         .mobile-only { display:none; }
 
-        .pc-layout { padding:30px; max-width:1600px; margin:0 auto; }
+        .pc-layout { padding:30px; width:100%; }
 
         .ticker-section { margin-bottom:20px; overflow:hidden; border-radius:8px; border:1px solid #1e2230; background:#161616; padding:4px 8px; }
 
@@ -280,7 +280,7 @@
         /* Legend note */
         .ov-legend-note { font-size:10px; color:#444; text-align:right; padding:0 4px; }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1000px) {
             .pc-only { display:none !important; }
             .mobile-only { display:block; }
             body { background:#111; overflow-x:hidden; }
@@ -885,7 +885,7 @@ var mobCsTF = 'H1', mobCsChart = null, mobCsHidden = new Set(), _mobCsRawTimes =
 var _mobCsHoverIdx = -1;
 
 function fmtTime(){ return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
-var IS_MOBILE = window.innerWidth <= 768;
+var IS_MOBILE = window.innerWidth <= 1000;
 
 /* =========================================================
    CURRENCY INDEX — MATAF METHOD
@@ -3508,7 +3508,7 @@ function mobRenderRates(){
    INIT
    ========================================================= */
 window.addEventListener('load', function() {
-    IS_MOBILE = window.innerWidth <= 768;
+    IS_MOBILE = window.innerWidth <= 1000;
     actualiserDonnees();
     chargerCOT();
     if (!IS_MOBILE) {
