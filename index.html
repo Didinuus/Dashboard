@@ -413,25 +413,6 @@
         </button>
     </div>
 
-    <div class="pairs-modal-overlay" id="pairsModalOverlay" onclick="if(event.target===this)closePairsModal()">
-        <div class="pairs-modal">
-            <div class="pairs-modal-header">
-                <h3>Select Pairs to Display</h3>
-                <button class="pairs-modal-close" onclick="closePairsModal()">&#10005;</button>
-            </div>
-            <div class="pairs-modal-actions">
-                <button class="pairs-action-btn" onclick="pairsSelectAll()">Select All</button>
-                <button class="pairs-action-btn" onclick="pairsSelectNone()">Deselect All</button>
-                <button class="pairs-action-btn" onclick="pairsSelectMajors()">Majors Only</button>
-            </div>
-            <div class="pairs-grid" id="pairsGrid"></div>
-            <div class="pairs-modal-footer">
-                <button class="pairs-action-btn" onclick="closePairsModal()">Cancel</button>
-                <button class="pairs-save-btn" onclick="savePairsSelection()">Save &amp; Apply</button>
-            </div>
-        </div>
-    </div>
-
     <!-- OVERVIEW -->
     <div class="tab-page active" id="page-overview">
         <div class="page-header" style="position:relative;">
@@ -4008,5 +3989,25 @@ async function ovRefresh() {
     renderOverview(bias);
 }
 </script>
+
+<!-- PAIRS MODAL — outside pc-only so it works on mobile too -->
+<div class="pairs-modal-overlay" id="pairsModalOverlay" onclick="if(event.target===this)closePairsModal()">
+    <div class="pairs-modal">
+        <div class="pairs-modal-header">
+            <h3>Select Pairs to Display</h3>
+            <button class="pairs-modal-close" onclick="closePairsModal()">&#10005;</button>
+        </div>
+        <div class="pairs-modal-actions">
+            <button class="pairs-action-btn" onclick="pairsSelectAll()">Select All</button>
+            <button class="pairs-action-btn" onclick="pairsSelectNone()">Deselect All</button>
+            <button class="pairs-action-btn" onclick="pairsSelectMajors()">Majors Only</button>
+        </div>
+        <div class="pairs-grid" id="pairsGrid"></div>
+        <div class="pairs-modal-footer">
+            <button class="pairs-action-btn" onclick="closePairsModal()">Cancel</button>
+            <button class="pairs-save-btn" onclick="savePairsSelection()">Save &amp; Apply</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
