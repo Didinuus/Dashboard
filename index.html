@@ -15,15 +15,8 @@
 
         .pc-layout { padding:10px 30px 30px 30px; width:100%; }
 
-        .ticker-section { margin-bottom:20px; overflow:hidden; border-radius:8px; border:1px solid #1e2230; background:#161616; padding:4px 8px; }
-
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .sentiment-headers { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:12px; }
-        .sentiment-headers .page-header { margin-bottom:0; }
-
-        .main-section { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px; height:95vh; border-radius:8px; }
-        .table-container { height:100%; border-radius:8px; background:#161616; border:1px solid #1e2230; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:#2a2a3a #161616; }
         .sentiment-table { width:100%; border-collapse:collapse; font-size:12px; table-layout:auto; }
         .sentiment-table thead tr { position:sticky; top:0; z-index:2; }
         table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
@@ -36,13 +29,12 @@
         .sentiment-table tbody tr:last-child td { border-bottom:none; }
         .chart-sentiment { background:#161616; border:1px solid #1e2230; border-radius:8px; height:100%; display:flex; flex-direction:column; overflow:hidden; }
         .chart-sentiment-wrapper { flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:#2a2a3a #161616; padding:12px 0 4px 4px; }
-        #sentimentChart { position:relative; width:100%!important; }
-        .pc-sent-title { display:none; }
         .pc-bar-row { display:flex; align-items:center; gap:8px; height:25px; }
         .pc-bar-label { font-size:12px; font-weight:bold; color:#fff; width:62px; flex-shrink:0; text-align:right; padding-right:2px; }
         .pc-bar-track { flex:1; height:19px; border-radius:4px; overflow:hidden; display:flex; margin-right:8px; }
-        .pc-bar-short { background:#C03939; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
-        .pc-bar-long  { background:#2F995F; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
+        .pc-bar-short { background:rgb(158,50,50); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
+        .pc-bar-long  { background:rgb(42,127,81); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
+        .pc-sent-title { font-size:13px; font-weight:bold; color:#fff; text-align:center; padding:12px; border-bottom:1px solid #1e2230; flex-shrink:0; }
 
         th, td { padding:6px 8px; text-align:center; border:1px solid #1e2230; }
         th { background:#161616; font-weight:bold; color:#fff; }
@@ -282,7 +274,6 @@
             .mobile-only { display:block; }
             body { background:#111; overflow-x:hidden; }
             .mobile-layout { display:flex; flex-direction:column; height:100dvh; height:100vh; position:relative; overflow:hidden; }
-            .mob-ticker { flex-shrink:0; background:#161616; border-bottom:1px solid #1e2230; padding:4px 8px; overflow:hidden; }
             .mob-content { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding:12px 12px 0 12px; padding-bottom:calc(64px + env(safe-area-inset-bottom) + 12px); }
             .mob-nav { position:fixed; bottom:0; left:0; right:0; z-index:100; background:#161616; border-top:1px solid #1e2230; display:flex; align-items:stretch; height:calc(64px + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom); }
             .mob-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:transparent; border:none; color:#666; font-size:9px; font-weight:600; cursor:pointer; transition:color 0.15s; padding:8px 0; letter-spacing:0.3px; -webkit-tap-highlight-color:transparent; margin-bottom:0; height:64px; align-self:flex-start; }
@@ -554,6 +545,7 @@
         <!-- SUB-PAGE: Chart -->
         <div class="cot-subpage" id="sent-sub-chart">
             <div class="chart-sentiment" style="height:calc(95vh - 120px);">
+                <div class="pc-sent-title">LONG / SHORT &mdash; ALL PAIRS</div>
                 <div class="chart-sentiment-wrapper" id="pcSentBarsContainer"><div style="text-align:center;color:#aaa;padding:20px;">Loading...</div></div>
             </div>
         </div>
@@ -2226,8 +2218,8 @@ function afficherTableau(map) {
             '<td>'+d.totalPositions.toLocaleString()+'</td>'+
             '<td style="padding:0;">'+
                 '<div style="display:flex;height:100%;min-height:34px;">'+
-                '<div style="flex:'+sp+';background:#C03939;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;">'+(sp>10?sp+'%':'')+'</div>'+
-                '<div style="flex:'+lp+';background:#2F995F;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;">'+(lp>10?lp+'%':'')+'</div>'+
+                '<div style="flex:'+sp+';background:rgb(158,50,50);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;">'+(sp>10?sp+'%':'')+'</div>'+
+                '<div style="flex:'+lp+';background:rgb(42,127,81);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;">'+(lp>10?lp+'%':'')+'</div>'+
                 '</div></td>';
         tbody.appendChild(row);
     });
@@ -2241,7 +2233,7 @@ function afficherGraphique(map) {
         container.innerHTML = '<div style="text-align:center;color:#aaa;padding:14px;">Loading...</div>';
         return;
     }
-    var html = '<div class="pc-sent-title">LONG / SHORT — ALL PAIRS</div>';
+    var html = '';
     PAIRS.forEach(function(pair) {
         var d = map[pair]; if (!d) return;
         var sp = d.shortPercentage, lp = d.longPercentage;
@@ -2359,13 +2351,13 @@ function renderCOTTable(tbodyId, data, key) {
     tbody.innerHTML = '';
     data.slice().sort(function(a, b){ return a.name.localeCompare(b.name); }).forEach(function(d) {
         var cat = d[key];
-        var nc = cat.net >= 0 ? '#2F995F' : '#C03939';
-        var dc = cat.dlt >= 0 ? '#2F995F' : '#C03939';
+        var nc = cat.net >= 0 ? 'rgb(42,127,81)' : 'rgb(158,50,50)';
+        var dc = cat.dlt >= 0 ? 'rgb(42,127,81)' : 'rgb(158,50,50)';
         var row = document.createElement('tr');
         row.innerHTML =
             '<td style="font-weight:bold">' + d.name + '</td>' +
-            '<td style="color:#2F995F">' + cat.lng.toLocaleString() + '</td>' +
-            '<td style="color:#C03939">' + cat.sht.toLocaleString() + '</td>' +
+            '<td style="color:rgb(42,127,81)">' + cat.lng.toLocaleString() + '</td>' +
+            '<td style="color:rgb(158,50,50)">' + cat.sht.toLocaleString() + '</td>' +
             '<td style="color:' + nc + ';font-weight:bold">' + (cat.net >= 0 ? '+' : '') + cat.net.toLocaleString() + '</td>' +
             '<td style="color:' + dc + '">' + (cat.dlt >= 0 ? '+' : '') + cat.dlt.toLocaleString() + '</td>' +
             '<td>' + (cat.net >= 0 ? '&#128994; Bullish' : '&#128308; Bearish') + '</td>';
@@ -2395,7 +2387,7 @@ function renderCOTPies(containerId, data, key) {
         cotPieCharts[cid] = new Chart(document.getElementById(cid), {
             type: 'doughnut',
             data: { labels: ['Long','Short'], datasets: [{ data: [cat.lng, cat.sht],
-                backgroundColor: ['rgb(47,153,95)','rgb(192,57,57)'],
+                backgroundColor: ['rgb(42,127,81)','rgb(158,50,50)'],
                 borderColor: ['#161616','#161616'], borderWidth: 2 }] },
             options: { responsive: false, cutout: '45%', plugins: { legend: { display: false },
                 tooltip: { callbacks: { label: function(c){
