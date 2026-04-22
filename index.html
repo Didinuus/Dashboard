@@ -34,9 +34,15 @@
         .sentiment-table th:last-child, .sentiment-table td:last-child { border-right:none; }
         .sentiment-table tbody tr:hover td { background:#1a1a24; }
         .sentiment-table tbody tr:last-child td { border-bottom:none; }
-        .chart-sentiment { background:#161616; padding:15px; border:1px solid #1e2230; border-radius:8px; height:100%; display:flex; flex-direction:column; overflow:hidden; }
-        .chart-sentiment-wrapper { flex:1; position:relative; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:#2a2a3a #111; }
+        .chart-sentiment { background:#161616; padding:10px 8px 10px 0; border:1px solid #1e2230; border-radius:8px; height:100%; display:flex; flex-direction:column; overflow:hidden; }
+        .chart-sentiment-wrapper { flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:#2a2a3a #111; padding:6px 8px 6px 6px; }
         #sentimentChart { position:relative; width:100%!important; }
+        .pc-sent-title { display:none; }
+        .pc-bar-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+        .pc-bar-label { font-size:11px; font-weight:bold; color:#fff; width:62px; flex-shrink:0; text-align:right; }
+        .pc-bar-track { flex:1; height:24px; border-radius:4px; overflow:hidden; display:flex; }
+        .pc-bar-short { background:#C03939; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
+        .pc-bar-long  { background:#2F995F; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
 
         th, td { padding:6px 8px; text-align:center; border:1px solid #1e2230; }
         th { background:#161616; font-weight:bold; color:#fff; }
@@ -47,6 +53,17 @@
         .cot-scroll thead th { background:#1a1a2a; color:#888; font-size:10px; letter-spacing:0.5px; text-transform:uppercase; border-color:#1a1a1a; }
         .cot-chart-wrap { background:#161616; padding:15px; border:1px solid #1e2230; border-radius:8px; display:flex; flex-direction:column; }
         .cot-chart-wrap h3 { text-align:center; margin-bottom:10px; font-size:13px; color:#fff; font-weight:bold; }
+
+        /* COT Sub-tabs */
+        .cot-subtabs { display:flex; background:#111; border:1px solid #1e2230; border-radius:8px; overflow:hidden; height:44px; margin-bottom:12px; }
+        .cot-subtab-btn { flex:1; padding:0 16px; background:transparent; color:#555; border:none; cursor:pointer; font-weight:bold; font-size:13px; font-family:inherit; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px; position:relative; }
+        .cot-subtab-btn + .cot-subtab-btn::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); height:55%; width:1px; background:#1e2230; }
+        .cot-subtab-btn:hover { color:#aaa; background:#161626; }
+        .cot-subtab-btn.active { color:#fff; background:#1e2230; }
+        .cot-subtab-btn .cot-subtab-sub { font-size:10px; color:#666; font-weight:normal; }
+        .cot-subtab-btn.active .cot-subtab-sub { color:#888; }
+        .cot-subpage { display:none; }
+        .cot-subpage.active { display:block; }
 
         .cot-pies { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px; }
         .cot-pie-item { display:flex; flex-direction:column; align-items:center; gap:4px; }
@@ -87,7 +104,7 @@
         .cs-legend-item.hidden { opacity:0.3; }
         .cs-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
         .cs-layout { display:flex; flex-direction:column; gap:15px; }
-        .cs-chart-inner { position:relative; height:65vh; margin-top:10px; background:#101010; border-radius:6px; overflow:hidden; }
+        .cs-chart-inner { position:relative; height:65vh; margin-top:10px; background:#0d0d0d; border-radius:6px; overflow:hidden; }
 
         .calendar-section { background:#161616; padding:15px 15px 6px 15px; border:1px solid #1e2230; border-radius:8px; height:95vh; display:flex; flex-direction:column; }
 
@@ -182,12 +199,12 @@
         .ci-modal-title { font-size:16px; font-weight:bold; }
         .ci-modal-close { background:transparent; border:none; color:#aaa; font-size:22px; cursor:pointer; }
         .ci-modal-close:hover { color:#fff; }
-        .ci-modal-chart { flex:1; position:relative; background:#101010; border-radius:6px; overflow:hidden; min-height:0; }
+        .ci-modal-chart { flex:1; position:relative; background:#0d0d0d; border-radius:6px; overflow:hidden; min-height:0; }
         .ci-modal-chart canvas { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
 
         /* Combined big chart */
         .ci-combined-wrap { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:16px; display:flex; flex-direction:column; gap:10px; }
-        .ci-combined-chart { position:relative; height:65vh; background:#101010; border-radius:6px; overflow:hidden; }
+        .ci-combined-chart { position:relative; height:65vh; background:#0d0d0d; border-radius:6px; overflow:hidden; }
         #ciCombinedChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
         .ci-combined-legend { display:flex; flex-wrap:wrap; gap:8px; }
         .ci-combined-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; cursor:pointer; padding:3px 7px; border-radius:4px; border:1px solid transparent; }
@@ -287,8 +304,8 @@
             .mob-pair-name { font-weight:bold; font-size:11px; text-align:left !important; padding-left:10px !important; }
             .mob-chart-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:14px; margin-bottom:12px; }
             .mob-chart-title { font-size:12px; font-weight:bold; color:#aaa; margin-bottom:12px; text-align:center; letter-spacing:0.5px; }
-            .mob-bar-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-            .mob-bar-label { font-size:10px; font-weight:bold; color:#fff; width:58px; flex-shrink:0; text-align:right; }
+            .mob-bar-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+            .mob-bar-label { font-size:10px; font-weight:bold; color:#fff; width:50px; flex-shrink:0; text-align:right; }
             .mob-bar-track { flex:1; height:22px; border-radius:4px; overflow:hidden; display:flex; }
             .mob-bar-short { background:#C03939; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
             .mob-bar-long  { background:#2F995F; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
@@ -346,7 +363,7 @@
             .ci-chart-wrap { height:80px; }
             .ci-combined-chart { height:260px; overflow:hidden; margin-right:0; }
             .mob-ci-tf-row { display:flex; gap:5px; margin-bottom:10px; }
-            .mob-ci-tf-btn { flex:1; padding:7px 4px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; font-size:11px; font-weight:bold; text-align:center; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+            .mob-ci-tf-btn { flex:1; padding:7px 4px; background:transparent; color:#aaa; border:1px solid #1e2230; border-radius:5px; font-size:11px; font-weight:bold; font-family:inherit; text-align:center; cursor:pointer; -webkit-tap-highlight-color:transparent; }
             .mob-ci-tf-btn.active { background:#2a3060; color:#fff; border-color:#3a4080; }
         }
         /* =============================================
@@ -536,7 +553,7 @@
                 </table>
             </div>
             <div class="chart-sentiment">
-                <div class="chart-sentiment-wrapper"><canvas id="sentimentChart"></canvas></div>
+                <div class="chart-sentiment-wrapper" id="pcSentBarsContainer"><div style="text-align:center;color:#aaa;padding:20px;">Loading...</div></div>
             </div>
         </div>
         <div style="margin-top:20px;">
@@ -545,18 +562,54 @@
                 <div class="ph-center">COT Report &mdash; CFTC Commitments of Traders</div>
                 <div class="ph-right"><span class="ph-status" id="cotDate">Loading...</span></div>
             </div>
-            <!-- COT tables row -->
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
-                <div class="cot-container"><div class="cot-header">Leveraged Funds (Hedge Funds)</div><div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyLev"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div></div>
-                <div class="cot-container"><div class="cot-header">Commercials (Dealer/Intermediary)</div><div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyCom"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div></div>
-                <div class="cot-container"><div class="cot-header">Large Speculators (Asset Manager)</div><div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyLS"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div></div>
+
+            <!-- COT Sub-tabs -->
+            <div class="cot-subtabs">
+                <button class="cot-subtab-btn active" onclick="showCotSub('lev',this)">
+                    Leveraged Funds <span class="cot-subtab-sub">(Hedge Funds)</span>
+                </button>
+                <button class="cot-subtab-btn" onclick="showCotSub('com',this)">
+                    Commercials <span class="cot-subtab-sub">(Dealer/Intermediary)</span>
+                </button>
+                <button class="cot-subtab-btn" onclick="showCotSub('ls',this)">
+                    Large Speculators <span class="cot-subtab-sub">(Asset Manager)</span>
+                </button>
             </div>
-            <!-- COT charts row -->
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
-                <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Leveraged Funds</h3><div class="cot-pies" id="cotPiesLev"></div></div>
-                <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Commercials</h3><div class="cot-pies" id="cotPiesCom"></div></div>
-                <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Large Speculators</h3><div class="cot-pies" id="cotPiesLS"></div></div>
+
+            <!-- SUB-PAGE: Leveraged Funds -->
+            <div class="cot-subpage active" id="cot-sub-lev">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div class="cot-container">
+                        <div class="cot-header">Leveraged Funds — Positions</div>
+                        <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyLev"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
+                    </div>
+                    <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Leveraged Funds</h3><div class="cot-pies" id="cotPiesLev"></div></div>
+                </div>
             </div>
+
+            <!-- SUB-PAGE: Commercials -->
+            <div class="cot-subpage" id="cot-sub-com">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div class="cot-container">
+                        <div class="cot-header">Commercials — Positions</div>
+                        <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyCom"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
+                    </div>
+                    <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Commercials</h3><div class="cot-pies" id="cotPiesCom"></div></div>
+                </div>
+            </div>
+
+            <!-- SUB-PAGE: Large Speculators -->
+            <div class="cot-subpage" id="cot-sub-ls">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div class="cot-container">
+                        <div class="cot-header">Large Speculators — Positions</div>
+                        <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyLS"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
+                    </div>
+                    <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Large Speculators</h3><div class="cot-pies" id="cotPiesLS"></div></div>
+                </div>
+            </div>
+
+            <!-- Net Positions (always visible) -->
             <div style="margin-top:15px">
                 <div class="page-header" style="justify-content:center;">Net Positions</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="histGrid"></div>
@@ -907,7 +960,7 @@
 var CONFIG = { email:'hamdikhireddine@icloud.com', password:'Didine@06', apiUrl:'https://www.myfxbook.com/api/' };
 var ALL_PAIRS = ['AUDUSD','EURUSD','GBPUSD','NZDUSD','USDCAD','USDCHF','USDJPY','AUDCAD','AUDCHF','AUDJPY','AUDNZD','CADCHF','CADJPY','CHFJPY','EURAUD','EURCAD','EURCHF','EURGBP','EURJPY','EURNZD','GBPAUD','GBPCAD','GBPCHF','GBPJPY','GBPNZD','NZDCAD','NZDCHF','NZDJPY'];
 var MAJOR_PAIRS = ['EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD'];
-var sentimentChart = null, _sentimentMap = {}, _sentimentMapCache = {};
+var _sentimentMap = {}, _sentimentMapCache = {};
 var OANDA_KEY = 'a6109748dde9f520b7491de5f93c4fde-50b266ca427e911f6bec97df47f92a4b';
 var OANDA_URL = 'https://api-fxpractice.oanda.com/v3';
 var CS_CURRENCIES = ['EUR','USD','GBP','AUD','CHF','JPY','CAD','NZD'];
@@ -2179,13 +2232,25 @@ function afficherTableau(map) {
 }
 
 function afficherGraphique(map) {
-    var PAIRS=getActivePairs(),ctx=document.getElementById('sentimentChart');
-    if(!ctx)return; if(sentimentChart)sentimentChart.destroy();
-    var lb=[],sD=[],lD=[];
-    PAIRS.forEach(function(p){var d=map[p];if(d){lb.push(p);sD.push(d.shortPercentage);lD.push(d.longPercentage);}});
-    /* Dynamic height: 28px per pair (18px bar + ~10px gap) */
-    ctx.style.height = Math.max(200, lb.length * 28) + 'px';
-    sentimentChart=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{label:'Short',data:sD,backgroundColor:'#C03939',borderWidth:0},{label:'Long',data:lD,backgroundColor:'#2F995F',borderWidth:0}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.x+'%';}}}},scales:{x:{stacked:true,max:100,display:false},y:{stacked:true,ticks:{font:{size:10},color:'#fff'},grid:{color:'#1e2230'}}},datasets:{bar:{barThickness:18}}}});
+    var container = document.getElementById('pcSentBarsContainer');
+    if (!container) return;
+    var PAIRS = getActivePairs();
+    if (!Object.keys(map).length) {
+        container.innerHTML = '<div style="text-align:center;color:#aaa;padding:14px;">Loading...</div>';
+        return;
+    }
+    var html = '<div class="pc-sent-title">LONG / SHORT — ALL PAIRS</div>';
+    PAIRS.forEach(function(pair) {
+        var d = map[pair]; if (!d) return;
+        var sp = d.shortPercentage, lp = d.longPercentage;
+        html += '<div class="pc-bar-row">' +
+            '<div class="pc-bar-label">' + pair + '</div>' +
+            '<div class="pc-bar-track">' +
+                '<div class="pc-bar-short" style="width:' + sp + '%">' + (sp > 6 ? sp + '%' : '') + '</div>' +
+                '<div class="pc-bar-long"  style="width:' + lp + '%">' + (lp > 6 ? lp + '%' : '') + '</div>' +
+            '</div></div>';
+    });
+    container.innerHTML = html;
 }
 
 function mobAfficherTableau(map) {
@@ -3590,6 +3655,14 @@ function showTab(name){
     if(name==='macropage') renderRates();
     if(name==='sentiment') actualiserDonnees();
     if(name==='overview') ovRefresh();
+}
+
+function showCotSub(name, btn) {
+    document.querySelectorAll('.cot-subpage').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('.cot-subtab-btn').forEach(function(b){ b.classList.remove('active'); });
+    var el = document.getElementById('cot-sub-'+name);
+    if(el) el.classList.add('active');
+    if(btn) btn.classList.add('active');
 }
 
 /* =========================================================
