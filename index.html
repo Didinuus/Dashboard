@@ -458,9 +458,17 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             Traders Sentiment
         </button>
+        <button class="tab-btn" onclick="showTab('cotreport')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            COT Report
+        </button>
         <button class="tab-btn" onclick="showTab('strength')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             Currency Strength
+        </button>
+        <button class="tab-btn" onclick="showTab('currencyindex')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+            Currency Index
         </button>
         <button class="tab-btn" onclick="showTab('macropage')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -553,8 +561,11 @@
             </div>
 
         </div>
+    </div>
 
-        <div style="margin-top:20px;">
+    <!-- COT REPORT -->
+    <div class="tab-page" id="page-cotreport">
+        <div style="margin-top:0;">
             <div class="page-header">
                 <div class="ph-left"></div>
                 <div class="ph-center">COT Report &mdash; CFTC Commitments of Traders</div>
@@ -657,8 +668,14 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- CURRENCY INDEX -->
+    <div class="tab-page" id="page-currencyindex">
+        <div id="sub-ci">
             <!-- Currency Index section -->
-            <div style="margin-top:20px;">
+            <div>
                 <div class="ci-combined-wrap" style="margin-bottom:15px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:relative;">
                         <div style="display:flex;align-items:center;gap:6px;position:relative;z-index:1;">
@@ -4014,9 +4031,11 @@ function showTab(name){
     document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
     document.getElementById('page-'+name).classList.add('active');
     document.querySelectorAll('.tab-btn').forEach(function(b){ if(b.getAttribute('onclick')==="showTab('"+name+"')")b.classList.add('active'); });
-    if(name==='strength'){ csLoad(); setTimeout(fxpLoad,1000); setTimeout(ciLoad,1500); }
+    if(name==='strength'){ csLoad(); setTimeout(fxpLoad,1000); }
+    if(name==='currencyindex'){ ciLoad(); }
     if(name==='macropage') renderRates();
     if(name==='sentiment') actualiserDonnees();
+    if(name==='cotreport') chargerCOT();
     if(name==='overview') ovRefresh();
 }
 
