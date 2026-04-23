@@ -34,7 +34,7 @@
         .pc-bar-track { flex:1; height:19px; border-radius:4px; overflow:hidden; display:flex; margin-right:8px; }
         .pc-bar-short { background:rgb(158,50,50); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
         .pc-bar-long  { background:rgb(42,127,81); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
-        .pc-sent-title { font-size:13px; font-weight:bold; color:#fff; text-align:center; padding:12px; border-bottom:1px solid #1e2230; flex-shrink:0; }
+        .pc-sent-title { background:#1a1a2a; font-weight:bold; color:#888; text-align:center; padding:10px 8px; border-bottom:1px solid #1a1a1a; flex-shrink:0; font-size:10px; letter-spacing:0.5px; text-transform:uppercase; }
 
         th, td { padding:6px 8px; text-align:center; border:1px solid #1e2230; }
         th { background:#161616; font-weight:bold; color:#fff; }
@@ -42,9 +42,9 @@
         .cot-container { display:flex; flex-direction:column; border-radius:8px; overflow:hidden; background:#161616; border:1px solid #1e2230; }
         .cot-header { background:#161616; padding:12px; text-align:center; font-weight:bold; font-size:13px; color:#fff; border-bottom:1px solid #1e2230; }
         .cot-scroll { overflow-y:auto; overflow-x:hidden; scrollbar-width:none; }
-        .cot-scroll thead th { background:#1a1a2a; color:#888; font-size:10px; letter-spacing:0.5px; text-transform:uppercase; border-color:#1a1a1a; }
-        .cot-chart-wrap { background:#161616; padding:15px; border:1px solid #1e2230; border-radius:8px; display:flex; flex-direction:column; }
-        .cot-chart-wrap h3 { text-align:center; margin-bottom:10px; font-size:13px; color:#fff; font-weight:bold; }
+        .cot-scroll thead th { background:#1a1a2a; color:#888; font-size:10px; letter-spacing:0.5px; text-transform:uppercase; border-color:#1a1a1a; padding:10px 8px; }
+        .cot-chart-wrap { background:#161616; padding:0; border:1px solid #1e2230; border-radius:8px; display:flex; flex-direction:column; overflow:hidden; }
+        .cot-chart-wrap h3 { background:#1a1a2a; text-align:center; padding:10px 8px; font-size:10px; color:#888; font-weight:bold; letter-spacing:0.5px; text-transform:uppercase; border-bottom:1px solid #1a1a1a; flex-shrink:0; }
 
         /* COT Sub-tabs */
         .cot-subtabs { display:flex; background:#111; border:1px solid #1e2230; border-radius:8px; overflow:hidden; height:44px; margin-bottom:12px; }
@@ -71,7 +71,7 @@
         .tab-page { display:none; }
         .tab-page.active { display:block; }
         .loading { text-align:center; padding:20px; color:#aaa; }
-        .short-cell, .long-cell { font-weight:bold; }
+        .short-cell, 
 
         .page-header {
             background:#161616; padding:0 18px; text-align:center; font-weight:bold; font-size:13px; color:#fff;
@@ -95,7 +95,6 @@
         .cs-legend-item:hover { border-color:#1e2230; }
         .cs-legend-item.hidden { opacity:0.3; }
         .cs-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-        .cs-layout { display:flex; flex-direction:column; gap:15px; }
         .cs-chart-inner { position:relative; height:65vh; margin-top:10px; background:#0d0d0d; border-radius:6px; overflow:hidden; }
 
         .calendar-section { background:#161616; padding:15px 15px 6px 15px; border:1px solid #1e2230; border-radius:8px; height:95vh; display:flex; flex-direction:column; }
@@ -144,10 +143,9 @@
         .pairs-edit-btn:hover { background:#1e2230; color:#fff; }
 
         .fxp-bars-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
-        .fxp-bars-title { font-size:12px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
         .fxp-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
         .fxp-bar-cur { font-size:13px; font-weight:bold; width:36px; flex-shrink:0; }
-        .fxp-bar-track { flex:1; height:28px; background:#111; border-radius:4px; position:relative; overflow:hidden; }
+        .fxp-bar-track { flex:1; height:28px; background:#0d0d0d; border-radius:4px; position:relative; overflow:hidden; }
         .fxp-bar-fill-pos { height:100%; position:absolute; top:0; left:50%; border-radius:0 4px 4px 0; }
         .fxp-bar-fill-neg { height:100%; position:absolute; top:0; right:50%; border-radius:4px 0 0 4px; }
         .fxp-bar-zero { position:absolute; top:0; bottom:0; width:2px; left:50%; background:#333; transform:translateX(-50%); z-index:1; }
@@ -155,13 +153,12 @@
         .fxp-bar-flag { font-size:14px; width:20px; flex-shrink:0; }
 
         .fxp-heatmap-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:18px; }
-        .fxp-heatmap-title { font-size:12px; font-weight:bold; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
         .fxp-heatmap-table { border-collapse:collapse; width:100%; min-width:560px; }
-        .fxp-heatmap-table th { font-size:11px; font-weight:bold; padding:8px 6px; text-align:center; color:#888; border:1px solid #1e2230; background:#111; }
+        .fxp-heatmap-table th { font-size:11px; font-weight:bold; padding:8px 6px; text-align:center; color:#888; border:1px solid #1e2230; background:#0d0d0d; }
         .fxp-heatmap-table td { font-size:11px; font-weight:bold; padding:8px 6px; text-align:center; border:1px solid #1e2230; cursor:default; transition:filter .15s; }
         .fxp-heatmap-table td:hover { filter:brightness(1.3); }
-        .fxp-heatmap-table .fxp-row-label { font-size:12px; font-weight:bold; color:#fff; background:#111; }
-        .fxp-heatmap-table .fxp-diag { background:#111; color:#555; }
+        .fxp-heatmap-table .fxp-row-label { font-size:12px; font-weight:bold; color:#fff; background:#0d0d0d; }
+        .fxp-heatmap-table .fxp-diag { background:#0d0d0d; color:#555; }
         .fxp-loading { text-align:center; padding:40px; color:#555; font-size:13px; }
 
         /* =============================================
@@ -203,8 +200,6 @@
         .ci-combined-legend-item:hover { border-color:#1e2230; }
         .ci-combined-legend-item.ci-hidden { opacity:0.3; }
         .ci-combined-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-
-        /* Rank table */
 
         /* =============================================
            MOBILE STYLES
@@ -252,7 +247,7 @@
 
         /* Pair bias section */
         .ov-pairs-section { background:#161616; border:1px solid #1e2230; border-radius:10px; padding:16px; }
-        .ov-pairs-title { font-size:12px; font-weight:bold; color:#aaa; letter-spacing:1px; text-transform:uppercase; margin-bottom:14px; }
+        .ov-pairs-title { font-size:12px; font-weight:bold; color:#aaa; letter-spacing:0.3px; margin-bottom:14px; }
         .ov-pairs-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
         .ov-pair-row {
             background:#111111; border:1px solid #1e2230; border-radius:7px;
@@ -293,15 +288,15 @@
             .mob-sentiment-table td { padding:9px 6px; text-align:center; border-bottom:1px solid #111; font-size:12px; background:#161616; color:#fff; }
             .mob-sentiment-table tr:last-child td { border-bottom:none; }
             .mob-pair-name { font-weight:bold; font-size:11px; text-align:left !important; padding-left:10px !important; }
-            .mob-chart-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:14px; margin-bottom:12px; }
-            .mob-chart-title { font-size:12px; font-weight:bold; color:#aaa; margin-bottom:12px; text-align:center; letter-spacing:0.5px; }
+            .mob-chart-card { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:0; margin-bottom:12px; overflow:hidden; }
+            .mob-chart-title { font-size:10px; font-weight:bold; color:#888; margin-bottom:0; padding:8px 6px; text-align:center; letter-spacing:0.5px; text-transform:uppercase; border-bottom:1px solid #1e2230; background:#1a1a2a; }
             .mob-bar-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
             .mob-bar-label { font-size:12px; font-weight:bold; color:#fff; width:58px; flex-shrink:0; text-align:right; }
             .mob-bar-track { flex:1; height:22px; border-radius:4px; overflow:hidden; display:flex; }
             .mob-bar-short { background:#C03939; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
             .mob-bar-long  { background:#2F995F; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
             .mob-cot-section { margin-bottom:12px; }
-            .mob-cot-header { background:#161616; border:1px solid #1e2230; border-radius:8px 8px 0 0; padding:10px 14px; font-size:13px; font-weight:bold; text-align:center; }
+            .mob-cot-header { background:#1a1a2a; border:1px solid #1e2230; border-radius:8px 8px 0 0; padding:10px 8px; font-size:10px; font-weight:bold; text-align:center; color:#888; letter-spacing:0.5px; text-transform:uppercase; border-bottom:1px solid #1a1a1a; }
             .mob-cot-table { background:#161616; border:1px solid #1e2230; border-top:none; border-radius:0 0 8px 8px; overflow:hidden; }
             .mob-cot-table table { width:100%; border-collapse:collapse; font-size:11px; }
             .mob-cot-table th { background:#1a1a2a; color:#888; padding:7px 5px; font-size:10px; text-align:center; border-bottom:1px solid #1e2230; }
@@ -310,8 +305,7 @@
             .mob-pies { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:10px; background:#161616; border:1px solid #1e2230; border-radius:8px; margin-top:8px; }
             .mob-pie-item { display:flex; flex-direction:column; align-items:center; gap:4px; }
             .mob-pie-item canvas { width:65px!important; height:65px!important; }
-            .mob-pie-label { font-size:9px; color:#aaa; text-align:center; }
-            .mob-cs-chart-wrap { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:12px; margin-bottom:10px; }
+                .mob-cs-chart-wrap { background:#161616; border:1px solid #1e2230; border-radius:8px; padding:12px; margin-bottom:10px; }
             .mob-cs-chart-inner { position:relative; height:260px; background:#101010; border-radius:6px; overflow:hidden; touch-action:none; }
             #mob-csChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
             .mob-cs-tf-row { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
@@ -381,7 +375,6 @@
         .weights-reset-btn:hover { background:#1e2230; color:#fff; }
         .weights-apply-btn { padding:8px 20px; background:#2a3060; color:#fff; border:1px solid #3a4080; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer; font-family:inherit; }
         .weights-apply-btn:hover { background:#3a4080; }
-        .weights-warn { color:#F26666; font-size:11px; }
 
         /* =============================================
            FOCUS PAIR PANEL
@@ -432,9 +425,19 @@
 
 <!-- CI MODAL (shared PC) -->
 <div class="ci-modal-overlay" id="ciModalOverlay" onclick="if(event.target===this)closeCiModal()">
-    <div class="ci-modal">
-        <div class="ci-modal-header">
-            <div class="ci-modal-title" id="ciModalTitle">Currency Index</div>
+    <div class="ci-modal" style="width:94vw;max-width:1400px;height:82vh;">
+        <div class="ci-modal-header" style="position:relative;">
+            <div style="display:flex;align-items:center;gap:6px;position:relative;z-index:1;">
+                <button class="cs-tf-btn" onclick="ciModalSetTF('M5',this)">5M</button>
+                <button class="cs-tf-btn" onclick="ciModalSetTF('M15',this)">15M</button>
+                <button class="cs-tf-btn active" id="ciModalTfActive" onclick="ciModalSetTF('H1',this)">1H</button>
+                <button class="cs-tf-btn" onclick="ciModalSetTF('H4',this)">4H</button>
+                <button class="cs-tf-btn" onclick="ciModalSetTF('D',this)">Daily</button>
+                <button class="cs-tf-btn" onclick="ciModalSetTF('W',this)">Weekly</button>
+                <button class="cs-tf-btn" onclick="ciModalReload()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                <span id="ciModalStatus" style="font-size:10px;color:#aaa;margin-left:4px;"></span>
+            </div>
+            <div class="ci-modal-title" id="ciModalTitle" style="position:absolute;left:50%;transform:translateX(-50%);">Currency Index</div>
             <button class="ci-modal-close" onclick="closeCiModal()">&#10005;</button>
         </div>
         <div class="ci-modal-chart"><canvas id="ciModalChart"></canvas></div>
@@ -526,28 +529,29 @@
             </div>
         </div>
 
-        <!-- Sous-onglets -->
-        <div class="cot-subtabs" style="margin-bottom:12px;">
-            <button class="cot-subtab-btn active" onclick="showSentSub('table',this)">Table</button>
-            <button class="cot-subtab-btn" onclick="showSentSub('chart',this)">Chart</button>
-        </div>
+        <!-- 2-column layout: 60% table | 40% chart -->
+        <div style="display:grid;grid-template-columns:3fr 2fr;gap:12px;height:calc(95vh - 120px);max-height:calc(95vh - 120px);">
 
-        <!-- SUB-PAGE: Table -->
-        <div class="cot-subpage active" id="sent-sub-table">
-            <div style="height:calc(95vh - 120px); border-radius:8px; background:#161616; border:1px solid #1e2230; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:#2a2a3a #161616;">
-                <table class="sentiment-table">
-                    <thead><tr><th style="width:70px;">Pair</th><th style="width:70px;">% Short</th><th style="width:70px;">% Long</th><th style="width:90px;">Short Volume</th><th style="width:90px;">Long Volume</th><th style="width:90px;">Short Positions</th><th style="width:90px;">Long Positions</th><th style="width:90px;">Total Positions</th><th style="width:220px;">Chart</th></tr></thead>
-                    <tbody id="sentimentBody"><tr><td colspan="9" class="loading">Loading...</td></tr></tbody>
-                </table>
+            <!-- TABLE (60%) -->
+            <div style="border-radius:8px; background:#161616; border:1px solid #1e2230; overflow:hidden; display:flex; flex-direction:column; min-height:0;">
+                <div style="flex-shrink:0;">
+                    <table class="sentiment-table" style="width:100%;">
+                        <thead><tr><th style="width:70px;">Pair</th><th style="width:70px;">% Short</th><th style="width:70px;">% Long</th><th style="width:90px;">Short Volume</th><th style="width:90px;">Long Volume</th><th style="width:90px;">Short Positions</th><th style="width:90px;">Long Positions</th><th style="width:90px;">Total Positions</th></tr></thead>
+                    </table>
+                </div>
+                <div style="flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:#2a2a3a #161616; min-height:0;">
+                    <table class="sentiment-table" style="width:100%;">
+                        <tbody id="sentimentBody"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <!-- SUB-PAGE: Chart -->
-        <div class="cot-subpage" id="sent-sub-chart">
-            <div class="chart-sentiment" style="height:calc(95vh - 120px);">
-                <div class="pc-sent-title">LONG / SHORT &mdash; ALL PAIRS</div>
+            <!-- CHART (40%) -->
+            <div class="chart-sentiment" style="min-height:0;">
+                <div class="pc-sent-title">Long / Short</div>
                 <div class="chart-sentiment-wrapper" id="pcSentBarsContainer"><div style="text-align:center;color:#aaa;padding:20px;">Loading...</div></div>
             </div>
+
         </div>
 
         <div style="margin-top:20px;">
@@ -574,10 +578,9 @@
             <div class="cot-subpage active" id="cot-sub-lev">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
                     <div class="cot-container">
-                        <div class="cot-header">Leveraged Funds — Positions</div>
                         <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyLev"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
                     </div>
-                    <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Leveraged Funds</h3><div class="cot-pies" id="cotPiesLev"></div></div>
+                    <div class="cot-chart-wrap"><h3>Long vs Short</h3><div class="cot-pies" id="cotPiesLev"></div></div>
                 </div>
             </div>
 
@@ -585,10 +588,9 @@
             <div class="cot-subpage" id="cot-sub-com">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
                     <div class="cot-container">
-                        <div class="cot-header">Commercials — Positions</div>
                         <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyCom"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
                     </div>
-                    <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Commercials</h3><div class="cot-pies" id="cotPiesCom"></div></div>
+                    <div class="cot-chart-wrap"><h3>Long vs Short</h3><div class="cot-pies" id="cotPiesCom"></div></div>
                 </div>
             </div>
 
@@ -596,10 +598,9 @@
             <div class="cot-subpage" id="cot-sub-ls">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
                     <div class="cot-container">
-                        <div class="cot-header">Large Speculators — Positions</div>
                         <div class="cot-scroll"><table><thead><tr><th>Currency</th><th>Long</th><th>Short</th><th>Net</th><th>&#916; Net</th><th>Bias</th></tr></thead><tbody id="cotBodyLS"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table></div>
                     </div>
-                    <div class="cot-chart-wrap"><h3>Long vs Short &mdash; Large Speculators</h3><div class="cot-pies" id="cotPiesLS"></div></div>
+                    <div class="cot-chart-wrap"><h3>Long vs Short</h3><div class="cot-pies" id="cotPiesLS"></div></div>
                 </div>
             </div>
 
@@ -649,11 +650,9 @@
                 </div>
                 <div style="display:grid;grid-template-columns:420px 1fr;gap:15px;align-items:stretch;">
                     <div class="fxp-bars-card" style="display:flex;flex-direction:column;">
-                        <div class="fxp-bars-title">Currency Performance</div>
                         <div id="fxpBarsContainer" style="flex:1;"><div class="fxp-loading">Loading...</div></div>
                     </div>
                     <div class="fxp-heatmap-card" style="display:flex;flex-direction:column;">
-                        <div class="fxp-heatmap-title">Pair Performance Heatmap</div>
                         <div id="fxpHeatmapContainer" style="flex:1;overflow-x:auto;"><div class="fxp-loading">Loading...</div></div>
                     </div>
                 </div>
@@ -792,8 +791,8 @@
             </div>
             <div id="mob-sub-chart" class="mob-sub-content" style="display:none;">
                 <div class="mob-chart-card">
-                    <div class="mob-chart-title">LONG / SHORT — ALL PAIRS</div>
-                    <div id="mob-sentBarsContainer"><div style="text-align:center;color:#aaa;padding:20px;">Loading...</div></div>
+                    <div class="mob-chart-title">Long / Short</div>
+                    <div id="mob-sentBarsContainer" style="padding:12px 8px 8px 8px;"><div style="text-align:center;color:#aaa;padding:20px;">Loading...</div></div>
                 </div>
             </div>
             <div id="mob-sub-cot" class="mob-sub-content" style="display:none;">
@@ -1162,7 +1161,7 @@ async function ciComputeCardValsMataf() {
     var el = document.getElementById('ciStatus');
     if (el) el.textContent = 'Loading base rates...';
     var [rates2000, ratesNow] = await Promise.all([fkrFetch('2000-01-03'), fkrFetch('latest')]);
-    if (!rates2000 || !ratesNow) { console.warn('Frankfurter fetch failed'); return false; }
+    if (!rates2000 || !ratesNow) { return false; }
     var prices2000 = fkrBuildPriceMap(rates2000);
     var pricesNow  = fkrBuildPriceMap(ratesNow);
     _ciCardVals = {};
@@ -1473,7 +1472,11 @@ function renderCICombinedChart(labels) {
     [ctx, ctx2].forEach(function(c) {
         if (!c) return;
         var id = c.id;
-        if (id === 'ciCombinedChart' && ciCombinedChart) { ciCombinedChart.destroy(); ciCombinedChart = null; }
+        if (id === 'ciCombinedChart' && ciCombinedChart) {
+            var oldCanvas = document.getElementById('ciCombinedChart');
+            if (oldCanvas && oldCanvas._ciMouseupFn) { document.removeEventListener('mouseup', oldCanvas._ciMouseupFn); }
+            ciCombinedChart.destroy(); ciCombinedChart = null;
+        }
         if (id === 'mob-ciCombinedChart' && mobCiCombinedChart) { mobCiCombinedChart.destroy(); mobCiCombinedChart = null; }
 
         var datasets = CS_CURRENCIES.map(function(cur) {
@@ -1692,7 +1695,10 @@ function ciSetupMouseInteraction(canvas, chart) {
         drag = { startX: e.clientX, startMin: chart.options.scales.x.min, startMax: chart.options.scales.x.max };
         canvas.style.cursor = 'grabbing'; e.preventDefault();
     };
-    window.addEventListener('mouseup', function(){ drag = null; canvas.style.cursor = 'crosshair'; });
+    /* Use document.onmouseup per-canvas to avoid accumulating window listeners */
+    var _ciMouseupFn = function(){ drag = null; canvas.style.cursor = 'crosshair'; };
+    canvas._ciMouseupFn = _ciMouseupFn;
+    document.addEventListener('mouseup', _ciMouseupFn);
 
     canvas.onmousemove = function(e) {
         if (!chart) return;
@@ -1918,7 +1924,7 @@ function renderCIMiniCharts(labels) {
             card.className = 'ci-chart-card';
             card.innerHTML = cardHTML;
             card.style.cursor = 'pointer';
-            (function(c){ card.onclick = function(){ openCiModal(c, labels); }; })(cur);
+            (function(c){ card.onclick = function(){ openCiModal(c); }; })(cur);
             grid.appendChild(card);
         }
         if (mobGrid) {
@@ -1926,7 +1932,7 @@ function renderCIMiniCharts(labels) {
             mobCard.className = 'mob-ir-card';
             mobCard.style.cursor = 'pointer';
             mobCard.innerHTML = mobCardHTML;
-            (function(c){ mobCard.onclick = function(){ openCiModal(c, labels); }; })(cur);
+            (function(c){ mobCard.onclick = function(){ openCiModal(c); }; })(cur);
             mobGrid.appendChild(mobCard);
         }
     });
@@ -1982,71 +1988,356 @@ function renderCIMiniCharts(labels) {
 }
 
 /* --- Modal for full-size individual chart --- */
-function openCiModal(cur, labels) {
-    var series = _ciIndexSeries[cur];
-    if (!series) return;
-    document.getElementById('ciModalTitle').innerHTML = CI_FLAGS[cur] + ' ' + cur + ' Currency Index';
+/* =========================================================
+   CI CARD MODAL — independent per-currency chart
+   ========================================================= */
+var _ciModalCur = null;
+var _ciModalTF = 'H1';
+var _ciModalRawData = {};
+var _ciModalLoadingMore = false;
+var _ciModalNoMore = false;
+var _ciModalDrag = null;
+var _ciModalHoverIdx = -1;
+var _ciModalTimes = [];
+
+function openCiModal(cur) {
+    _ciModalCur = cur;
+    _ciModalTF = 'H1';
+    document.getElementById('ciModalTitle').innerHTML = CI_FLAGS[cur] + ' ' + cur + ' — Currency Index';
     document.getElementById('ciModalOverlay').classList.add('open');
-    setTimeout(function() {
-        var c = document.getElementById('ciModalChart');
-        if (ciModalChartInst) ciModalChartInst.destroy();
-        var color = CS_COLORS[cur];
-        var pctSeries = series.map(function(v){ return v !== null ? v * 100 : null; });
-        ciModalChartInst = new Chart(c, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: cur + ' Index',
-                    data: pctSeries,
-                    borderColor: color,
-                    backgroundColor: function(ctx2) {
-                        var gc = ctx2.chart.ctx.createLinearGradient(0,0,0,300);
-                        gc.addColorStop(0, color+'44'); gc.addColorStop(1, color+'00');
-                        return gc;
-                    },
-                    borderWidth: 2, pointRadius: 0, tension: 0.2, fill: true
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, animation: false,
-                interaction: { mode:'index', intersect:false },
-                plugins: {
-                    legend: { display:false },
-                    tooltip: {
-                        backgroundColor:'rgba(16,16,24,0.97)', borderColor:'#1e2230', borderWidth:1,
-                        callbacks: {
-                            label: function(c2){
-                                var v = c2.parsed.y;
-                                return ' Variation: ' + (v>=0?'+':'') + v.toFixed(4) + '%';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: { grid:{color:'#1a1a2a'}, ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12,color:'#444',font:{size:9}} },
-                    y: { position:'right', grid:{color:'#1a1a2a'}, ticks:{color:'#555',font:{size:9},callback:function(v){return (v>=0?'+':'')+v.toFixed(2)+'%';}} }
-                }
-            },
-            plugins: [{
-                id:'ref0',
-                afterDraw: function(ch){
-                    var y=ch.scales.y,ca=ch.chartArea;if(!y||!ca)return;
-                    var yp=y.getPixelForValue(0);if(yp<ca.top||yp>ca.bottom)return;
-                    var c2=ch.ctx;c2.save();c2.beginPath();c2.moveTo(ca.left,yp);c2.lineTo(ca.right,yp);
-                    c2.strokeStyle='#4a4a6a';c2.lineWidth=1.5;c2.setLineDash([4,4]);c2.stroke();c2.restore();
-                    c2.save();c2.fillStyle='rgba(56,56,80,0.8)';c2.fillRect(ca.right+2,yp-9,28,16);
-                    c2.fillStyle='#888';c2.font='bold 10px JetBrains Mono,monospace';c2.textAlign='center';c2.textBaseline='middle';
-                    c2.fillText('0%',ca.right+16,yp);c2.restore();
-                }
-            }]
-        });
-        ciSetupMouseInteraction(c, ciModalChartInst);
-    }, 50);
+    /* Mark H1 active */
+    document.querySelectorAll('#ciModalOverlay .cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('#ciModalOverlay .cs-tf-btn').forEach(function(b){
+        if (b.textContent.trim() === '1H') b.classList.add('active');
+    });
+    ciModalLoad();
 }
+
+function ciModalSetTF(tf, btn) {
+    _ciModalTF = tf;
+    document.querySelectorAll('#ciModalOverlay .cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    ciModalLoad();
+}
+
+function ciModalReload() { ciModalLoad(); }
+
+var _ciModalBase2000 = null; /* fixed base prices from 2000-01-03 */
+
+async function ciModalLoad() {
+    if (!_ciModalCur) return;
+    var statusEl = document.getElementById('ciModalStatus');
+    if (statusEl) statusEl.textContent = 'Loading...';
+    _ciModalRawData = {};
+    _ciModalLoadingMore = false;
+    _ciModalNoMore = false;
+    _ciModalHoverIdx = -1;
+
+    var cfg = CI_TF_CONFIG[_ciModalTF];
+    var basket = CI_PAIRS[_ciModalCur];
+
+    /* Fetch base2000 once (cache it) */
+    if (!_ciModalBase2000) {
+        var rates2000 = await fkrFetch('2000-01-03');
+        _ciModalBase2000 = rates2000 ? fkrBuildPriceMap(rates2000) : null;
+    }
+    if (!_ciModalBase2000) { if (statusEl) statusEl.textContent = 'Error'; return; }
+
+    await Promise.all(basket.map(async function(item) {
+        var url = OANDA_URL + '/instruments/' + item.pair + '/candles?granularity=' + cfg.gran + '&count=' + cfg.count + '&price=M';
+        try {
+            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
+            if (!r.ok) return;
+            var d = await r.json();
+            if (!d.candles || d.candles.length <= 1) return;
+            _ciModalRawData[item.pair] = {
+                closes: d.candles.map(function(c){ return parseFloat(c.mid.c); }),
+                times:  d.candles.map(function(c){ return c.time; })
+            };
+        } catch(e) {}
+    }));
+
+    if (!Object.keys(_ciModalRawData).length) {
+        if (statusEl) statusEl.textContent = 'Error'; return;
+    }
+    var result = ciModalCompute();
+    if (!result) { if (statusEl) statusEl.textContent = 'Error'; return; }
+    if (statusEl) statusEl.textContent = fmtTime();
+    ciModalRender(result.labels, result.series);
+}
+
+function ciModalCompute() {
+    var basket = CI_PAIRS[_ciModalCur];
+    var pairKeys = Object.keys(_ciModalRawData);
+    if (!pairKeys.length || !_ciModalBase2000) return null;
+
+    /* Align on common times */
+    var timeSets = {};
+    pairKeys.forEach(function(p){ _ciModalRawData[p].times.forEach(function(t){ timeSets[t] = (timeSets[t]||0)+1; }); });
+    var commonTimes = Object.keys(timeSets).filter(function(t){ return timeSets[t] === pairKeys.length; }).sort();
+    if (commonTimes.length < 2) return null;
+
+    var series = [];
+    commonTimes.forEach(function(t) {
+        var sum = 0, cnt = 0;
+        basket.forEach(function(item) {
+            var raw = _ciModalRawData[item.pair];
+            if (!raw) return;
+            var idx = raw.times.indexOf(t);
+            if (idx < 0) return;
+            var closeNow = raw.closes[idx];
+            /* base2000: fixed reference price for this pair */
+            var base = _ciModalBase2000[item.pair];
+            if (!base) return;
+            /* apply inv: if inv, the currency is quote not base */
+            var p0 = item.inv ? 1/base : base;
+            var pN = item.inv ? 1/closeNow : closeNow;
+            sum += (pN - p0) / p0; cnt++;
+        });
+        series.push(cnt > 0 ? parseFloat((100 * (1 + sum/cnt)).toFixed(4)) : null);
+    });
+
+    var labels = commonTimes.map(function(t){
+        var dt = new Date(t);
+        if (_ciModalTF === 'D' || _ciModalTF === 'W') return dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
+        return dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    });
+
+    _ciModalTimes = commonTimes;
+    return { labels: labels, series: series, times: commonTimes };
+}
+
+function ciModalRender(labels, series) {
+    var canvas = document.getElementById('ciModalChart');
+    if (!canvas) return;
+    if (ciModalChartInst) { ciModalChartInst.destroy(); ciModalChartInst = null; }
+    _ciModalDrag = null; _ciModalHoverIdx = -1;
+
+    var color = CS_COLORS[_ciModalCur];
+    var cfg = CI_TF_CONFIG[_ciModalTF];
+    var total = labels.length;
+    var viewLen = cfg.view || 200;
+    var initMin = Math.max(0, total - viewLen);
+    var initMax = total - 1;
+
+    ciModalChartInst = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: _ciModalCur,
+                data: series,
+                borderColor: color,
+                backgroundColor: (function(){
+                    var gc = canvas.getContext('2d').createLinearGradient(0, 0, 0, 500);
+                    gc.addColorStop(0, color + '33'); gc.addColorStop(1, color + '00');
+                    return gc;
+                })(),
+                borderWidth: 2, pointRadius: 0, tension: 0.2, fill: true
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            interaction: { mode: 'index', intersect: false },
+            layout: { padding: { right: 52 } },
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: {
+                x: { grid:{color:'#161616'}, ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:14,color:'#444',font:{size:9}},
+                    min: initMin, max: initMax },
+                y: { position:'right', grid:{color:'#1a1a2a'},
+                    ticks:{color:'#444',font:{size:9},callback:function(v){return v.toFixed(2);}},
+                    afterFit: function(axis){ axis.width = 0; } }
+            }
+        },
+        plugins: [{
+            id: 'ciModalPlugin',
+            beforeDraw: function(chart) {
+                /* Dark strip on the right for badges */
+                var c2=chart.ctx, ca=chart.chartArea; if(!ca) return;
+                c2.save(); c2.fillStyle='#101010';
+                c2.fillRect(ca.right, 0, chart.width-ca.right, chart.height);
+                c2.restore();
+            },
+            afterDraw: function(chart) {
+                var y=chart.scales.y, ca=chart.chartArea; if(!y||!ca) return;
+                var c2=chart.ctx;
+
+                /* Y-axis tick labels in the strip */
+                var ticks = y.ticks || [];
+                c2.save(); c2.font='9px JetBrains Mono,monospace'; c2.fillStyle='#555';
+                c2.textAlign='center'; c2.textBaseline='middle';
+                ticks.forEach(function(tick){
+                    var tyPx=y.getPixelForValue(tick.value);
+                    if(tyPx<ca.top||tyPx>ca.bottom) return;
+                    c2.fillText(tick.value.toFixed(2), ca.right+(chart.width-ca.right)/2, tyPx);
+                });
+                c2.restore();
+
+                /* End-of-line price badge */
+                var xMax = chart.options.scales.x.max;
+                var ds = chart.data.datasets[0];
+                var lastVal = null;
+                var maxIdx = Math.min(Math.round(xMax), ds.data.length-1);
+                for (var k=maxIdx; k>=0; k--) {
+                    if (ds.data[k] !== null && ds.data[k] !== undefined) { lastVal=ds.data[k]; break; }
+                }
+                if (lastVal !== null) {
+                    var yPx = y.getPixelForValue(lastVal);
+                    if (yPx >= ca.top && yPx <= ca.bottom) {
+                        var BW=48, BH=16, bx=ca.right+2, by=yPx-BH/2;
+                        by = Math.max(ca.top, Math.min(ca.bottom-BH, by));
+                        var text = lastVal.toFixed(3);
+                        c2.save(); c2.fillStyle=color;
+                        var r=3;
+                        c2.beginPath();
+                        c2.moveTo(bx+r,by); c2.lineTo(bx+BW-r,by);
+                        c2.arcTo(bx+BW,by,bx+BW,by+BH,r); c2.lineTo(bx+BW,by+BH-r);
+                        c2.arcTo(bx+BW,by+BH,bx+BW-r,by+BH,r); c2.lineTo(bx+r,by+BH);
+                        c2.arcTo(bx,by+BH,bx,by+BH-r,r); c2.lineTo(bx,by+r);
+                        c2.arcTo(bx,by,bx+r,by,r); c2.closePath(); c2.fill();
+                        c2.fillStyle='#fff'; c2.font='bold 9px JetBrains Mono,monospace';
+                        c2.textAlign='center'; c2.textBaseline='middle';
+                        c2.fillText(text, bx+BW/2, by+BH/2); c2.restore();
+                    }
+                }
+
+                /* Floating hover labels with timestamp */
+                if (_ciModalHoverIdx >= 0) {
+                    drawFloatingLabels(chart, _ciModalHoverIdx, _ciModalTimes, _ciModalTF, function(label, val){
+                        return label + ' ' + val.toFixed(3);
+                    });
+                }
+            }
+        }]
+    });
+
+    ciModalSetupInteraction(canvas);
+}
+
+function ciModalSetupInteraction(canvas) {
+    canvas.style.cursor = 'crosshair';
+    canvas.onmousedown = function(e) {
+        if (e.button !== 0 || !ciModalChartInst) return;
+        _ciModalDrag = { startX: e.clientX, startMin: ciModalChartInst.options.scales.x.min, startMax: ciModalChartInst.options.scales.x.max };
+        canvas.style.cursor = 'grabbing'; e.preventDefault();
+    };
+    canvas.onmousemove = function(e) {
+        if (!ciModalChartInst) return;
+        var rect = canvas.getBoundingClientRect(), mx = e.clientX - rect.left;
+        var ca = ciModalChartInst.chartArea, xScale = ciModalChartInst.scales.x;
+        if (_ciModalDrag) {
+            var dx = e.clientX - _ciModalDrag.startX, range = _ciModalDrag.startMax - _ciModalDrag.startMin;
+            var shift = -(dx / (ca ? ca.right - ca.left : 1)) * range;
+            var total = ciModalChartInst.data.labels.length;
+            var newMin = Math.max(0, _ciModalDrag.startMin + shift);
+            var newMax = Math.min(total - 1, _ciModalDrag.startMax + shift);
+            ciModalChartInst.options.scales.x.min = newMin;
+            ciModalChartInst.options.scales.x.max = newMax;
+            ciModalChartInst.update('none');
+            if (newMin < range * 0.15) ciModalLoadMore();
+            return;
+        }
+        if (!ca || mx < ca.left || mx > ca.right) { _ciModalHoverIdx = -1; ciModalChartInst.draw(); return; }
+        var minIdx = Math.round(xScale.min), maxIdx = Math.round(xScale.max), best = minIdx, bd = Infinity;
+        for (var i = minIdx; i <= maxIdx; i++) { var xp = xScale.getPixelForValue(i), d = Math.abs(xp-mx); if(d<bd){bd=d;best=i;} }
+        _ciModalHoverIdx = best; ciModalChartInst.draw();
+    };
+    canvas.onmouseleave = function() { _ciModalDrag = null; canvas.style.cursor = 'crosshair'; _ciModalHoverIdx = -1; if(ciModalChartInst) ciModalChartInst.draw(); };
+    canvas.onwheel = function(e) {
+        if (!ciModalChartInst) return; e.preventDefault();
+        var total = ciModalChartInst.data.labels.length;
+        var curMin = ciModalChartInst.options.scales.x.min, curMax = ciModalChartInst.options.scales.x.max;
+        var range = curMax - curMin, factor = e.deltaY > 0 ? 1.12 : 0.88;
+        var newRange = Math.max(10, Math.min(total - 1, range * factor));
+        var mid = (curMin + curMax) / 2;
+        var newMin = Math.max(0, Math.min(total - 1 - newRange, mid - newRange/2));
+        var newMax = Math.min(total - 1, newMin + newRange);
+        ciModalChartInst.options.scales.x.min = newMin;
+        ciModalChartInst.options.scales.x.max = newMax;
+        ciModalChartInst.update('none');
+        if (newMin < newRange * 0.3) ciModalLoadMore();
+    };
+    canvas.ondblclick = function() {
+        if (!ciModalChartInst) return;
+        var total = ciModalChartInst.data.labels.length, view = CI_TF_CONFIG[_ciModalTF].view || 200;
+        ciModalChartInst.options.scales.x.min = Math.max(0, total - view);
+        ciModalChartInst.options.scales.x.max = total - 1;
+        ciModalChartInst.update('none');
+    };
+    window.addEventListener('mouseup', function(){ _ciModalDrag = null; if(canvas) canvas.style.cursor = 'crosshair'; });
+}
+
+async function ciModalLoadMore() {
+    if (_ciModalLoadingMore || _ciModalNoMore || !_ciModalCur) return;
+    _ciModalLoadingMore = true;
+    var statusEl = document.getElementById('ciModalStatus');
+    if (statusEl) statusEl.textContent = 'Loading history...';
+
+    var cfg = CI_TF_CONFIG[_ciModalTF];
+    var basket = CI_PAIRS[_ciModalCur];
+    var batchCount = cfg.view || 200;
+
+    var earliestTime = null;
+    Object.keys(_ciModalRawData).forEach(function(p){
+        var t0 = _ciModalRawData[p].times[0];
+        if (!earliestTime || t0 < earliestTime) earliestTime = t0;
+    });
+    if (!earliestTime) { _ciModalLoadingMore = false; return; }
+    var toTime = new Date(earliestTime).toISOString();
+
+    var fetchedAny = false;
+    await Promise.all(basket.map(async function(item) {
+        if (!_ciModalRawData[item.pair]) return;
+        var url = OANDA_URL + '/instruments/' + item.pair + '/candles?granularity=' + cfg.gran + '&count=' + batchCount + '&price=M&to=' + encodeURIComponent(toTime);
+        try {
+            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
+            if (!r.ok) return;
+            var d = await r.json();
+            if (!d.candles || !d.candles.length) return;
+            var newCloses = d.candles.map(function(c){ return parseFloat(c.mid.c); });
+            var newTimes = d.candles.map(function(c){ return c.time; });
+            var keep = newTimes.map(function(t,i){ return t < earliestTime ? i : -1; }).filter(function(i){ return i>=0; });
+            if (!keep.length) return;
+            fetchedAny = true;
+            _ciModalRawData[item.pair].closes = keep.map(function(i){ return newCloses[i]; }).concat(_ciModalRawData[item.pair].closes);
+            _ciModalRawData[item.pair].times  = keep.map(function(i){ return newTimes[i];  }).concat(_ciModalRawData[item.pair].times);
+        } catch(e) {}
+    }));
+
+    _ciModalLoadingMore = false;
+    if (!fetchedAny) { _ciModalNoMore = true; if(statusEl) statusEl.textContent = fmtTime(); return; }
+
+    /* Save current view position */
+    var prevMin = ciModalChartInst ? ciModalChartInst.options.scales.x.min : 0;
+    var prevMax = ciModalChartInst ? ciModalChartInst.options.scales.x.max : 0;
+    var prevTotal = ciModalChartInst ? ciModalChartInst.data.labels.length : 0;
+    var offsetFromRight = prevTotal - 1 - prevMax;
+    var viewRange = prevMax - prevMin;
+
+    var result = ciModalCompute();
+    if (!result) { if(statusEl) statusEl.textContent = fmtTime(); return; }
+
+    var newTotal = result.labels.length;
+    var newMax = newTotal - 1 - offsetFromRight;
+    var newMin = Math.max(0, newMax - viewRange);
+
+    if (ciModalChartInst) {
+        ciModalChartInst.data.labels = result.labels;
+        ciModalChartInst.data.datasets[0].data = result.series;
+        ciModalChartInst.options.scales.x.min = newMin;
+        ciModalChartInst.options.scales.x.max = newMax;
+        ciModalChartInst.update('none');
+    }
+    if (statusEl) statusEl.textContent = fmtTime();
+}
+
 function closeCiModal() {
     document.getElementById('ciModalOverlay').classList.remove('open');
+    if (ciModalChartInst) { ciModalChartInst.destroy(); ciModalChartInst = null; }
+    _ciModalCur = null; _ciModalRawData = {}; _ciModalDrag = null; _ciModalHoverIdx = -1; _ciModalTimes = [];
+    /* Keep _ciModalBase2000 cached for next open */
 }
+document.addEventListener('keydown', function(e){ if(e.key==='Escape'&&document.getElementById('ciModalOverlay').classList.contains('open')) closeCiModal(); });
 
 /* =========================================================
    MOBILE NAV
@@ -2215,12 +2506,7 @@ function afficherTableau(map) {
             '<td>'+d.longVolume.toLocaleString()+'</td>'+
             '<td>'+d.shortPositions.toLocaleString()+'</td>'+
             '<td>'+d.longPositions.toLocaleString()+'</td>'+
-            '<td>'+d.totalPositions.toLocaleString()+'</td>'+
-            '<td style="padding:0;">'+
-                '<div style="display:flex;height:100%;min-height:34px;">'+
-                '<div style="flex:'+sp+';background:rgb(158,50,50);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;">'+(sp>10?sp+'%':'')+'</div>'+
-                '<div style="flex:'+lp+';background:rgb(42,127,81);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;">'+(lp>10?lp+'%':'')+'</div>'+
-                '</div></td>';
+            '<td>'+d.totalPositions.toLocaleString()+'</td>';
         tbody.appendChild(row);
     });
 }
@@ -3308,7 +3594,7 @@ function mobCsRefresh() { mobCsLoad(); }
 var FXP_CURRENCIES=['EUR','USD','GBP','AUD','CHF','JPY','CAD','NZD'];
 var FXP_FLAGS={EUR:'&#127466;&#127482;',USD:'&#127482;&#127480;',GBP:'&#127468;&#127463;',AUD:'&#127462;&#127482;',CHF:'&#127464;&#127469;',JPY:'&#127471;&#127477;',CAD:'&#127464;&#127462;',NZD:'&#127475;&#127487;'};
 var FXP_COLORS={EUR:'#1C79B3',USD:'#AD4055',GBP:'#2E832B',AUD:'#6C2835',CHF:'#885713',JPY:'#999999',CAD:'#13527B',NZD:'#1A4817'};
-var FXP_PAIRS=['EUR_USD','GBP_USD','AUD_USD','NZD_USD','USD_JPY','USD_CAD','USD_CHF','EUR_GBP','EUR_JPY','EUR_CAD','EUR_CHF','EUR_AUD','GBP_JPY','GBP_CAD','GBP_CHF','GBP_AUD','AUD_JPY','AUD_CAD','AUD_CHF','AUD_NZD','CAD_JPY','CAD_CHF','CHF_JPY','NZD_JPY','NZD_CAD','NZD_CHF'];
+var FXP_PAIRS=['EUR_USD','GBP_USD','AUD_USD','NZD_USD','USD_JPY','USD_CAD','USD_CHF','EUR_GBP','EUR_JPY','EUR_CAD','EUR_CHF','EUR_AUD','EUR_NZD','GBP_JPY','GBP_CAD','GBP_CHF','GBP_AUD','GBP_NZD','AUD_JPY','AUD_CAD','AUD_CHF','AUD_NZD','CAD_JPY','CAD_CHF','CHF_JPY','NZD_JPY','NZD_CAD','NZD_CHF'];
 var FXP_TF_CONFIG={D:{granularity:'H1',count:25,label:'Today'},W:{granularity:'H4',count:42,label:'1 Week'},M:{granularity:'D',count:22,label:'1 Month'},M3:{granularity:'D',count:65,label:'3 Months'},Y:{granularity:'W',count:52,label:'1 Year'}};
 var fxpTF='D',mobFxpTF='D';
 
@@ -3383,7 +3669,7 @@ function fxpRenderHeatmap(results) {
         lookup[b][q] = pct; lookup[q][b] = pct !== null ? -pct : null;
     });
     function heatColor(val) {
-        if (val === null) return { bg:'#111', fg:'#444' };
+        if (val === null) return { bg:'#0d0d0d', fg:'#444' };
         var intensity = Math.min(Math.abs(val) / 1.5, 1);
         if (val > 0) { var g = Math.round(80 + intensity * 120); return { bg:'rgba(0,'+g+',60,0.35)', fg:'#'+(val>0.5?'14BC60':'4ddb8a') }; }
         else { var r = Math.round(140 + intensity * 100); return { bg:'rgba('+r+',30,30,0.35)', fg:'#'+(val<-0.5?'F26666':'ff9090') }; }
@@ -3467,20 +3753,20 @@ function mobFxpRenderHeatmap(results) {
         lookup[b][q] = pct; lookup[q][b] = pct !== null ? -pct : null;
     });
     function heatColor(val) {
-        if (val === null) return { bg:'#111', fg:'#444' };
+        if (val === null) return { bg:'#0d0d0d', fg:'#444' };
         var intensity = Math.min(Math.abs(val) / 1.5, 1);
         if (val > 0) { var g = Math.round(80 + intensity * 120); return { bg:'rgba(0,'+g+',60,0.35)', fg:'#'+(val>0.5?'14BC60':'4ddb8a') }; }
         else { var r = Math.round(140 + intensity * 100); return { bg:'rgba('+r+',30,30,0.35)', fg:'#'+(val<-0.5?'F26666':'ff9090') }; }
     }
     var curs = FXP_CURRENCIES;
     var html = '<table style="border-collapse:collapse;font-size:9px;min-width:420px"><thead><tr>' +
-        '<th style="padding:5px 3px;color:#666;border:1px solid #1e2230;background:#111"></th>';
-    curs.forEach(function(c){ html += '<th style="padding:5px 3px;color:#888;border:1px solid #1e2230;background:#111;font-size:9px">' + c + '</th>'; });
+        '<th style="padding:5px 3px;color:#666;border:1px solid #1e2230;background:#0d0d0d"></th>';
+    curs.forEach(function(c){ html += '<th style="padding:5px 3px;color:#888;border:1px solid #1e2230;background:#0d0d0d;font-size:9px">' + c + '</th>'; });
     html += '</tr></thead><tbody>';
     curs.forEach(function(base) {
-        html += '<tr><td style="font-size:10px;font-weight:bold;color:#fff;background:#111;border:1px solid #1e2230;padding:5px 4px">' + base + '</td>';
+        html += '<tr><td style="font-size:10px;font-weight:bold;color:#fff;background:#0d0d0d;border:1px solid #1e2230;padding:5px 4px">' + base + '</td>';
         curs.forEach(function(quote) {
-            if (base === quote) { html += '<td style="background:#111;color:#444;border:1px solid #1e2230;text-align:center;padding:5px 2px">—</td>'; }
+            if (base === quote) { html += '<td style="background:#0d0d0d;color:#444;border:1px solid #1e2230;text-align:center;padding:5px 2px">—</td>'; }
             else {
                 var val = (lookup[base] && lookup[base][quote] !== undefined) ? lookup[base][quote] : null;
                 var col = heatColor(val), display = val !== null ? (val>=0?'+':'') + val.toFixed(1) + '%' : '—';
