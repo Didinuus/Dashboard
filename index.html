@@ -426,8 +426,8 @@
 <!-- CI MODAL (shared PC) -->
 <div class="ci-modal-overlay" id="ciModalOverlay" onclick="if(event.target===this)closeCiModal()">
     <div class="ci-modal" style="width:94vw;max-width:1400px;height:82vh;">
-        <div class="ci-modal-header" style="position:relative;">
-            <div style="display:flex;align-items:center;gap:6px;position:relative;z-index:1;">
+        <div class="ci-modal-header" style="position:relative;flex-wrap:wrap;gap:6px;">
+            <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;flex-shrink:0;">
                 <button class="cs-tf-btn" onclick="ciModalSetTF('M5',this)">5M</button>
                 <button class="cs-tf-btn" onclick="ciModalSetTF('M15',this)">15M</button>
                 <button class="cs-tf-btn active" id="ciModalTfActive" onclick="ciModalSetTF('H1',this)">1H</button>
@@ -435,10 +435,10 @@
                 <button class="cs-tf-btn" onclick="ciModalSetTF('D',this)">Daily</button>
                 <button class="cs-tf-btn" onclick="ciModalSetTF('W',this)">Weekly</button>
                 <button class="cs-tf-btn" onclick="ciModalReload()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
-                <span id="ciModalStatus" style="font-size:10px;color:#aaa;margin-left:4px;"></span>
+                <span id="ciModalStatus" style="font-size:10px;color:#aaa;"></span>
             </div>
-            <div class="ci-modal-title" id="ciModalTitle" style="position:absolute;left:50%;transform:translateX(-50%);">Currency Index</div>
-            <button class="ci-modal-close" onclick="closeCiModal()">&#10005;</button>
+            <div class="ci-modal-title" id="ciModalTitle" style="flex:1;text-align:center;font-size:13px;">Currency Index</div>
+            <button class="ci-modal-close" onclick="closeCiModal()" style="flex-shrink:0;">&#10005;</button>
         </div>
         <div class="ci-modal-chart"><canvas id="ciModalChart"></canvas></div>
     </div>
@@ -2216,6 +2216,8 @@ function ciModalRender(labels, series) {
 
 function ciModalSetupInteraction(canvas) {
     canvas.style.cursor = 'crosshair';
+
+    /* ---- Mouse ---- */
     canvas.onmousedown = function(e) {
         if (e.button !== 0 || !ciModalChartInst) return;
         _ciModalDrag = { startX: e.clientX, startMin: ciModalChartInst.options.scales.x.min, startMax: ciModalChartInst.options.scales.x.max };
@@ -2265,6 +2267,87 @@ function ciModalSetupInteraction(canvas) {
         ciModalChartInst.update('none');
     };
     window.addEventListener('mouseup', function(){ _ciModalDrag = null; if(canvas) canvas.style.cursor = 'crosshair'; });
+
+    /* ---- Touch ---- */
+    var _touch0 = null, _touchDragMin = null, _touchDragMax = null;
+    var _pinchDist0 = null, _pinchMin0 = null, _pinchMax0 = null;
+    var _lastTap = 0;
+
+    canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (!ciModalChartInst) return;
+        if (e.touches.length === 1) {
+            _touch0 = e.touches[0];
+            _touchDragMin = ciModalChartInst.options.scales.x.min;
+            _touchDragMax = ciModalChartInst.options.scales.x.max;
+            _pinchDist0 = null;
+            /* hover */
+            var rect = canvas.getBoundingClientRect(), mx = e.touches[0].clientX - rect.left;
+            var ca = ciModalChartInst.chartArea, xScale = ciModalChartInst.scales.x;
+            if (ca && mx >= ca.left && mx <= ca.right) {
+                var minI = Math.round(xScale.min), maxI = Math.round(xScale.max), best = minI, bd = Infinity;
+                for (var i = minI; i <= maxI; i++) { var xp = xScale.getPixelForValue(i), d = Math.abs(xp-mx); if(d<bd){bd=d;best=i;} }
+                _ciModalHoverIdx = best;
+            }
+            ciModalChartInst.draw();
+        } else if (e.touches.length === 2) {
+            var t0 = e.touches[0], t1 = e.touches[1];
+            _pinchDist0 = Math.hypot(t1.clientX-t0.clientX, t1.clientY-t0.clientY);
+            _pinchMin0 = ciModalChartInst.options.scales.x.min;
+            _pinchMax0 = ciModalChartInst.options.scales.x.max;
+            _ciModalHoverIdx = -1;
+        }
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        if (!ciModalChartInst) return;
+        if (e.touches.length === 1 && _touch0 && _touchDragMin !== null) {
+            var dx = e.touches[0].clientX - _touch0.clientX;
+            var ca = ciModalChartInst.chartArea;
+            var range = _touchDragMax - _touchDragMin;
+            var shift = -(dx / (ca ? ca.right - ca.left : 1)) * range;
+            var total = ciModalChartInst.data.labels.length;
+            var newMin = Math.max(0, _touchDragMin + shift);
+            var newMax = Math.min(total - 1, _touchDragMax + shift);
+            ciModalChartInst.options.scales.x.min = newMin;
+            ciModalChartInst.options.scales.x.max = newMax;
+            ciModalChartInst.update('none');
+            if (newMin < range * 0.15) ciModalLoadMore();
+        } else if (e.touches.length === 2 && _pinchDist0 !== null) {
+            var t0 = e.touches[0], t1 = e.touches[1];
+            var dist = Math.hypot(t1.clientX-t0.clientX, t1.clientY-t0.clientY);
+            var scale = _pinchDist0 / dist;
+            var origRange = _pinchMax0 - _pinchMin0;
+            var total2 = ciModalChartInst.data.labels.length;
+            var newRange2 = Math.max(10, Math.min(total2-1, origRange * scale));
+            var mid2 = (_pinchMin0 + _pinchMax0) / 2;
+            ciModalChartInst.options.scales.x.min = Math.max(0, mid2 - newRange2/2);
+            ciModalChartInst.options.scales.x.max = Math.min(total2-1, mid2 + newRange2/2);
+            ciModalChartInst.update('none');
+        }
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', function(e) {
+        var now = Date.now();
+        if (e.touches.length === 0) {
+            _touch0 = null; _touchDragMin = null; _pinchDist0 = null;
+            setTimeout(function(){ _ciModalHoverIdx = -1; if(ciModalChartInst) ciModalChartInst.draw(); }, 2000);
+        } else if (e.touches.length === 1) {
+            _touch0 = e.touches[0];
+            _touchDragMin = ciModalChartInst ? ciModalChartInst.options.scales.x.min : null;
+            _touchDragMax = ciModalChartInst ? ciModalChartInst.options.scales.x.max : null;
+            _pinchDist0 = null;
+        }
+        /* Double tap = reset zoom */
+        if (now - _lastTap < 300 && ciModalChartInst) {
+            var total = ciModalChartInst.data.labels.length, view = CI_TF_CONFIG[_ciModalTF].view || 200;
+            ciModalChartInst.options.scales.x.min = Math.max(0, total - view);
+            ciModalChartInst.options.scales.x.max = total - 1;
+            ciModalChartInst.update('none');
+        }
+        _lastTap = now;
+    }, { passive: false });
 }
 
 async function ciModalLoadMore() {
