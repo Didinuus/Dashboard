@@ -1854,7 +1854,7 @@ function mobSetupChartTouchCI(canvas, chart) {
     var touch0 = null, dragStartMin = null, dragStartMax = null;
     var pinchStartDist = null, pinchStartMin = null, pinchStartMax = null;
 
-    function setView(mn, mx) {
+    function ci_setView(mn, mx) {
         var t = chart.data.labels.length;
         var newMin = Math.max(0, Math.round(mn));
         var newMax = Math.min(t - 1, Math.round(mx));
@@ -1866,7 +1866,7 @@ function mobSetupChartTouchCI(canvas, chart) {
         if (newMin < (newMax - newMin) * 0.30) ciLoadMoreHistory();
     }
 
-    function updateHoverFromTouch(touchX) {
+    function ci_updateHoverFromTouch(touchX) {
         var rect = canvas.getBoundingClientRect();
         var mx = touchX - rect.left;
         var ca = chart.chartArea;
@@ -1889,7 +1889,7 @@ function mobSetupChartTouchCI(canvas, chart) {
             var r = chart.options.scales.x;
             dragStartMin = r.min; dragStartMax = r.max;
             pinchStartDist = null;
-            updateHoverFromTouch(e.touches[0].clientX);
+            ci_updateHoverFromTouch(e.touches[0].clientX);
             chart.draw();
         } else if (e.touches.length === 2) {
             touch0 = e.touches[0];
@@ -1909,8 +1909,8 @@ function mobSetupChartTouchCI(canvas, chart) {
             var ca = chart.chartArea;
             var range = dragStartMax - dragStartMin;
             var shift = -(dx / (ca ? ca.right - ca.left : 1)) * range;
-            setView(dragStartMin + shift, dragStartMax + shift);
-            updateHoverFromTouch(e.touches[0].clientX);
+            ci_setView(dragStartMin + shift, dragStartMax + shift);
+            ci_updateHoverFromTouch(e.touches[0].clientX);
             chart.draw();
         } else if (e.touches.length === 2 && pinchStartDist != null) {
             var t0 = e.touches[0], t1 = e.touches[1];
@@ -1920,7 +1920,7 @@ function mobSetupChartTouchCI(canvas, chart) {
             var origRange = pinchStartMax - pinchStartMin;
             var newRange = Math.max(10, Math.min(chart.data.labels.length, origRange * scale));
             var mid = (pinchStartMin + pinchStartMax) / 2;
-            setView(mid - newRange/2, mid + newRange/2);
+            ci_setView(mid - newRange/2, mid + newRange/2);
         }
     }, { passive: false });
 
@@ -1938,7 +1938,7 @@ function mobSetupChartTouchCI(canvas, chart) {
         }
         if (now - lastTap < 300) {
             var t = chart.data.labels.length, v = CI_TF_CONFIG[ciTF].view || 100;
-            setView(Math.max(0, t - v), t - 1);
+            ci_setView(Math.max(0, t - v), t - 1);
         }
         lastTap = now;
     }, { passive: false });
@@ -3686,14 +3686,14 @@ function mobSetupChartTouchCS(canvas, chart) {
     var touch0 = null, dragStartMin = null, dragStartMax = null;
     var pinchStartDist = null, pinchStartMin = null, pinchStartMax = null;
 
-    function setView(mn, mx) {
+    function cs_setView(mn, mx) {
         var t = chart.data.labels.length;
         chart.options.scales.x.min = Math.max(0, Math.round(mn));
         chart.options.scales.x.max = Math.min(t - 1, Math.round(mx));
         chart.update('none');
     }
 
-    function updateHoverFromTouch(touchX) {
+    function cs_updateHoverFromTouch(touchX) {
         var rect = canvas.getBoundingClientRect();
         var mx = touchX - rect.left;
         var ca = chart.chartArea;
@@ -3716,7 +3716,7 @@ function mobSetupChartTouchCS(canvas, chart) {
             var r = chart.options.scales.x;
             dragStartMin = r.min; dragStartMax = r.max;
             pinchStartDist = null;
-            updateHoverFromTouch(e.touches[0].clientX);
+            cs_updateHoverFromTouch(e.touches[0].clientX);
             chart.draw();
         } else if (e.touches.length === 2) {
             touch0 = e.touches[0];
@@ -3736,8 +3736,8 @@ function mobSetupChartTouchCS(canvas, chart) {
             var ca = chart.chartArea;
             var range = dragStartMax - dragStartMin;
             var shift = -(dx / (ca ? ca.right - ca.left : 1)) * range;
-            setView(dragStartMin + shift, dragStartMax + shift);
-            updateHoverFromTouch(e.touches[0].clientX);
+            cs_setView(dragStartMin + shift, dragStartMax + shift);
+            cs_updateHoverFromTouch(e.touches[0].clientX);
             chart.draw();
         } else if (e.touches.length === 2 && pinchStartDist != null) {
             var t0 = e.touches[0], t1 = e.touches[1];
@@ -3747,7 +3747,7 @@ function mobSetupChartTouchCS(canvas, chart) {
             var origRange = pinchStartMax - pinchStartMin;
             var newRange = Math.max(10, Math.min(chart.data.labels.length, origRange * scale));
             var mid = (pinchStartMin + pinchStartMax) / 2;
-            setView(mid - newRange/2, mid + newRange/2);
+            cs_setView(mid - newRange/2, mid + newRange/2);
         }
     }, { passive: false });
 
@@ -3767,7 +3767,7 @@ function mobSetupChartTouchCS(canvas, chart) {
         /* Double-tap to reset zoom */
         if (now - lastTap < 300) {
             var t = chart.data.labels.length, v = CS_VIEW[mobCsTF] || 100;
-            setView(Math.max(0, t - v), t - 1);
+            cs_setView(Math.max(0, t - v), t - 1);
         }
         lastTap = now;
     }, { passive: false });
@@ -3983,7 +3983,7 @@ function mobFxpRenderHeatmap(results) {
         var pct = results[pair];
         lookup[b][q] = pct; lookup[q][b] = pct !== null ? -pct : null;
     });
-    function heatColor(val) {
+    function mobHeatColor(val) {
         if (val === null) return { bg:'#0d0d0d', fg:'#444' };
         var intensity = Math.min(Math.abs(val) / 1.5, 1);
         if (val > 0) { var g = Math.round(80 + intensity * 120); return { bg:'rgba(0,'+g+',60,0.35)', fg:'#'+(val>0.5?'14BC60':'4ddb8a') }; }
@@ -4000,7 +4000,7 @@ function mobFxpRenderHeatmap(results) {
             if (base === quote) { html += '<td style="background:#0d0d0d;color:#444;border:1px solid #1e2230;text-align:center;padding:5px 2px">—</td>'; }
             else {
                 var val = (lookup[base] && lookup[base][quote] !== undefined) ? lookup[base][quote] : null;
-                var col = heatColor(val), display = val !== null ? (val>=0?'+':'') + val.toFixed(1) + '%' : '—';
+                var col = mobHeatColor(val), display = val !== null ? (val>=0?'+':'') + val.toFixed(1) + '%' : '—';
                 html += '<td style="background:' + col.bg + ';color:' + col.fg + ';border:1px solid #1e2230;text-align:center;padding:5px 2px;font-weight:bold;font-size:9px">' + display + '</td>';
             }
         });
