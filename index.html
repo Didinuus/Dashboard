@@ -200,8 +200,23 @@
         /* Full-size individual chart modal */
         .ci-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; }
         .ci-modal-overlay.open { display:flex; }
-        .ci-modal { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px; width:90vw; max-width:1100px; height:70vh; display:flex; flex-direction:column; gap:12px; }
-        .ci-modal-header { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+        .ci-modal { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:12px 16px 16px 16px; width:90vw; max-width:1100px; height:70vh; display:flex; flex-direction:column; gap:10px; }
+        /* Mobile : 2 lignes — [titre centré] / [boutons TF gauche | X droite] */
+        .ci-modal-header { display:flex; flex-direction:column; gap:6px; align-items:stretch; flex-shrink:0; }
+        .ci-mh-title-row { display:flex; justify-content:center; }
+        .ci-mh-controls-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+        .ci-mh-tf-row { display:flex; align-items:center; gap:4px; flex-wrap:wrap; flex:1; }
+        .ci-mh-close { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .ci-mh-close-pc { display:none; }
+        /* PC (>1000px) : 1 ligne — boutons à gauche, titre centré absolu, close à droite */
+        @media (min-width: 1001px) {
+            .ci-modal-header { flex-direction:row; align-items:center; position:relative; gap:6px; }
+            .ci-mh-title-row { position:absolute; left:0; right:0; top:0; bottom:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+            .ci-mh-controls-row { flex:1; justify-content:flex-start; }
+            .ci-mh-tf-row { flex:1; }
+            .ci-mh-close { display:none; }
+            .ci-mh-close-pc { display:inline-flex; position:relative; z-index:1; flex-shrink:0; }
+        }
         .ci-modal-title { font-size:16px; font-weight:bold; text-align:center; }
         .ci-modal-close { background:transparent; border:none; color:var(--text-muted); font-size:22px; cursor:pointer; }
         .ci-modal-close:hover { color:var(--text-primary); }
@@ -437,26 +452,27 @@
 <!-- CI MODAL (shared PC) -->
 <div class="ci-modal-overlay" id="ciModalOverlay" onclick="if(event.target===this)closeCiModal()">
     <div class="ci-modal" style="width:94vw;max-width:1400px;height:82vh;">
-        <div class="ci-modal-header" style="flex-direction:column;gap:8px;align-items:stretch;">
-            <!-- Row 1: title centré + close button -->
-            <div style="display:flex;align-items:center;justify-content:space-between;position:relative;">
-                <div style="flex:1;"></div>
-                <div class="ci-modal-title" id="ciModalTitle" style="font-size:13px;position:static;pointer-events:auto;text-align:center;flex:0 0 auto;">Currency Index</div>
-                <div style="flex:1;display:flex;justify-content:flex-end;">
-                    <button class="ci-modal-close" onclick="closeCiModal()">&#10005;</button>
+        <div class="ci-modal-header" id="ciModalHeader">
+            <!-- Ligne 1 : titre centré -->
+            <div class="ci-mh-title-row">
+                <div class="ci-modal-title" id="ciModalTitle" style="font-size:13px;">Currency Index</div>
+            </div>
+            <!-- Ligne 2 : TF à gauche | X à droite -->
+            <div class="ci-mh-controls-row">
+                <div class="ci-mh-tf-row">
+                    <button class="cs-tf-btn" onclick="ciModalSetTF('M5',this)">5M</button>
+                    <button class="cs-tf-btn" onclick="ciModalSetTF('M15',this)">15M</button>
+                    <button class="cs-tf-btn active" id="ciModalTfActive" onclick="ciModalSetTF('H1',this)">1H</button>
+                    <button class="cs-tf-btn" onclick="ciModalSetTF('H4',this)">4H</button>
+                    <button class="cs-tf-btn" onclick="ciModalSetTF('D',this)">Daily</button>
+                    <button class="cs-tf-btn" onclick="ciModalSetTF('W',this)">Weekly</button>
+                    <button class="cs-tf-btn btn-refresh" onclick="ciModalReload()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                    <span id="ciModalStatus" style="font-size:10px;color:#aaa;"></span>
                 </div>
+                <button class="ci-modal-close ci-mh-close" onclick="closeCiModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
-            <!-- Row 2: TF buttons + refresh + status -->
-            <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-                <button class="cs-tf-btn" onclick="ciModalSetTF('M5',this)">5M</button>
-                <button class="cs-tf-btn" onclick="ciModalSetTF('M15',this)">15M</button>
-                <button class="cs-tf-btn active" id="ciModalTfActive" onclick="ciModalSetTF('H1',this)">1H</button>
-                <button class="cs-tf-btn" onclick="ciModalSetTF('H4',this)">4H</button>
-                <button class="cs-tf-btn" onclick="ciModalSetTF('D',this)">Daily</button>
-                <button class="cs-tf-btn" onclick="ciModalSetTF('W',this)">Weekly</button>
-                <button class="cs-tf-btn btn-refresh" onclick="ciModalReload()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
-                <span id="ciModalStatus" style="font-size:10px;color:#aaa;"></span>
-            </div>
+            <!-- Close PC uniquement (affiché via CSS sur >1000px) -->
+            <button class="ci-modal-close ci-mh-close-pc" onclick="closeCiModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         <div class="ci-modal-chart"><canvas id="ciModalChart"></canvas></div>
     </div>
@@ -4810,7 +4826,7 @@ function closeFocusPair() {
     <div class="pairs-modal">
         <div class="pairs-modal-header">
             <h3>Select Pairs to Display</h3>
-            <button class="pairs-modal-close" onclick="closePairsModal()">&#10005;</button>
+            <button class="pairs-modal-close" onclick="closePairsModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         <div class="pairs-modal-actions">
             <button class="pairs-action-btn" onclick="pairsSelectAll()">Select All</button>
@@ -4833,7 +4849,7 @@ function closeFocusPair() {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><line x1="12" y1="20" x2="12" y2="4"/><line x1="5" y1="13" x2="19" y2="13"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="16" r="2"/></svg>
                 Adjust Signal Weights
             </h3>
-            <button class="weights-modal-close" onclick="closeWeightsModal()">&#10005;</button>
+            <button class="weights-modal-close" onclick="closeWeightsModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         <div class="weights-total-bar">
             <span style="color:#888">Total weight</span>
@@ -4869,7 +4885,7 @@ function closeFocusPair() {
 <div class="fp-panel" id="fpPanel">
     <div class="fp-header">
         <div class="fp-title" id="fpPairTitle">EURUSD</div>
-        <button class="fp-close" onclick="closeFocusPair()">&#10005;</button>
+        <button class="fp-close" onclick="closeFocusPair()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="fp-body" id="fpBody"></div>
     <div class="fp-footer">
