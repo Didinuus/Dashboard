@@ -114,6 +114,8 @@
         .cs-tf-btn { padding:5px 12px; background:transparent; color:var(--text-muted); border:1px solid var(--border); border-radius:var(--radius-btn); cursor:pointer; font-size:var(--font-base); font-weight:bold; font-family:inherit; }
         .cs-tf-btn:hover { background:var(--border); color:var(--text-primary); }
         .cs-tf-btn.active { background:var(--accent); color:var(--text-primary); border-color:var(--accent-hover); }
+        /* Refresh button — square, same height as TF buttons */
+        .btn-refresh { display:inline-flex; align-items:center; justify-content:center; padding:0; width:27px; height:27px; }
         .cs-legend { display:flex; flex-wrap:wrap; gap:8px; }
         .cs-legend-item { display:flex; align-items:center; gap:5px; font-size:var(--font-base); cursor:pointer; padding:3px 7px; border-radius:4px; border:1px solid transparent; transition:border-color .15s; }
         .cs-legend-item:hover { border-color:var(--border); }
@@ -467,7 +469,7 @@
                 <button class="cs-tf-btn" onclick="ciModalSetTF('H4',this)">4H</button>
                 <button class="cs-tf-btn" onclick="ciModalSetTF('D',this)">Daily</button>
                 <button class="cs-tf-btn" onclick="ciModalSetTF('W',this)">Weekly</button>
-                <button class="cs-tf-btn" onclick="ciModalReload()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                <button class="cs-tf-btn btn-refresh" onclick="ciModalReload()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                 <span id="ciModalStatus" style="font-size:10px;color:#aaa;"></span>
             </div>
             <div class="ci-modal-title" id="ciModalTitle" style="flex:1;text-align:center;font-size:13px;">Currency Index</div>
@@ -533,7 +535,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><line x1="12" y1="20" x2="12" y2="4"/><line x1="5" y1="13" x2="19" y2="13"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="16" r="2"/></svg>
                     Weights
                 </button>
-                <button class="cs-tf-btn" onclick="ovRefresh()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                <button class="cs-tf-btn btn-refresh" onclick="ovRefresh()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
             </div>
         </div>
         <div class="ov-layout">
@@ -566,7 +568,7 @@
             <div class="ph-center">Traders Sentiment</div>
             <div class="ph-right">
                 <span class="ph-status" id="lastUpdate">Loading...</span>
-                <button class="cs-tf-btn" onclick="actualiserDonnees()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                <button class="cs-tf-btn btn-refresh" onclick="actualiserDonnees()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
             </div>
         </div>
 
@@ -674,7 +676,7 @@
                         <button class="cs-tf-btn active" onclick="csSetTF('H1',this)">Hourly</button>
                         <button class="cs-tf-btn" onclick="csSetTF('H4',this)">4H</button>
                         <button class="cs-tf-btn" onclick="csSetTF('D',this)">Daily</button>
-                        <button class="cs-tf-btn" onclick="csRefresh()" style="margin-left:4px;display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                        <button class="cs-tf-btn btn-refresh" onclick="csRefresh()" style="margin-left:4px;width:28px;height:28px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                         <span class="ph-status" id="csStatus" style="margin-left:8px;font-size:10px;color:#aaa;">Loading...</span>
                     </div>
                     <div style="font-size:13px;font-weight:bold;color:#fff;position:absolute;left:50%;transform:translateX(-50%);">Currency Strength Index</div>
@@ -696,7 +698,7 @@
                     <div style="position:absolute;left:50%;transform:translateX(-50%);font-size:13px;font-weight:bold;color:#fff;">FX Performance</div>
                     <div class="ph-right">
                         <span class="ph-status" id="fxpStatus">&mdash;</span>
-                        <button class="cs-tf-btn" onclick="fxpLoad()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                        <button class="cs-tf-btn btn-refresh" onclick="fxpLoad()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:420px 1fr;gap:15px;align-items:stretch;">
@@ -725,7 +727,7 @@
                             <button class="cs-tf-btn" onclick="ciSetTF('H4',this)">4H</button>
                             <button class="cs-tf-btn" onclick="ciSetTF('D',this)">Daily</button>
                             <button class="cs-tf-btn" onclick="ciSetTF('W',this)">Weekly</button>
-                            <button class="cs-tf-btn" onclick="ciLoad()" style="margin-left:4px;display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                            <button class="cs-tf-btn btn-refresh" onclick="ciLoad()" style="margin-left:4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                             <span class="ph-status" id="ciStatus" style="margin-left:8px;font-size:10px;color:#aaa;"></span>
                         </div>
                         <div style="font-size:13px;font-weight:bold;color:#fff;position:absolute;left:50%;transform:translateX(-50%);">Currency Index</div>
@@ -747,7 +749,7 @@
                 <div class="ph-left">
                     <span class="source-badge">Static + verified</span>
                     <span style="color:#aaa;font-size:10px" id="irStatus">&mdash;</span>
-                    <button class="cs-tf-btn" onclick="renderRates()" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                    <button class="cs-tf-btn btn-refresh" onclick="renderRates()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                 </div>
                 <div class="ph-center">Central Bank Interest Rates</div>
                 <div class="ph-right"></div>
