@@ -308,7 +308,7 @@
             .mob-section-header { display:flex; align-items:center; justify-content:space-between; padding:0 14px; height:44px; min-height:44px; box-sizing:border-box; background:#121212; border:1px solid #1e2230; border-left:3px solid #2a4a8a; border-radius:8px; margin-bottom:10px; }
             .mob-section-header .msh-title { font-size:13px; font-weight:bold; color:#fff; }
             .mob-section-header .msh-right { display:flex; align-items:center; gap:8px; }
-            .mob-section-header .msh-status { font-size:12px; color:#aaa; }
+            .mob-section-header .msh-status { font-size:10px; color:#aaa; }
             /* Sentiment table */
             .mob-sentiment-table { background:#121212; border:1px solid #1e2230; border-radius:8px; overflow:hidden; margin-bottom:12px; }
             .mob-sentiment-table table { width:100%; border-collapse:collapse; font-size:12px; }
@@ -1376,12 +1376,18 @@ async function ciLoadMoreHistory() {
 
 function ciSetTF(tf, btn) {
     ciTF = tf;
-    /* CI TF buttons are now inside page-strength (PC) — select by proximity to ciCombinedTfActive */
+    _ciHoverIdx = -1;
+    _mobCiHoverIdx = -1;
+    /* PC buttons */
     var active = document.getElementById('ciCombinedTfActive');
     if (active && active.parentNode) {
         active.parentNode.querySelectorAll('.cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
     }
-    document.querySelectorAll('.mob-ci-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    /* Mobile buttons */
+    var mobActive = document.getElementById('mob-ciCombinedLegend');
+    if (mobActive && mobActive.parentNode) {
+        mobActive.parentNode.querySelectorAll('.cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    }
     if (btn) btn.classList.add('active');
     ciLoad();
 }
