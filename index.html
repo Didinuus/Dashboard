@@ -673,7 +673,7 @@
                     <div style="display:flex;align-items:center;gap:6px;position:relative;z-index:1;">
                         <button class="cs-tf-btn" onclick="csSetTF('M5',this)">5 Min</button>
                         <button class="cs-tf-btn" onclick="csSetTF('M15',this)">15 Min</button>
-                        <button class="cs-tf-btn active" onclick="csSetTF('H1',this)">Hourly</button>
+                        <button class="cs-tf-btn active" id="csTfActive" onclick="csSetTF('H1',this)">Hourly</button>
                         <button class="cs-tf-btn" onclick="csSetTF('H4',this)">4H</button>
                         <button class="cs-tf-btn" onclick="csSetTF('D',this)">Daily</button>
                         <button class="cs-tf-btn btn-refresh" onclick="csRefresh()" style="margin-left:4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
@@ -3187,6 +3187,7 @@ function buildLabels(times, tf) {
 }
 
 async function csLoad(){
+    _csHoverIdx = -1;
     var el=document.getElementById('csStatus');if(el)el.textContent='Loading...';
     var pairs=csAllPairs(),results={};
     /* Fetch CS_COUNT + 20 extra to ensure we always have enough after RSI warmup */
@@ -3250,7 +3251,33 @@ function renderCSChart(labels,series){
             plugins:{ legend:{display:false}, tooltip:{enabled:false} },
             scales:{
                 x:{ grid:{color:'#121212'}, ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12,color:'#444',font:{size:9}} },
-                y:{ position:'right', min:15, max:85, grid:{color:'#161622'},
+                y:{ position:'right', grid:{color:'#161622'},
+                    min: function(ctx) {
+                        var chart = ctx.chart;
+                        var xMin = Math.round(chart.options.scales.x.min || 0);
+                        var xMax = Math.round(chart.options.scales.x.max || 0);
+                        var lo = 100;
+                        chart.data.datasets.forEach(function(ds) {
+                            if (ds.hidden) return;
+                            for (var i = xMin; i <= xMax && i < ds.data.length; i++) {
+                                if (ds.data[i] !== null && ds.data[i] < lo) lo = ds.data[i];
+                            }
+                        });
+                        return Math.max(0, lo - 10);
+                    },
+                    max: function(ctx) {
+                        var chart = ctx.chart;
+                        var xMin = Math.round(chart.options.scales.x.min || 0);
+                        var xMax = Math.round(chart.options.scales.x.max || 0);
+                        var hi = 0;
+                        chart.data.datasets.forEach(function(ds) {
+                            if (ds.hidden) return;
+                            for (var i = xMin; i <= xMax && i < ds.data.length; i++) {
+                                if (ds.data[i] !== null && ds.data[i] > hi) hi = ds.data[i];
+                            }
+                        });
+                        return Math.min(100, hi + 10);
+                    },
                     ticks:{ display:false },
                     afterFit:function(axis){ axis.width=0; }
                 }
@@ -3404,7 +3431,11 @@ function buildCSLegend() {
 function csRefresh() { csLoad(); }
 function csSetTF(tf, btn) {
     csTF = tf;
-    document.querySelectorAll('.cs-tf-btns .cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    _csHoverIdx = -1;
+    var active = document.getElementById('csTfActive');
+    if (active && active.parentNode) {
+        active.parentNode.querySelectorAll('.cs-tf-btn').forEach(function(b){ b.classList.remove('active'); });
+    }
     if (btn) btn.classList.add('active');
     csLoad();
 }
