@@ -18,8 +18,8 @@
             --bg-card:      #121212;
             --bg-card-deep: #0d0d0d;
             --bg-header:    #161622;
-            --border:       var(--border);
-            --border-dark:  var(--border-dark);
+            --border:       transparent;
+            --border-dark:  transparent;
             --radius-card:  8px;
             --radius-btn:   5px;
             --accent:       #2a3060;
@@ -29,7 +29,7 @@
             --text-dim:     #666666;
             --text-faint:   #444444;
             --text-label:   #888888;
-            --shadow-card:  0 2px 14px rgba(0,0,0,0.55), 0 0 0 1px var(--border);
+            --shadow-card:  none;
             --tab-icon:     #4a8fff;
             --font-xs:      9px;
             --font-sm:      10px;
@@ -82,12 +82,12 @@
         th { background:var(--bg-card); font-weight:bold; color:var(--text-primary); }
         td { background:var(--bg-card); color:var(--text-primary); }
         .cot-container { display:flex; flex-direction:column; border-radius:var(--radius-card);
-        box-shadow: var(--shadow-card); overflow:hidden; background:var(--bg-card); border:1px solid var(--border); }
+        overflow:hidden; background:var(--bg-card); border:none; }
         .cot-header { background:var(--bg-card); padding:12px; text-align:center; font-weight:bold; font-size:var(--font-md); color:var(--text-primary); border-bottom:1px solid var(--border); }
         .cot-scroll { overflow-y:auto; overflow-x:hidden; scrollbar-width:none; }
         .cot-scroll thead th { background:var(--bg-header); color:var(--text-label); font-size:var(--font-sm); letter-spacing:0.5px; text-transform:uppercase; border-color:var(--border-dark); padding:10px 8px; }
-        .cot-chart-wrap { background:var(--bg-card); padding:0; border:1px solid var(--border); border-radius:var(--radius-card);
-        box-shadow: var(--shadow-card); display:flex; flex-direction:column; overflow:hidden; }
+        .cot-chart-wrap { background:var(--bg-card); padding:0; border:none; border-radius:var(--radius-card);
+        display:flex; flex-direction:column; overflow:hidden; }
         .cot-chart-wrap h3 { background:var(--bg-header); text-align:center; padding:10px 8px; font-size:var(--font-sm); color:var(--text-label); font-weight:bold; letter-spacing:0.5px; text-transform:uppercase; border-bottom:1px solid var(--border-dark); flex-shrink:0; }
 
         /* COT Sub-tabs */
@@ -581,9 +581,9 @@
         <div class="page-header" style="position:relative;">
             <div class="ph-left" style="min-width:0;flex:1;">
                 <div style="display:flex;gap:14px;align-items:center;">
-                    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);padding:10px;text-align:center"><div style="font-size:9px;color:#555555;text-transform:uppercase;letter-spacing:0.5px;">Strongest</div><div id="ovStrongest" style="font-size:13px;font-weight:bold;">—</div></div>
+                    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);padding:6px 10px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;"><div style="font-size:9px;color:#555555;text-transform:uppercase;letter-spacing:0.5px;">Strongest</div><div id="ovStrongest" style="font-size:13px;font-weight:bold;">—</div></div>
                     <div style="width:1px;height:28px;background:#1e2230;flex-shrink:0;"></div>
-                    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);padding:10px;text-align:center"><div style="font-size:9px;color:#555555;text-transform:uppercase;letter-spacing:0.5px;">Weakest</div><div id="ovWeakest" style="font-size:13px;font-weight:bold;">—</div></div>
+                    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);padding:6px 10px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;"><div style="font-size:9px;color:#555555;text-transform:uppercase;letter-spacing:0.5px;">Weakest</div><div id="ovWeakest" style="font-size:13px;font-weight:bold;">—</div></div>
                     <div style="width:1px;height:28px;background:#1e2230;flex-shrink:0;"></div>
                     <div><div style="font-size:9px;color:#555555;text-transform:uppercase;letter-spacing:0.5px;">Top Pair</div><div id="ovTopPair" style="font-size:12px;font-weight:bold;">—</div></div>
                     <div style="width:1px;height:28px;background:#1e2230;flex-shrink:0;"></div>
@@ -867,11 +867,11 @@
             <div id="mob-ovSessions" class="ov-sessions" style="margin-bottom:10px;"></div>
             <!-- Summary strip -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);padding:10px;text-align:center">
+                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);padding:6px 10px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;">
                     <div style="font-size:9px;color:#666666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Strongest</div>
                     <div style="font-size:14px;font-weight:bold" id="mob-ovStrongest">—</div>
                 </div>
-                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);padding:10px;text-align:center">
+                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);padding:6px 10px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;">
                     <div style="font-size:9px;color:#666666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Weakest</div>
                     <div style="font-size:14px;font-weight:bold" id="mob-ovWeakest">—</div>
                 </div>
@@ -935,7 +935,7 @@
                     <div class="mob-pies" id="mob-cotPiesLS"></div>
                 </div>
                 <div style="margin-top:12px;">
-                    <div style="background:#121212;border:1px solid #1e2230;border-radius:8px;padding:10px;text-align:center;font-size:12px;font-weight:bold;margin-bottom:10px;">Net Positions</div>
+                    <div style="background:#121212;border:none;box-shadow:none;border-radius:8px;padding:10px;text-align:center;font-size:12px;font-weight:bold;margin-bottom:10px;">Net Positions</div>
                     <div id="mob-histGrid" style="display:grid;grid-template-columns:1fr;gap:8px;"></div>
                 </div>
             </div>
@@ -2996,7 +2996,7 @@ function buildHistGrid() {
     grid.innerHTML = '';
     CURRENCIES_ORDER.forEach(function(cur) {
         var wrap = document.createElement('div');
-        wrap.style.cssText = 'background:#121212;border:1px solid #1e2230;border-radius:8px;padding:10px';
+        wrap.style.cssText = 'background:#121212;border:none;box-shadow:none;border-radius:8px;padding:10px';
         wrap.innerHTML =
             '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
                 '<span style="font-size:11px;font-weight:bold;color:#fff">' + cur + '</span>' +
@@ -3156,7 +3156,7 @@ function mobBuildHistGrid(cotData) {
         var rows = byCode[market.code];
         if (!rows || !rows.length) return;
         var wrap = document.createElement('div');
-        wrap.style.cssText = 'background:#121212;border:1px solid #1e2230;border-radius:8px;padding:8px';
+        wrap.style.cssText = 'background:#121212;border:none;box-shadow:none;border-radius:8px;padding:8px';
         wrap.innerHTML = '<div style="font-size:11px;font-weight:bold;color:#fff;margin-bottom:5px">' + cur + '</div>' +
             '<div style="position:relative;height:80px"><canvas id="mob-histChart_' + cur + '"></canvas></div>';
         grid.appendChild(wrap);
