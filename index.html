@@ -112,7 +112,7 @@
         .tab-btn.active { color:var(--text-primary); }
         .tab-btn svg { width:15px; height:15px; flex-shrink:0; opacity:1; }
         .tab-btn.active svg { opacity:1; }
-        .tab-btn::after { content:""; position:absolute; bottom:0; left:15%; right:15%; height:2px; background:#2563eb; border-radius:2px 2px 0 0; opacity:0; transform:scaleX(0); transition:all .2s cubic-bezier(.4,0,.2,1); }
+        .tab-btn::after { content:""; position:absolute; bottom:0; left:15%; right:15%; height:2px; background:var(--tab-icon); border-radius:2px 2px 0 0; opacity:0; transform:scaleX(0); transition:all .2s cubic-bezier(.4,0,.2,1); }
         .tab-btn.active::after { opacity:1; transform:scaleX(1); }
         .tab-page { display:none; }
         .tab-page.active { display:block; }
@@ -329,11 +329,12 @@
             .mobile-layout { display:flex; flex-direction:column; height:100dvh; height:100vh; position:relative; overflow:hidden; }
             .mob-content { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding:12px 12px 0 12px; padding-bottom:calc(64px + env(safe-area-inset-bottom) + 12px); }
             .mob-nav { position:fixed; bottom:0; left:0; right:0; z-index:100; background:#121212; border-top:1px solid var(--border); display:flex; align-items:stretch; height:calc(64px + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom); }
-            .mob-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:transparent; border:none; color:var(--text-faint); font-size:var(--font-xs); font-weight:600; cursor:pointer; transition:color 0.15s; padding:8px 0; letter-spacing:0.3px; -webkit-tap-highlight-color:transparent; margin-bottom:0; height:64px; align-self:flex-start; }
+            .mob-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:transparent; border:none; color:var(--text-faint); font-size:var(--font-xs); font-weight:600; cursor:pointer; transition:color 0.15s; padding:8px 0; letter-spacing:0.3px; -webkit-tap-highlight-color:transparent; margin-bottom:0; height:64px; align-self:flex-start; position:relative; }
             .mob-nav-btn.active { color:#fff; }
             .mob-nav-btn svg { width:20px; height:20px; }
             .mob-nav-btn.active svg path, .mob-nav-btn.active svg rect, .mob-nav-btn.active svg polyline, .mob-nav-btn.active svg circle { stroke:#fff; }
-            .mob-nav-indicator { position:absolute; top:0; height:2px; background:#4a8fff; border-radius:0 0 2px 2px; transition:left 0.25s cubic-bezier(.4,0,.2,1), width 0.25s; }
+            .mob-nav-btn::after { content:""; position:absolute; top:0; left:15%; right:15%; height:2px; background:var(--tab-icon); border-radius:0 0 2px 2px; opacity:0; transform:scaleX(0); transition:all .2s cubic-bezier(.4,0,.2,1); }
+            .mob-nav-btn.active::after { opacity:1; transform:scaleX(1); }
             .mob-page { display:none; }
             .mob-page.active { display:block; }
             /* Section headers — matches PC page-header */
@@ -1052,7 +1053,7 @@
 
     <!-- Bottom navigation (5 tabs) -->
     <nav class="mob-nav" id="mobNav">
-        <div class="mob-nav-indicator" id="mobNavIndicator"></div>
+
         <button class="mob-nav-btn active" onclick="mobShowPage('overview',0,this)" id="mobnav-overview">
             <svg viewBox="0 0 24 24" fill="none" stroke="#666666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             Overview
@@ -2658,11 +2659,6 @@ function mobShowPage(name, idx, btn) {
     document.getElementById('mob-page-'+name).classList.add('active');
     btn.classList.add('active'); btn.style.color='#fff';
     var s=btn.querySelector('svg'); if(s)s.style.stroke='#fff';
-    var nav = document.getElementById('mobNav');
-    var btnWidth = nav.offsetWidth / 4;
-    var ind = document.getElementById('mobNavIndicator');
-    ind.style.left = (idx * btnWidth) + 'px';
-    ind.style.width = btnWidth + 'px';
     document.getElementById('mobContent').scrollTop = 0;
     if (name === 'strength') { mobCsLoad(); setTimeout(mobFxpLoad, 800); }
     if (name === 'macro') mobRenderRates();
@@ -2670,14 +2666,6 @@ function mobShowPage(name, idx, btn) {
     if (name === 'overview') ovRefresh();
 }
 
-window.addEventListener('load', function() {
-    var nav = document.getElementById('mobNav');
-    if (nav) {
-        var btnWidth = nav.offsetWidth / 4;
-        var ind = document.getElementById('mobNavIndicator');
-        if (ind) { ind.style.left='0'; ind.style.width=btnWidth+'px'; }
-    }
-});
 
 /* =========================================================
    MOBILE SUB-TABS
