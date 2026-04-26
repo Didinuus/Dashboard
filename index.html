@@ -72,8 +72,8 @@
         .pc-bar-row { display:flex; align-items:center; gap:8px; height:25px; }
         .pc-bar-label { font-size:var(--font-base); font-weight:bold; color:var(--text-primary); width:62px; flex-shrink:0; text-align:right; padding-right:2px; }
         .pc-bar-track { flex:1; height:19px; border-radius:var(--radius-btn); overflow:hidden; display:flex; margin-right:8px; }
-        .pc-bar-short { background:rgb(158,50,50); display:flex; align-items:center; justify-content:center; font-size:var(--font-base); font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
-        .pc-bar-long  { background:rgb(42,127,81); display:flex; align-items:center; justify-content:center; font-size:var(--font-base); font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
+        .pc-bar-short { background:#C03939; display:flex; align-items:center; justify-content:center; font-size:var(--font-base); font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
+        .pc-bar-long  { background:#2F995F; display:flex; align-items:center; justify-content:center; font-size:var(--font-base); font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
         .pc-sent-title { background:var(--bg-header); font-weight:bold; color:var(--text-label); text-align:center; padding:10px 8px; border-bottom:1px solid #111111; flex-shrink:0; font-size:var(--font-sm); letter-spacing:0.5px; text-transform:uppercase; }
 
         th, td { padding:6px 8px; text-align:center; border:1px solid var(--border); }
@@ -199,7 +199,7 @@
            ============================================= */
         .ci-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
         .ci-chart-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); display:flex; flex-direction:column; overflow:hidden; transition:border-color .2s; cursor:pointer; }
-        .ci-chart-card:hover { border-color:#2a3060; }
+        .ci-chart-card:hover { border-color:var(--accent); }
         .ci-card-header { display:flex; align-items:flex-start; justify-content:space-between; padding:12px 12px 4px 12px; flex-shrink:0; }
         .ci-card-cur { display:flex; align-items:center; gap:6px; }
         .ci-card-flag { font-size:var(--font-base); font-weight:bold; color:var(--text-dim); letter-spacing:0.5px; }
@@ -337,7 +337,7 @@
             .mob-bar-long  { background:#2F995F; display:flex; align-items:center; justify-content:center; font-size:var(--font-base); font-weight:bold; color:#fff; min-width:0; transition:width 0.4s; }
             /* COT */
             .mob-cot-section { margin-bottom:12px; }
-            .mob-cot-header { background:#161622; border:1px solid var(--border); border-radius:var(--radius-card) 8px 0 0; padding:10px 8px; font-size:var(--font-sm); font-weight:bold; text-align:center; color:var(--text-label); letter-spacing:0.5px; text-transform:uppercase; border-bottom:1px solid #111111; }
+            .mob-cot-header { background:#161622; border:1px solid var(--border); border-radius:var(--radius-card) var(--radius-card) 0 0; padding:10px 8px; font-size:var(--font-sm); font-weight:bold; text-align:center; color:var(--text-label); letter-spacing:0.5px; text-transform:uppercase; border-bottom:1px solid #111111; }
             .mob-cot-table { background:#121212; border:1px solid var(--border); border-top:none; border-radius:0 0 8px 8px; overflow:hidden; }
             .mob-cot-table table { width:100%; border-collapse:collapse; font-size:var(--font-base); }
             .mob-cot-table th { background:#161622; color:var(--text-label); padding:7px 5px; font-size:var(--font-sm); font-weight:bold; text-align:center; border-bottom:1px solid var(--border); letter-spacing:0.5px; text-transform:uppercase; }
@@ -430,8 +430,7 @@
         .ai-settings-footer { display:flex; align-items:center; justify-content:space-between; padding-top:8px; border-top:1px solid #111; }
 
         /* Brief card */
-        .ai-brief-card { background:#0d0d0d; border:1px solid #1e2230; border-radius:var(--radius-card); min-height:400px; display:flex; flex-direction:column; position:relative; }
-        .ai-brief-empty { display:flex; flex-direction:column; flex:1; }
+        .ai-brief-card { background:var(--bg-base); border:1px solid #1e2230; border-radius:var(--radius-card); min-height:400px; display:flex; flex-direction:column; position:relative; }
         .ai-history-entry-card { background:#111; border:1px solid #1e2230; border-radius:6px; padding:12px 16px; cursor:pointer; transition:border-color .15s, background .15s; display:flex; flex-direction:column; gap:6px; }
         .ai-history-entry-card:hover { border-color:#4a8fff; background:#0d1830; }
         .ai-history-entry-date { font-size:11px; font-weight:bold; color:#4a8fff; }
@@ -497,8 +496,6 @@
         .ai-brief-timestamp { font-size:var(--font-xs); color:#444; }
         .ai-brief-sources { font-size:var(--font-xs); color:#444; }
         .ai-streaming-cursor { display:inline-block; width:2px; height:12px; background:#4a8fff; margin-left:2px; animation:pulse-dot 0.8s infinite; vertical-align:middle; }
-
-        /* History */
 
         /* =============================================
            FOCUS PAIR PANEL
@@ -963,74 +960,6 @@
         </div>
     </div>
 
-    <!-- AI ANALYST -->
-    <div class="tab-page" id="page-aianalyst">
-        <div class="ai-layout">
-
-            <!-- API Key banner (shown only if no key stored) -->
-            <div class="ai-key-banner" id="aiKeyBanner">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;color:#4a8fff"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span style="flex:1">Clé API Anthropic requise</span>
-                <input class="ai-key-input" id="aiKeyInput" type="password" placeholder="sk-ant-api03-..." spellcheck="false"/>
-                <button class="ai-key-save-btn" onclick="aiSaveKey()">Enregistrer</button>
-            </div>
-
-            <!-- Top row : controls -->
-            <div class="page-header" style="position:relative;">
-                <div class="ph-left" style="gap:8px;">
-                    <button class="ai-settings-btn" onclick="aiToggleSettings()" title="Sources & Settings">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                        Sources
-                    </button>
-                    <span class="ph-status" id="aiStatus"></span>
-                </div>
-                <div class="ph-center">AI Macro Analyst</div>
-                <div class="ph-right" style="gap:6px;">
-                    <select class="ai-lang-select" id="aiLangSelect">
-                        <option value="french">Français</option>
-                        <option value="english">English</option>
-                    </select>
-                    <button class="ai-generate-btn" id="aiGenerateBtn" onclick="aiGenerate()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                        Daily Brief
-                    </button>
-                </div>
-            </div>
-
-            <!-- Settings panel -->
-            <div class="ai-settings-panel" id="aiSettingsPanel" style="display:none;">
-                <div class="ai-settings-header">
-                    <span>Sources de données</span>
-                    <button class="ai-settings-close" onclick="aiToggleSettings()">✕</button>
-                </div>
-                <div class="ai-sources-grid" id="aiSourcesGrid"></div>
-                <div class="ai-custom-source">
-                    <input class="ai-custom-input" id="aiCustomUrl" type="text" placeholder="Ajouter une URL custom (ex: https://www.forexlive.com)"/>
-                    <button class="ai-custom-add-btn" onclick="aiAddCustomSource()">Ajouter</button>
-                </div>
-                <div class="ai-settings-footer">
-                    <span style="color:#666;font-size:10px;">Les sources cochées seront lues avant génération du brief</span>
-                    <button class="ai-key-clear-btn" onclick="aiClearKey()">Effacer la clé API</button>
-                </div>
-            </div>
-
-            <!-- Brief output -->
-            <div class="ai-brief-card" id="aiBriefCard">
-                <div class="ai-brief-empty" id="aiBriefEmpty">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;color:#333;margin-bottom:12px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                    <div style="color:#444;font-size:13px;font-weight:bold;">Aucun brief généré</div>
-                    <div style="color:#333;font-size:11px;margin-top:4px;">Cliquez sur "Daily Brief" pour analyser les marchés</div>
-                </div>
-                <div class="ai-brief-content" id="aiBriefContent" style="display:none;"></div>
-            </div>
-
-            </div>
-
-        </div>
-    </div>
-</div>
-</div>
-
 <!-- ================================================
      MOBILE LAYOUT
      ================================================ -->
@@ -1274,7 +1203,7 @@
             <div class="mob-section-header">
                 <span class="msh-title">Central Bank Rates</span>
                 <div class="msh-right">
-                    <span class="msh-status" id="mob-irStatus">Apr 6, 2026</span>
+                    <span class="msh-status" id="mob-irStatus">—</span>
                     <button class="cs-tf-btn" onclick="mobRenderRates()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
                 </div>
             </div>
@@ -4349,6 +4278,7 @@ function renderRates(){
 
 function mobRenderRates(){
     var grid = document.getElementById('mob-irCardsGrid'); if (!grid) return; grid.innerHTML = '';
+    var mobisel = document.getElementById('mob-irStatus'); if (mobisel) mobisel.textContent = 'Updated Apr 17, 2026';
     IR_BANKS.forEach(function(b){
         var bpsChg = b.lastChangeBps || 0;
         var changeStr = bpsChg===0 ? 'Unchanged' : (bpsChg>0?'▲ +':'▼ ')+Math.abs(bpsChg)+'bps';
