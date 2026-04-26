@@ -263,6 +263,9 @@
         .ov-top-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
         .ov-cur-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); padding:14px 16px; position:relative; overflow:hidden; transition:border-color .2s, background .2s; cursor:default; }
         .ov-cur-card:hover { border-color:var(--accent); background:var(--bg-header); }
+        .ov-ai-signal { display:flex; align-items:center; gap:5px; margin-top:6px; padding-top:6px; border-top:1px solid #111; font-size:9px; }
+        .ov-ai-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+        .ov-ai-text { color:#555; line-height:1.3; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
         .ov-sparkline { display:block; width:100%; height:28px; margin-top:8px; opacity:0.7; }
         .ov-accent { position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
         .ov-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
@@ -4491,6 +4494,50 @@ var _ovSparkHistory = (function() {
     try { return JSON.parse(localStorage.getItem('ov_spark_history') || '{}'); } catch(e) { return {}; }
 })();
 
+/* AI signals extracted from latest brief — { USD:{s:'bull',r:'...'}, EUR:{...}, ... } */
+var _ovAiSignals = {};
+
+function ovParseAiSignals(briefText) {
+    if (!briefText) return;
+    // Find the recap section
+    var recapIdx = briefText.search(/récapitulatif des 8 devises|8 currency recap/i);
+    if (recapIdx === -1) return;
+    var section = briefText.slice(recapIdx, recapIdx + 3000);
+    var lines = section.split('\n');
+    var CURRENCIES = ['USD','EUR','GBP','JPY','CHF','CAD','AUD','NZD'];
+    var signals = {};
+    lines.forEach(function(line) {
+        CURRENCIES.forEach(function(cur) {
+            if (line.indexOf('| ' + cur) === -1 && line.indexOf('|' + cur) === -1) return;
+            var s = 'neutral';
+            if (/🟢|BULL/i.test(line)) s = 'bull';
+            else if (/🔴|BEAR/i.test(line)) s = 'bear';
+            // Extract reason — last pipe-separated column
+            var parts = line.split('|').map(function(p){ return p.trim(); }).filter(Boolean);
+            var reason = parts.length >= 4 ? parts[parts.length-1] : (parts[parts.length-1] || '');
+            reason = reason.replace(/🟢|🔴|🟡|BULL|BEAR|NEUTRE|NEUTRAL/gi,'').trim();
+            if (reason.length > 2) signals[cur] = { s: s, r: reason.slice(0,80) };
+        });
+    });
+    if (Object.keys(signals).length >= 4) {
+        _ovAiSignals = signals;
+        try { localStorage.setItem('ov_ai_signals', JSON.stringify(signals)); } catch(e) {}
+    }
+}
+
+function ovLoadAiSignals() {
+    // Load from latest brief in history
+    if (_aiHistory && _aiHistory.length) {
+        ovParseAiSignals(_aiHistory[0].text);
+        return;
+    }
+    // Fallback: localStorage
+    try {
+        var s = localStorage.getItem('ov_ai_signals');
+        if (s) _ovAiSignals = JSON.parse(s);
+    } catch(e) {}
+}
+
 function ovSaveSparkSnapshot(scores) {
     var now = Date.now();
     Object.keys(scores).forEach(function(cur) {
@@ -4816,6 +4863,12 @@ function renderOverview(bias) {
                     '</div>' +
                 '</div>' +
                 '<div class="ov-signals">'+sigsHTML+'</div>' +
+                (function(){
+                    var ai = _ovAiSignals[cur];
+                    if (!ai) return '';
+                    var dot = ai.s==='bull'?'#14BC60':ai.s==='bear'?'#F26666':'#f0a500';
+                    return '<div class="ov-ai-signal"><div class="ov-ai-dot" style="background:'+dot+'"></div><div class="ov-ai-text">'+ai.r+'</div></div>';
+                })() +
                 '<canvas class="ov-sparkline" data-cur="'+cur+'" data-score="'+d.score+'" data-color="'+lbl.color+'"></canvas>';
             grid.appendChild(card);
         });
@@ -4997,6 +5050,7 @@ function renderSessions() {
 setInterval(renderSessions, 60000);
 
 async function ovRefresh() {
+    ovLoadAiSignals();
     /* Update status indicators */
     ['ovStatus','mob-ovStatus'].forEach(function(id){
         var el = document.getElementById(id); if (el) el.textContent = 'Loading...';
@@ -5315,8 +5369,8 @@ async function mobAiGenerate() {
     var today   = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
 
     var systemPrompt = lang === 'french'
-        ? 'Tu es un analyste FX macro senior. Tu génères un brief macro quotidien clair et actionnable pour un trader forex. Réponds en français. Structure avec Markdown : # titre, ## sections, **gras** pour les points clés. Signaux : 🟢 bullish, 🔴 bearish, 🟡 neutre. Sections OBLIGATOIRES dans cet ordre : 1) Résumé du jour — contexte macro global et thèmes dominants. 2) Données macro & impact devises — données économiques du jour et leur impact sur les devises. 3) Politique monétaire — décisions et communications des banques centrales. 4) Récapitulatif des 8 devises — pour chaque devise (USD, EUR, GBP, JPY, CHF, CAD, AUD, NZD) : une ligne avec signal 🟢/🔴/🟡, biais du jour et raison principale. 5) Risk Sentiment — appétit au risque global, corrélations or/pétrole/indices. 6) Points clés demain — événements macro et risques à surveiller pour la prochaine session. Explique toujours les causalités (données → impact devise). Limite-toi à 6-8 recherches web ciblées.'
-        : 'You are a senior FX macro analyst. Generate a clear, actionable daily macro brief for a forex trader. Respond in English. Use Markdown: # title, ## sections, **bold** for key points. Signals: 🟢 🔴 🟡. MANDATORY sections in this order: 1) Day Summary — global macro context and dominant themes. 2) Macro Data & Currency Impact — economic data and their impact on currencies. 3) Monetary Policy — central bank decisions and communications. 4) 8 Currency Recap — for each currency (USD, EUR, GBP, JPY, CHF, CAD, AUD, NZD): one line with 🟢/🔴/🟡 signal, daily bias and main reason. 5) Risk Sentiment — global risk appetite, gold/oil/indices correlations. 6) Key Points Tomorrow — macro events and risks to watch for the next session. Always explain causality (data → currency impact). Limit yourself to 6-8 targeted web searches.';
+        ? 'Tu es un analyste FX macro senior. Tu génères un brief macro quotidien clair et actionnable pour un trader forex. Réponds en français. Structure avec Markdown : # titre, ## sections, **gras** pour les points clés. Signaux : 🟢 bullish, 🔴 bearish, 🟡 neutre. Sections OBLIGATOIRES dans cet ordre : 1) Résumé du jour — contexte macro global et thèmes dominants. 2) Données macro & impact devises — données économiques du jour et leur impact sur les devises. 3) Politique monétaire — décisions et communications des banques centrales. 4) Récapitulatif des 8 devises — tableau Markdown OBLIGATOIRE avec EXACTEMENT ces 8 devises dans cet ordre : USD, EUR, GBP, JPY, CHF, CAD, AUD, NZD. Format : | Devise | Signal | Biais du Jour | Raison Principale |. Ne jamais omettre AUD et NZD. 5) Risk Sentiment — appétit au risque global, corrélations or/pétrole/indices. 6) Points clés demain — événements macro et risques à surveiller pour la prochaine session. Explique toujours les causalités (données → impact devise). Limite-toi à 6-8 recherches web ciblées.'
+        : 'You are a senior FX macro analyst. Generate a clear, actionable daily macro brief for a forex trader. Respond in English. Use Markdown: # title, ## sections, **bold** for key points. Signals: 🟢 🔴 🟡. MANDATORY sections in this order: 1) Day Summary — global macro context and dominant themes. 2) Macro Data & Currency Impact — economic data and their impact on currencies. 3) Monetary Policy — central bank decisions and communications. 4) 8 Currency Recap — MANDATORY Markdown table with EXACTLY these 8 currencies in this order: USD, EUR, GBP, JPY, CHF, CAD, AUD, NZD. Format: | Currency | Signal | Daily Bias | Main Reason |. Never omit AUD and NZD. 5) Risk Sentiment — global risk appetite, gold/oil/indices correlations. 6) Key Points Tomorrow — macro events and risks to watch for the next session. Always explain causality (data → currency impact). Limit yourself to 6-8 targeted web searches.';
 
     var userPrompt = (lang === 'french' ? 'Brief macro FX pour le ' : 'FX macro brief for ') + today + '.\n\nSources :\n' +
         sources.map(function(s){ return '- ' + s.name + ' : ' + s.url; }).join('\n') +
@@ -5360,7 +5414,8 @@ async function mobAiGenerate() {
         if (icon) icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
         if (themeBtn) themeBtn.style.display = 'inline-flex';
 
-        // Sync histories
+        // Sync histories + parse signals
+        ovParseAiSignals(text);
         aiRenderHistory();
         mobAiRenderHistory();
         document.getElementById('mob-aiStatus').textContent = '✓';
@@ -5495,8 +5550,8 @@ async function aiGenerate() {
     var today = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
 
     var systemPrompt = lang === 'french'
-        ? 'Tu es un analyste FX macro senior. Tu génères un brief macro quotidien clair et actionnable pour un trader forex. Réponds en français. Structure avec Markdown : # titre, ## sections, **gras** pour les points clés. Signaux : 🟢 bullish, 🔴 bearish, 🟡 neutre. Sections OBLIGATOIRES dans cet ordre : 1) Résumé du jour — contexte macro global et thèmes dominants. 2) Données macro & impact devises — données économiques du jour et leur impact sur les devises. 3) Politique monétaire — décisions et communications des banques centrales. 4) Récapitulatif des 8 devises — pour chaque devise (USD, EUR, GBP, JPY, CHF, CAD, AUD, NZD) : une ligne avec signal 🟢/🔴/🟡, biais du jour et raison principale. 5) Risk Sentiment — appétit au risque global, corrélations or/pétrole/indices. 6) Points clés demain — événements macro et risques à surveiller pour la prochaine session. Explique toujours les causalités (données → impact devise). Limite-toi à 6-8 recherches web ciblées.'
-        : 'You are a senior FX macro analyst. Generate a clear, actionable daily macro brief for a forex trader. Respond in English. Use Markdown: # title, ## sections, **bold** for key points. Signals: 🟢 🔴 🟡. MANDATORY sections in this order: 1) Day Summary — global macro context and dominant themes. 2) Macro Data & Currency Impact — economic data and their impact on currencies. 3) Monetary Policy — central bank decisions and communications. 4) 8 Currency Recap — for each currency (USD, EUR, GBP, JPY, CHF, CAD, AUD, NZD): one line with 🟢/🔴/🟡 signal, daily bias and main reason. 5) Risk Sentiment — global risk appetite, gold/oil/indices correlations. 6) Key Points Tomorrow — macro events and risks to watch for the next session. Always explain causality (data → currency impact). Limit yourself to 6-8 targeted web searches.';
+        ? 'Tu es un analyste FX macro senior. Tu génères un brief macro quotidien clair et actionnable pour un trader forex. Réponds en français. Structure avec Markdown : # titre, ## sections, **gras** pour les points clés. Signaux : 🟢 bullish, 🔴 bearish, 🟡 neutre. Sections OBLIGATOIRES dans cet ordre : 1) Résumé du jour — contexte macro global et thèmes dominants. 2) Données macro & impact devises — données économiques du jour et leur impact sur les devises. 3) Politique monétaire — décisions et communications des banques centrales. 4) Récapitulatif des 8 devises — tableau Markdown OBLIGATOIRE avec EXACTEMENT ces 8 devises dans cet ordre : USD, EUR, GBP, JPY, CHF, CAD, AUD, NZD. Format : | Devise | Signal | Biais du Jour | Raison Principale |. Ne jamais omettre AUD et NZD. 5) Risk Sentiment — appétit au risque global, corrélations or/pétrole/indices. 6) Points clés demain — événements macro et risques à surveiller pour la prochaine session. Explique toujours les causalités (données → impact devise). Limite-toi à 6-8 recherches web ciblées.'
+        : 'You are a senior FX macro analyst. Generate a clear, actionable daily macro brief for a forex trader. Respond in English. Use Markdown: # title, ## sections, **bold** for key points. Signals: 🟢 🔴 🟡. MANDATORY sections in this order: 1) Day Summary — global macro context and dominant themes. 2) Macro Data & Currency Impact — economic data and their impact on currencies. 3) Monetary Policy — central bank decisions and communications. 4) 8 Currency Recap — MANDATORY Markdown table with EXACTLY these 8 currencies in this order: USD, EUR, GBP, JPY, CHF, CAD, AUD, NZD. Format: | Currency | Signal | Daily Bias | Main Reason |. Never omit AUD and NZD. 5) Risk Sentiment — global risk appetite, gold/oil/indices correlations. 6) Key Points Tomorrow — macro events and risks to watch for the next session. Always explain causality (data → currency impact). Limit yourself to 6-8 targeted web searches.';
 
     var srcList = sources.map(function(s){ return '- ' + s.name + ' : ' + s.url; }).join('\n');
     var userPrompt = lang === 'french'
@@ -5553,6 +5608,7 @@ async function aiGenerate() {
         _aiHistory.unshift(_aiCurrentBrief);
         if (_aiHistory.length > 10) _aiHistory.length = 10;
         aiCloudSave(_aiCurrentBrief);
+        ovParseAiSignals(text);
         aiRenderHistory();
 
         document.getElementById('aiStatus').textContent = '✓ Brief généré';
