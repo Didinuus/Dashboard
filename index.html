@@ -263,6 +263,7 @@
         .ov-top-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
         .ov-cur-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); padding:14px 16px; position:relative; overflow:hidden; transition:border-color .2s, background .2s; cursor:default; }
         .ov-cur-card:hover { border-color:var(--accent); background:var(--bg-header); }
+        .ov-sparkline { display:block; width:100%; height:28px; margin-top:8px; opacity:0.7; }
         .ov-accent { position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
         .ov-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
         .ov-cur-name { font-size:16px; font-weight:900; letter-spacing:0.5px; color:var(--tab-icon); }
@@ -429,12 +430,20 @@
         .ai-settings-footer { display:flex; align-items:center; justify-content:space-between; padding-top:8px; border-top:1px solid #111; }
 
         /* Brief card */
-        .ai-brief-card { background:#0d0d0d; border:1px solid #1e2230; border-radius:var(--radius-card); min-height:400px; display:flex; flex-direction:column; }
+        .ai-brief-card { background:#0d0d0d; border:1px solid #1e2230; border-radius:var(--radius-card); min-height:400px; display:flex; flex-direction:column; position:relative; }
+        .ai-brief-empty { display:flex; flex-direction:column; flex:1; }
+        .ai-history-entry-card { background:#111; border:1px solid #1e2230; border-radius:6px; padding:12px 16px; cursor:pointer; transition:border-color .15s, background .15s; display:flex; flex-direction:column; gap:6px; }
+        .ai-history-entry-card:hover { border-color:#4a8fff; background:#0d1830; }
+        .ai-history-entry-date { font-size:11px; font-weight:bold; color:#4a8fff; }
+        .ai-history-entry-preview { font-size:11px; color:#555; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .ai-history-entry-sources { font-size:10px; color:#333; }
+        .ai-brief-header-x { width:24px; height:24px; background:transparent; border:1px solid #2a2a3a; border-radius:50%; color:#666; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; line-height:1; transition:all .15s; flex-shrink:0; }
+        .ai-brief-header-x:hover { background:#1a1a2a; color:#fff; border-color:#666; }
         .ai-brief-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; }
         .ai-brief-content { flex:1; padding:24px 28px; line-height:1.8; color:#ccc; font-size:var(--font-base); overflow-y:auto; }
 
         /* Brief markdown rendering */
-        .ai-brief-content h1 { font-size:15px; font-weight:900; color:#fff; margin:0 0 20px 0; padding:14px 16px; background:linear-gradient(135deg,#0d1830,#0a1020); border:1px solid #1e3a5f; border-left:3px solid #4a8fff; border-radius:6px; letter-spacing:0.5px; }
+        .ai-brief-content h1 { font-size:15px; font-weight:900; color:#fff; margin:0 0 20px 0; padding:12px 14px; background:linear-gradient(135deg,#0d1830,#0a1020); border:1px solid #1e3a5f; border-left:3px solid #4a8fff; border-radius:6px; letter-spacing:0.5px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
         .ai-brief-content h2 { font-size:11px; font-weight:bold; color:#4a8fff; margin:24px 0 10px 0; text-transform:uppercase; letter-spacing:1.2px; display:flex; align-items:center; gap:8px; }
         .ai-brief-content h2::before { content:''; display:block; width:3px; height:12px; background:#4a8fff; border-radius:2px; flex-shrink:0; }
         .ai-brief-content h2::after { content:''; flex:1; height:1px; background:linear-gradient(to right,#1e2230,transparent); }
@@ -450,18 +459,46 @@
         .ai-brief-content .ai-tag-bear { display:inline-block; padding:1px 7px; background:rgba(242,102,102,0.15); border:1px solid rgba(242,102,102,0.3); border-radius:3px; color:#F26666; font-size:var(--font-xs); font-weight:bold; }
         .ai-brief-content .ai-tag-neutral { display:inline-block; padding:1px 7px; background:rgba(74,143,255,0.1); border:1px solid rgba(74,143,255,0.2); border-radius:3px; color:#4a8fff; font-size:var(--font-xs); font-weight:bold; }
         .ai-brief-content .ai-section-block { background:#0d0d0d; border:1px solid #1a1a2a; border-radius:6px; padding:12px 16px; margin-bottom:12px; }
-        .ai-brief-meta { padding:10px 28px; border-top:1px solid #111; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+        .ai-brief-meta { padding:8px 16px; border-top:1px solid #111; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; gap:8px; }
+        .ai-brief-meta-actions { display:flex; align-items:center; gap:6px; }
+        .ai-brief-close-btn { background:#0a0a0a; border:1px solid #1e2230; border-radius:var(--radius-btn); color:#666; font-size:var(--font-sm); cursor:pointer; font-family:inherit; padding:4px 10px; }
+        .ai-brief-close-btn:hover { color:#fff; border-color:#444; }
+        .ai-brief-x-btn { position:absolute; top:10px; right:10px; width:26px; height:26px; background:#0d0d0d; border:1px solid #2a2a3a; border-radius:50%; color:#666; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; z-index:10; transition:all .15s; }
+        .ai-brief-x-btn:hover { background:#1a1a2a; color:#fff; border-color:#666; }
+        .ai-brief-theme-btn { padding:3px 10px; background:transparent; border:1px solid #2a2a3a; border-radius:var(--radius-btn); color:#666; font-size:var(--font-xs); cursor:pointer; font-family:inherit; }
+        .ai-brief-theme-btn:hover { border-color:#aaa; color:#aaa; }
+        /* Light mode for brief content */
+        .ai-brief-card.light-mode, #mob-aiBriefCard.light-mode { background:#f5f5f0; border-color:#ddd; }
+        #mob-aiBriefContent { color:#ccc; }
+        #mob-aiBriefCard.light-mode #mob-aiBriefContent { color:#222; }
+        #mob-aiBriefCard.light-mode .ai-brief-content h1 { background:#e8eaf0; border-color:#bbb; border-left-color:#2a5acc; color:#111; }
+        #mob-aiBriefCard.light-mode .ai-brief-content h2 { color:#2a5acc; }
+        #mob-aiBriefCard.light-mode .ai-brief-content h2::before { background:#2a5acc; }
+        #mob-aiBriefCard.light-mode .ai-brief-content h3 { color:#444; }
+        #mob-aiBriefCard.light-mode .ai-brief-content p,
+        #mob-aiBriefCard.light-mode .ai-brief-content li { color:#333; }
+        #mob-aiBriefCard.light-mode .ai-brief-content strong { color:#000; }
+        #mob-aiBriefCard.light-mode .ai-section-block { background:#eeeee8; border-color:#ccc; }
+        .ai-brief-card.light-mode .ai-brief-content { color:#222; }
+        .ai-brief-card.light-mode .ai-brief-content h1 { background:#e8eaf0; border-color:#bbb; border-left-color:#2a5acc; color:#111; }
+        .ai-brief-card.light-mode .ai-brief-content h2 { color:#2a5acc; }
+        .ai-brief-card.light-mode .ai-brief-content h2::before { background:#2a5acc; }
+        .ai-brief-card.light-mode .ai-brief-content h2::after { background:linear-gradient(to right,#ccd,transparent); }
+        .ai-brief-card.light-mode .ai-brief-content h3 { color:#444; border-left-color:#aab; }
+        .ai-brief-card.light-mode .ai-brief-content p { color:#333; }
+        .ai-brief-card.light-mode .ai-brief-content ul { color:#333; }
+        .ai-brief-card.light-mode .ai-brief-content li { color:#333; }
+        .ai-brief-card.light-mode .ai-brief-content li::before { color:#2a5acc; }
+        .ai-brief-card.light-mode .ai-brief-content strong { color:#000; }
+        .ai-brief-card.light-mode .ai-section-block { background:#eeeee8; border-color:#ccc; }
+        .ai-brief-card.light-mode .ai-brief-meta { border-top-color:#ddd; background:#eee; }
+        .ai-brief-card.light-mode .ai-brief-timestamp,
+        .ai-brief-card.light-mode .ai-brief-sources { color:#888; }
         .ai-brief-timestamp { font-size:var(--font-xs); color:#444; }
         .ai-brief-sources { font-size:var(--font-xs); color:#444; }
         .ai-streaming-cursor { display:inline-block; width:2px; height:12px; background:#4a8fff; margin-left:2px; animation:pulse-dot 0.8s infinite; vertical-align:middle; }
 
         /* History */
-        .ai-history-bar { background:#0a0a0a; border:1px solid #1e2230; border-radius:var(--radius-card); padding:10px 14px; display:flex; align-items:center; gap:10px; }
-        .ai-history-list { flex:1; display:flex; gap:6px; flex-wrap:wrap; }
-        .ai-history-chip { padding:3px 10px; background:#121212; border:1px solid #1e2230; border-radius:var(--radius-btn); color:#666; font-size:var(--font-xs); cursor:pointer; transition:all .15s; }
-        .ai-history-chip:hover { border-color:#4a8fff; color:#aaa; }
-        .ai-history-clear { padding:3px 10px; background:transparent; border:1px solid #2a1010; border-radius:var(--radius-btn); color:#553333; font-size:var(--font-xs); cursor:pointer; font-family:inherit; }
-        .ai-history-clear:hover { background:#2a1010; color:#cc8888; }
 
         /* =============================================
            FOCUS PAIR PANEL
@@ -861,6 +898,9 @@
                     </div>
                     <div class="ph-center">AI Macro Analyst</div>
                     <div class="ph-right" style="gap:6px;">
+                        <button class="cs-tf-btn" id="aiBriefThemeBtn" onclick="aiBriefToggleTheme()" style="display:none;padding:0;width:27px;height:27px;display:none;align-items:center;justify-content:center;" title="Mode clair/sombre">
+                            <svg id="aiBriefThemeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                        </button>
                         <select class="ai-lang-select" id="aiLangSelect">
                             <option value="french">Français</option>
                             <option value="english">English</option>
@@ -890,17 +930,15 @@
 
                 <div class="ai-brief-card" id="aiBriefCard">
                     <div class="ai-brief-empty" id="aiBriefEmpty">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;color:#333;margin-bottom:12px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                        <div style="color:#444;font-size:13px;font-weight:bold;">Aucun brief généré</div>
-                        <div style="color:#333;font-size:11px;margin-top:4px;">Cliquez sur "Daily Brief" pour analyser les marchés</div>
+                        <div id="aiBriefHistoryCards" style="display:none;width:100%;padding:16px;display:flex;flex-direction:column;gap:8px;"></div>
+                        <div id="aiBriefNoHistory" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:60px 20px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;color:#333;margin-bottom:12px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                            <div style="color:#444;font-size:13px;font-weight:bold;">Aucun brief généré</div>
+                            <div style="color:#333;font-size:11px;margin-top:4px;">Cliquez sur "Daily Brief" pour analyser les marchés</div>
+                        </div>
                     </div>
                     <div class="ai-brief-content" id="aiBriefContent" style="display:none;"></div>
                 </div>
-
-                <div class="ai-history-bar" id="aiHistoryBar" style="display:none;">
-                    <span style="color:#666;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">Historique</span>
-                    <div class="ai-history-list" id="aiHistoryList"></div>
-                    <button class="ai-history-clear" onclick="aiClearHistory()">Effacer</button>
                 </div>
 
             </div>
@@ -986,11 +1024,6 @@
                 <div class="ai-brief-content" id="aiBriefContent" style="display:none;"></div>
             </div>
 
-            <!-- History -->
-            <div class="ai-history-bar" id="aiHistoryBar" style="display:none;">
-                <span style="color:#666;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">Historique</span>
-                <div class="ai-history-list" id="aiHistoryList"></div>
-                <button class="ai-history-clear" onclick="aiClearHistory()">Effacer</button>
             </div>
 
         </div>
@@ -1180,7 +1213,7 @@
 
         <!-- MACRO PAGE -->
         <div class="mob-page" id="mob-page-macro">
-            <!-- AI ANALYST (mobile, at top of macro) -->
+            <!-- AI ANALYST (mobile) -->
             <div id="mob-aiKeyBanner" style="display:none;align-items:center;gap:8px;background:#0d1117;border:1px solid #1e3a5f;border-radius:8px;padding:10px 12px;margin:8px 0;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#4a8fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 <input id="mob-aiKeyInput" type="password" placeholder="Clé API Anthropic..." style="flex:1;background:#0a0a0a;border:1px solid #1e2230;border-radius:5px;padding:5px 8px;color:#fff;font-family:inherit;font-size:11px;outline:none;min-width:0;"/>
@@ -1191,7 +1224,16 @@
                 <span class="msh-title">AI Analyst</span>
                 <div class="msh-right">
                     <span class="msh-status" id="mob-aiStatus"></span>
-                    <button class="cs-tf-btn" onclick="mobAiToggleSettings()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;" title="Sources">
+                    <!-- Close brief -->
+                    <button class="cs-tf-btn" id="mob-aiBriefCloseBtn" onclick="mobAiBriefClose()" style="display:none;width:34px;height:34px;padding:0;align-items:center;justify-content:center;" title="Fermer le brief">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                    <!-- Theme toggle -->
+                    <button class="cs-tf-btn" id="mob-aiBriefThemeBtn" onclick="mobAiBriefToggleTheme()" style="display:none;width:34px;height:34px;padding:0;align-items:center;justify-content:center;" title="Mode clair/sombre">
+                        <svg id="mob-aiBriefThemeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    </button>
+                    <!-- Sources -->
+                    <button class="cs-tf-btn" onclick="mobAiToggleSettings()" style="display:inline-flex;width:34px;height:34px;padding:0;align-items:center;justify-content:center;" title="Sources">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     </button>
                 </div>
@@ -1220,20 +1262,16 @@
                 </select>
             </div>
 
-            <div id="mob-aiBriefCard" style="background:#0d0d0d;border:1px solid #1e2230;border-radius:8px;min-height:200px;display:flex;flex-direction:column;margin-bottom:12px;">
-                <div id="mob-aiBriefEmpty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 16px;text-align:center;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;margin-bottom:8px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                    <div style="color:#444;font-size:11px;font-weight:bold;">Aucun brief généré</div>
+            <!-- Brief card -->
+            <div id="mob-aiBriefCard" style="background:#0d0d0d;border:1px solid #1e2230;border-radius:8px;min-height:200px;display:flex;flex-direction:column;margin-bottom:12px;position:relative;">
+                <div id="mob-aiBriefEmpty" style="display:flex;flex-direction:column;flex:1;">
+                    <div id="mob-aiBriefHistoryCards" style="display:none;flex-direction:column;gap:6px;padding:12px;"></div>
+                    <div id="mob-aiBriefNoHistory" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 16px;text-align:center;flex:1;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;margin-bottom:8px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                        <div style="color:#444;font-size:11px;font-weight:bold;">Aucun brief généré</div>
+                    </div>
                 </div>
-                <div id="mob-aiBriefContent" style="display:none;padding:14px;line-height:1.7;color:#ccc;font-size:12px;overflow-y:auto;max-height:400px;"></div>
-            </div>
-
-            <div id="mob-aiHistoryBar" style="display:none;background:#0a0a0a;border:1px solid #1e2230;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                    <span style="color:#666;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">Historique</span>
-                    <button onclick="aiClearHistory();mobAiRenderHistory();" style="padding:2px 8px;background:transparent;border:1px solid #2a1010;border-radius:4px;color:#553333;font-size:10px;cursor:pointer;font-family:inherit;">Effacer</button>
-                </div>
-                <div id="mob-aiHistoryList" style="display:flex;gap:5px;flex-wrap:wrap;"></div>
+                <div id="mob-aiBriefContent" style="display:none;padding:14px;line-height:1.7;font-size:12px;overflow-y:auto;max-height:500px;"></div>
             </div>
 
             <!-- Central Bank Rates -->
@@ -4452,6 +4490,85 @@ var OV_CUR_ORDER = ['AUD','CAD','CHF','EUR','GBP','JPY','NZD','USD'];
 /* Adjustable signal weights — user can modify via the weight panel */
 var OV_WEIGHTS = { rsi: 0.25, ci: 0.20, cot: 0.25, sentiment: 0.30 };
 
+/* Sparkline history: { cur: [{ t, score }] } — last 20 snapshots */
+var _ovSparkHistory = (function() {
+    try { return JSON.parse(localStorage.getItem('ov_spark_history') || '{}'); } catch(e) { return {}; }
+})();
+
+function ovSaveSparkSnapshot(scores) {
+    var now = Date.now();
+    Object.keys(scores).forEach(function(cur) {
+        if (!_ovSparkHistory[cur]) _ovSparkHistory[cur] = [];
+        var arr = _ovSparkHistory[cur];
+        // Only add if last snapshot was >30min ago or first entry
+        if (!arr.length || now - arr[arr.length-1].t > 30*60*1000) {
+            arr.push({ t: now, s: scores[cur] });
+            if (arr.length > 20) arr.shift();
+        }
+    });
+    try { localStorage.setItem('ov_spark_history', JSON.stringify(_ovSparkHistory)); } catch(e) {}
+}
+
+function ovDrawSparkline(canvas, cur, currentScore, color) {
+    var arr = (_ovSparkHistory[cur] || []).concat([{ t: Date.now(), s: currentScore }]);
+    if (arr.length < 2) { return; }
+    var ctx = canvas.getContext('2d');
+    var W = canvas.offsetWidth || 200, H = 28;
+    canvas.width = W; canvas.height = H;
+    ctx.clearRect(0, 0, W, H);
+
+    var vals = arr.map(function(p){ return p.s; });
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+    var range = mx - mn || 1;
+    var pad = 3;
+
+    var pts = arr.map(function(p, i) {
+        return {
+            x: pad + (i / (arr.length - 1)) * (W - pad * 2),
+            y: H - pad - ((p.s - mn) / range) * (H - pad * 2)
+        };
+    });
+
+    // Fill gradient
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, H);
+    pts.forEach(function(p){ ctx.lineTo(p.x, p.y); });
+    ctx.lineTo(pts[pts.length-1].x, H);
+    ctx.closePath();
+    var grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, color.replace(')', ',0.25)').replace('rgb','rgba'));
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Line
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    pts.forEach(function(p){ ctx.lineTo(p.x, p.y); });
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Zero line
+    if (mn < 0 && mx > 0) {
+        var zeroY = H - pad - ((0 - mn) / range) * (H - pad * 2);
+        ctx.beginPath();
+        ctx.moveTo(pad, zeroY); ctx.lineTo(W - pad, zeroY);
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // Last dot
+    var last = pts[pts.length-1];
+    ctx.beginPath();
+    ctx.arc(last.x, last.y, 2.5, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+}
+
 var OV_LABEL_CONFIG = [
     { min:  60, max: 100, label:'Strong Bull', bg:'rgba(20,188,96,0.10)',  color:'#14BC60' },
     { min:   0, max:  60, label:'Bullish',      bg:'rgba(47,153,95,0.10)',  color:'#14BC60' },
@@ -4702,7 +4819,8 @@ function renderOverview(bias) {
                         '<div class="ov-gauge-fill" style="width:'+gaugeW+'%;'+(gaugePos?'left:50%':'right:50%')+';background:'+lbl.color+'"></div>' +
                     '</div>' +
                 '</div>' +
-                '<div class="ov-signals">'+sigsHTML+'</div>';
+                '<div class="ov-signals">'+sigsHTML+'</div>' +
+                '<canvas class="ov-sparkline" data-cur="'+cur+'" data-score="'+d.score+'" data-color="'+lbl.color+'"></canvas>';
             grid.appendChild(card);
         });
     });
@@ -4710,6 +4828,19 @@ function renderOverview(bias) {
     /* ---- Pair bias grid (shared) ---- */
     _ovLastBias = bias;
     ovRenderPairsGrid(pairBiases);
+
+    /* ---- Save sparkline snapshot & draw ---- */
+    var snapScores = {};
+    Object.keys(bias).forEach(function(cur){ if (bias[cur].score !== null) snapScores[cur] = bias[cur].score; });
+    ovSaveSparkSnapshot(snapScores);
+    requestAnimationFrame(function() {
+        document.querySelectorAll('.ov-sparkline').forEach(function(canvas) {
+            var cur   = canvas.getAttribute('data-cur');
+            var score = parseFloat(canvas.getAttribute('data-score'));
+            var color = canvas.getAttribute('data-color');
+            ovDrawSparkline(canvas, cur, score, color);
+        });
+    });
 }
 
 function ovSortedPairs(pairBiases) {
@@ -5098,7 +5229,8 @@ function mobAiInit() {
     var banner = document.getElementById('mob-aiKeyBanner');
     if (banner) banner.style.display = key ? 'none' : 'flex';
     mobAiRenderSources();
-    mobAiRenderHistory();
+    aiLoadHistory(); // loads _aiHistory, renders PC + mobile history
+    mobAiRenderHistoryCards();
 }
 
 function mobAiSaveKey() {
@@ -5168,6 +5300,27 @@ function mobAiLoadHistory(idx) {
     var el = document.getElementById('mob-aiBriefContent');
     el.style.display = 'block';
     el.innerHTML = aiRenderMarkdown(h.text);
+    var themeBtn = document.getElementById('mob-aiBriefThemeBtn');
+    var closeBtn = document.getElementById('mob-aiBriefCloseBtn');
+    if (themeBtn) themeBtn.style.display = 'inline-flex';
+    if (closeBtn) closeBtn.style.display = 'inline-flex';
+}
+
+function mobAiBriefClose() {
+    var briefCard = document.getElementById('mob-aiBriefCard');
+    var contentEl = document.getElementById('mob-aiBriefContent');
+    var emptyEl   = document.getElementById('mob-aiBriefEmpty');
+    contentEl.style.display = 'none';
+    contentEl.innerHTML = '';
+    emptyEl.style.display = 'flex';
+    briefCard.classList.remove('light-mode');
+    var themeBtn = document.getElementById('mob-aiBriefThemeBtn');
+    var closeBtn = document.getElementById('mob-aiBriefCloseBtn');
+    var icon = document.getElementById('mob-aiBriefThemeIcon');
+    if (themeBtn) themeBtn.style.display = 'none';
+    if (closeBtn) closeBtn.style.display = 'none';
+    if (icon) icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    mobAiRenderHistoryCards();
 }
 
 async function mobAiGenerate() {
@@ -5225,7 +5378,13 @@ async function mobAiGenerate() {
         if (_aiHistory.length > 10) _aiHistory.length = 10;
         try { localStorage.setItem('ai_analyst_history', JSON.stringify(_aiHistory)); } catch(e) {}
 
-        // Sync PC history too
+        // Show theme button
+        var themeBtn = document.getElementById('mob-aiBriefThemeBtn');
+        var closeBtn = document.getElementById('mob-aiBriefCloseBtn');
+        if (themeBtn) themeBtn.style.display = 'inline-flex';
+        if (closeBtn) closeBtn.style.display = 'inline-flex';
+
+        // Sync histories
         aiRenderHistory();
         mobAiRenderHistory();
         document.getElementById('mob-aiStatus').textContent = '✓';
@@ -5418,11 +5577,13 @@ async function aiGenerate() {
         contentEl.innerHTML = aiRenderMarkdown(text);
 
         // Add meta footer
+        var nowDate = new Date();
+        var nowStr = nowDate.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long'}) + ' · ' + nowDate.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
         var meta = document.createElement('div');
         meta.className = 'ai-brief-meta';
-        meta.innerHTML = '<span class="ai-brief-timestamp">Généré le ' + new Date().toLocaleString('fr-FR') + '</span>' +
-            '<span class="ai-brief-sources">Sources : ' + sources.map(function(s){ return s.name; }).join(', ') + '</span>';
+        meta.innerHTML = aiMakeMeta('Généré le ' + nowDate.toLocaleString('fr-FR'), 'Sources : ' + sources.map(function(s){ return s.name; }).join(', '));
         briefCard.appendChild(meta);
+        aiShowBriefActions(nowStr);
 
         // Save to history
         _aiCurrentBrief = { date: new Date().toISOString(), text: text, sources: sources.map(function(s){ return s.name; }) };
@@ -5456,18 +5617,24 @@ function aiRenderMarkdown(text) {
     var html = '';
     var inList = false;
     var inSection = false;
+    var skipIntro = true; // skip text before the first H1
 
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
 
-        // H1 — title banner
+        // H1 — title banner with X close button
         var m1 = line.match(/^# (.+)$/);
         if (m1) {
             if (inList) { html += '</ul>'; inList = false; }
             if (inSection) { html += '</div>'; inSection = false; }
-            html += '<h1>' + inlineFormat(m1[1]) + '</h1>';
+            html += '<h1><span>' + inlineFormat(m1[1]) + '</span>' +
+                '<button class="ai-brief-header-x" onclick="aiBriefCloseAny()" title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></h1>';
+            skipIntro = false; // stop skipping after H1 found
             continue;
         }
+
+        // Skip intro paragraphs before the H1
+        if (skipIntro) continue;
 
         // H2 — section header + open card
         var m2 = line.match(/^## (.+)$/);
@@ -5534,36 +5701,151 @@ function aiLoadHistory() {
         if (h) _aiHistory = JSON.parse(h);
     } catch(e) { _aiHistory = []; }
     aiRenderHistory();
+    mobAiRenderHistory();
+    aiRenderHistoryCards();
 }
 
 function aiRenderHistory() {
-    var bar = document.getElementById('aiHistoryBar');
-    var list = document.getElementById('aiHistoryList');
-    if (!list) return;
-    if (!_aiHistory.length) { bar.style.display='none'; return; }
-    bar.style.display='flex';
-    list.innerHTML = _aiHistory.map(function(h, i) {
-        var d = new Date(h.date);
-        var label = d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}) + ' ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-        return '<div class="ai-history-chip" onclick="aiLoadHistoryItem(' + i + ')" title="' + (h.sources||[]).join(', ') + '">' + label + '</div>';
-    }).join('');
+    // History bar removed — cards in brief card used instead
+}
+
+function aiBriefCloseAny() {
+    if (document.getElementById('mob-aiBriefContent').style.display === 'block') {
+        mobAiBriefClose();
+    } else {
+        aiBriefClose();
+    }
+}
+
+function aiBriefClose() {
+    var briefCard = document.getElementById('aiBriefCard');
+    var contentEl = document.getElementById('aiBriefContent');
+    var emptyEl   = document.getElementById('aiBriefEmpty');
+    var oldMeta   = briefCard.querySelector('.ai-brief-meta');
+    if (oldMeta) oldMeta.remove();
+    contentEl.style.display = 'none';
+    contentEl.innerHTML = '';
+    emptyEl.style.display = 'flex';
+    briefCard.classList.remove('light-mode');
+    var themeBtn = document.getElementById('aiBriefThemeBtn');
+    var icon     = document.getElementById('aiBriefThemeIcon');
+    if (themeBtn) { themeBtn.style.display = 'none'; }
+    if (icon) icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    aiRenderHistoryCards();
+}
+
+function aiBriefToggleTheme() {
+    var briefCard = document.getElementById('aiBriefCard');
+    var icon = document.getElementById('aiBriefThemeIcon');
+    var isLight = briefCard.classList.toggle('light-mode');
+    if (icon) {
+        icon.innerHTML = isLight
+            ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>' // moon
+            : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'; // sun
+    }
+}
+
+function aiShowBriefActions() {
+    var themeBtn = document.getElementById('aiBriefThemeBtn');
+    if (themeBtn) { themeBtn.style.display = 'inline-flex'; }
+}
+
+function aiDeleteHistoryItem(idx, e) {
+    e.stopPropagation();
+    _aiHistory.splice(idx, 1);
+    try { localStorage.setItem('ai_analyst_history', JSON.stringify(_aiHistory)); } catch(ex) {}
+    aiRenderHistoryCards();
+    mobAiRenderHistoryCards();
+    aiRenderHistory();
+    mobAiRenderHistory();
+}
+
+function aiRenderHistoryCards() {
+    var container = document.getElementById('aiBriefHistoryCards');
+    var noHistory = document.getElementById('aiBriefNoHistory');
+    if (!container) return;
+    if (!_aiHistory.length) {
+        container.style.display = 'none';
+        if (noHistory) noHistory.style.display = 'flex';
+        return;
+    }
+    if (noHistory) noHistory.style.display = 'none';
+    container.style.display = 'flex';
+    var svgX = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    container.innerHTML = '<div style="font-size:10px;font-weight:bold;color:#444;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Briefs récents</div>' +
+        _aiHistory.map(function(h, i) {
+            var d = new Date(h.date);
+            var date = d.toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long'}) + ' · ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+            var preview = h.text.replace(/[#*`]/g,'').replace(/\n+/g,' ').trim().slice(0, 120) + '…';
+            var sources = (h.sources||[]).slice(0,4).join(', ');
+            return '<div class="ai-history-entry-card" style="position:relative;" onclick="aiLoadHistoryItem(' + i + ')">' +
+                '<button onclick="aiDeleteHistoryItem(' + i + ',event)" title="Supprimer" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);width:22px;height:22px;background:transparent;border:1px solid #2a2a3a;border-radius:50%;color:#555;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;" onmouseover="this.style.background=\'#2a1010\';this.style.color=\'#F26666\'" onmouseout="this.style.background=\'transparent\';this.style.color=\'#555\'">' + svgX + '</button>' +
+                '<div class="ai-history-entry-date">' + date + '</div>' +
+                '<div class="ai-history-entry-preview">' + preview + '</div>' +
+                '<div class="ai-history-entry-sources">' + sources + '</div>' +
+                '</div>';
+        }).join('');
+}
+
+function mobAiRenderHistoryCards() {
+    var container = document.getElementById('mob-aiBriefHistoryCards');
+    var noHistory = document.getElementById('mob-aiBriefNoHistory');
+    if (!container) return;
+    if (!_aiHistory.length) {
+        container.style.display = 'none';
+        if (noHistory) noHistory.style.display = 'flex';
+        return;
+    }
+    if (noHistory) noHistory.style.display = 'none';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    var svgX = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:10px;height:10px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    container.innerHTML = '<div style="font-size:10px;font-weight:bold;color:#444;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Briefs récents</div>' +
+        _aiHistory.map(function(h, i) {
+            var d = new Date(h.date);
+            var date = d.toLocaleDateString('fr-FR', {weekday:'short', day:'2-digit', month:'short'}) + ' · ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+            var preview = h.text.replace(/[#*`]/g,'').replace(/\n+/g,' ').trim().slice(0, 80) + '…';
+            return '<div style="background:#111;border:1px solid #1e2230;border-radius:6px;padding:10px 12px;cursor:pointer;position:relative;margin-bottom:0;" onclick="mobAiLoadHistory(' + i + ')">' +
+                '<button onclick="aiDeleteHistoryItem(' + i + ',event)" title="Supprimer" style="position:absolute;top:7px;right:7px;width:20px;height:20px;background:transparent;border:1px solid #2a2a3a;border-radius:50%;color:#555;cursor:pointer;display:flex;align-items:center;justify-content:center;">' + svgX + '</button>' +
+                '<div style="font-size:11px;font-weight:bold;color:#4a8fff;margin-bottom:3px;padding-right:24px;">' + date + '</div>' +
+                '<div style="font-size:10px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + preview + '</div>' +
+                '</div>';
+        }).join('');
+}
+
+function mobAiBriefToggleTheme() {
+    var briefCard = document.getElementById('mob-aiBriefCard');
+    var icon = document.getElementById('mob-aiBriefThemeIcon');
+    var isLight = briefCard.classList.toggle('light-mode');
+    if (icon) {
+        icon.innerHTML = isLight
+            ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+            : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    }
+}
+
+function aiMakeMeta(dateStr, sourcesStr) {
+    return '<span class="ai-brief-timestamp">' + dateStr + '</span>' +
+        '<span class="ai-brief-sources">' + sourcesStr + '</span>';
 }
 
 function aiLoadHistoryItem(idx) {
     var h = _aiHistory[idx];
     if (!h) return;
     var contentEl = document.getElementById('aiBriefContent');
-    var emptyEl = document.getElementById('aiBriefEmpty');
+    var emptyEl   = document.getElementById('aiBriefEmpty');
     var briefCard = document.getElementById('aiBriefCard');
     emptyEl.style.display = 'none';
     contentEl.style.display = 'block';
     contentEl.innerHTML = aiRenderMarkdown(h.text);
     var oldMeta = briefCard.querySelector('.ai-brief-meta');
     if (oldMeta) oldMeta.remove();
+    var d = new Date(h.date);
+    var dateStr = d.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long'}) + ' · ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    aiShowBriefActions(dateStr);
     var meta = document.createElement('div');
     meta.className = 'ai-brief-meta';
-    meta.innerHTML = '<span class="ai-brief-timestamp">Archivé le ' + new Date(h.date).toLocaleString('fr-FR') + '</span>' +
-        '<span class="ai-brief-sources">Sources : ' + (h.sources||[]).join(', ') + '</span>';
+    meta.innerHTML = aiMakeMeta('Archivé le ' + d.toLocaleString('fr-FR'), 'Sources : ' + (h.sources||[]).join(', '));
     briefCard.appendChild(meta);
 }
 
@@ -5571,6 +5853,9 @@ function aiClearHistory() {
     _aiHistory = [];
     try { localStorage.removeItem('ai_analyst_history'); } catch(e) {}
     aiRenderHistory();
+    mobAiRenderHistory();
+    aiRenderHistoryCards();
+    mobAiRenderHistoryCards();
 }
 
 // Init on tab switch
