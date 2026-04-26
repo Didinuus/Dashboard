@@ -5695,8 +5695,9 @@ function aiCloudDelete(idx) {
 
 function aiLoadHistory() {
     fetch(PROXY_URL, {
-        method: 'GET',
-        headers: { 'x-action': 'load-briefs' }
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-action': 'load-briefs' },
+        body: '{}'
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -5707,7 +5708,6 @@ function aiLoadHistory() {
         mobAiRenderHistoryCards();
     })
     .catch(function() {
-        // Fallback to localStorage if cloud unavailable
         try {
             var h = localStorage.getItem('ai_analyst_history');
             if (h) _aiHistory = JSON.parse(h);
