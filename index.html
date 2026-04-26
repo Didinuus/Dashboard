@@ -5337,7 +5337,7 @@ async function mobAiGenerate() {
 
     var userPrompt = (lang === 'french' ? 'Brief macro FX pour le ' : 'FX macro brief for ') + today + '.\n\nSources :\n' +
         sources.map(function(s){ return '- ' + s.name + ' : ' + s.url; }).join('\n') +
-        '\n\nRecherche les informations les plus récentes (5-7 recherches ciblées) et produis un brief structuré et actionnable.';
+        '\n\nRecherche les informations les plus récentes (5-7 recherches ciblées) et produis un brief structuré et actionnable. IMPORTANT : commence ta réponse DIRECTEMENT par le titre # sans aucune phrase d\'introduction.';
 
     try {
         var response = await fetch('https://anthropic-proxy.didinehamdii.workers.dev/', {
@@ -5517,8 +5517,8 @@ async function aiGenerate() {
 
     var srcList = sources.map(function(s){ return '- ' + s.name + ' : ' + s.url; }).join('\n');
     var userPrompt = lang === 'french'
-        ? 'Brief macro FX pour le ' + today + '.\n\nSources :\n' + srcList + '\n\nRecherche les informations les plus récentes (5-7 recherches ciblées) et produis un brief structuré et actionnable.'
-        : 'FX macro brief for ' + today + '.\n\nSources:\n' + srcList + '\n\nSearch for the most recent info (5-7 targeted searches) and produce a structured, actionable brief.';
+        ? 'Brief macro FX pour le ' + today + '.\n\nSources :\n' + srcList + '\n\nRecherche les informations les plus récentes (5-7 recherches ciblées) et produis un brief structuré et actionnable. IMPORTANT : commence ta réponse DIRECTEMENT par le titre # sans aucune phrase d\'introduction.'
+        : 'FX macro brief for ' + today + '.\n\nSources:\n' + srcList + '\n\nSearch for the most recent info (5-7 targeted searches) and produce a structured, actionable brief. IMPORTANT: start your response DIRECTLY with the # title, no introduction.';
 
     try {
         var response = await fetch('https://anthropic-proxy.didinehamdii.workers.dev/', {
@@ -5826,8 +5826,8 @@ function aiRenderHistoryCards() {
         _aiHistory.map(function(h, i) {
             var d = new Date(h.date);
             var date = d.toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long'}) + ' · ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-            var preview = h.text.replace(/[#*`]/g,'').replace(/\n+/g,' ').trim().slice(0, 120) + '…';
-            var sources = (h.sources||[]).slice(0,4).join(', ');
+            var rawText = h.text.indexOf('#') > -1 ? h.text.slice(h.text.indexOf('#')) : h.text;
+            var preview = rawText.replace(/[#*`]/g,'').replace(/\n+/g,' ').trim().slice(0, 120) + '…';
             return '<div class="ai-history-entry-card" style="position:relative;" onclick="aiLoadHistoryItem(' + i + ')">' +
                 '<button onclick="aiDeleteHistoryItem(' + i + ',event)" title="Supprimer" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);width:22px;height:22px;background:transparent;border:1px solid #2a2a3a;border-radius:50%;color:#555;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;" onmouseover="this.style.background=\'#2a1010\';this.style.color=\'#F26666\'" onmouseout="this.style.background=\'transparent\';this.style.color=\'#555\'">' + svgX + '</button>' +
                 '<div class="ai-history-entry-date">' + date + '</div>' +
@@ -5854,7 +5854,8 @@ function mobAiRenderHistoryCards() {
         _aiHistory.map(function(h, i) {
             var d = new Date(h.date);
             var date = d.toLocaleDateString('fr-FR', {weekday:'short', day:'2-digit', month:'short'}) + ' · ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-            var preview = h.text.replace(/[#*`]/g,'').replace(/\n+/g,' ').trim().slice(0, 80) + '…';
+            var rawTextMob = h.text.indexOf('#') > -1 ? h.text.slice(h.text.indexOf('#')) : h.text;
+            var preview = rawTextMob.replace(/[#*`]/g,'').replace(/\n+/g,' ').trim().slice(0, 80) + '…';
             return '<div style="background:#111;border:1px solid #1e2230;border-radius:6px;padding:10px 12px;cursor:pointer;position:relative;margin-bottom:0;" onclick="mobAiLoadHistory(' + i + ')">' +
                 '<button onclick="aiDeleteHistoryItem(' + i + ',event)" title="Supprimer" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);width:20px;height:20px;background:transparent;border:1px solid #2a2a3a;border-radius:50%;color:#555;cursor:pointer;display:flex;align-items:center;justify-content:center;">' + svgX + '</button>' +
                 '<div style="font-size:11px;font-weight:bold;color:#4a8fff;margin-bottom:3px;padding-right:24px;">' + date + '</div>' +
