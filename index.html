@@ -5741,6 +5741,7 @@ function aiLoadHistory() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
         _aiHistory = Array.isArray(data) ? data : [];
+        if (_aiHistory.length) ovParseAiSignals(_aiHistory[0].text);
         aiRenderHistory();
         mobAiRenderHistory();
         aiRenderHistoryCards();
