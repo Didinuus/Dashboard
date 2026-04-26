@@ -40,8 +40,14 @@
 
         .pc-layout { padding:10px 30px 30px 30px; width:100%; }
 
+        /* ---- Global scrollbar (Chrome/Edge) ---- */
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-track { background:#121212; }
+        ::-webkit-scrollbar-thumb { background:#161622; border-radius:3px; }
+        ::-webkit-scrollbar-thumb:hover { background:#2a2a3a; }
+        * { scrollbar-width:thin; scrollbar-color:#161622 #121212; }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(6px); }
             to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes valueFlash {
@@ -61,8 +67,7 @@
         .sentiment-table td { background:var(--bg-card); color:var(--text-primary); padding:0 8px; height:34px; border:none; border-bottom:1px solid #111111; font-size:var(--font-base); }
         .sentiment-table tbody tr:hover td { background:var(--bg-header); }
         .sentiment-table tbody tr:last-child td { border-bottom:none; }
-        .chart-sentiment { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card);
-        box-shadow: none; height:100%; display:flex; flex-direction:column; overflow:hidden; }
+        .chart-sentiment { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); height:100%; display:flex; flex-direction:column; overflow:hidden; }
         .chart-sentiment-wrapper { flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:var(--bg-header) var(--bg-card); padding:12px 0 4px 4px; }
         .pc-bar-row { display:flex; align-items:center; gap:8px; height:25px; }
         .pc-bar-label { font-size:var(--font-base); font-weight:bold; color:var(--text-primary); width:62px; flex-shrink:0; text-align:right; padding-right:2px; }
@@ -74,13 +79,11 @@
         th, td { padding:6px 8px; text-align:center; border:1px solid var(--border); }
         th { background:var(--bg-card); font-weight:bold; color:var(--text-primary); }
         td { background:var(--bg-card); color:var(--text-primary); }
-        .cot-container { display:flex; flex-direction:column; border-radius:var(--radius-card);
-        overflow:hidden; background:var(--bg-card); border:none; }
+        .cot-container { display:flex; flex-direction:column; border-radius:var(--radius-card); overflow:hidden; background:var(--bg-card); border:none; }
         .cot-header { background:var(--bg-card); padding:12px; text-align:center; font-weight:bold; font-size:var(--font-md); color:var(--text-primary); border-bottom:1px solid var(--border); }
         .cot-scroll { overflow-y:auto; overflow-x:hidden; scrollbar-width:none; }
         .cot-scroll thead th { background:var(--bg-header); color:var(--text-label); font-size:var(--font-sm); letter-spacing:0.5px; text-transform:uppercase; border-color:#111111; padding:10px 8px; }
-        .cot-chart-wrap { background:var(--bg-card); padding:0; border:none; border-radius:var(--radius-card);
-        display:flex; flex-direction:column; overflow:hidden; }
+        .cot-chart-wrap { background:var(--bg-card); padding:0; border:none; border-radius:var(--radius-card); display:flex; flex-direction:column; overflow:hidden; }
         .cot-chart-wrap h3 { background:var(--bg-header); text-align:center; padding:10px 8px; font-size:var(--font-sm); color:var(--text-label); font-weight:bold; letter-spacing:0.5px; text-transform:uppercase; border-bottom:1px solid #111111; flex-shrink:0; }
 
         /* COT Sub-tabs */
@@ -128,13 +131,11 @@
         .btn-refresh { display:inline-flex; align-items:center; justify-content:center; padding:0; width:27px; height:27px; }
         .cs-legend { display:flex; flex-wrap:wrap; gap:8px; }
 
-        .calendar-section { background:var(--bg-card); padding:15px 15px 6px 15px; border:1px solid var(--border); border-radius:var(--radius-card);
-        box-shadow: none; height:95vh; display:flex; flex-direction:column; }
+        .macro-page-section { display:flex; flex-direction:column; gap:16px; margin-bottom:30px; }
 
         .ir-layout { display:flex; flex-direction:column; gap:15px; }
         .ir-cards-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:6px; }
-        .ir-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card);
-        box-shadow: none; padding:18px; display:flex; flex-direction:column; gap:6px; position:relative; overflow:hidden; transition:border-color .2s; }
+        .ir-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); padding:18px; display:flex; flex-direction:column; gap:6px; position:relative; overflow:hidden; transition:border-color .2s; }
         .ir-card:hover { border-color:var(--border); }
         .ir-card-top { display:flex; align-items:center; justify-content:space-between; }
         .ir-card-hist { margin-top:10px; padding-top:10px; border-top:1px solid var(--border); position:relative; height:90px; }
@@ -150,10 +151,9 @@
         .ir-expectation { font-size:var(--font-base); margin-top:3px; font-weight:bold; }
         .ir-accent-bar { position:absolute; left:0; top:0; bottom:0; width:3px; }
 
-        .macro-page-section { margin-bottom:30px; }
         .source-badge { font-size:var(--font-xs); color:var(--text-faint); padding:2px 6px; border:1px solid var(--bg-card); border-radius:var(--radius-btn); }
 
-        .pairs-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
+        .pairs-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); z-index:1000; align-items:center; justify-content:center; }
         .pairs-modal-overlay.open { display:flex; }
         .pairs-modal { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); padding:24px; width:600px; max-width:95vw; max-height:85vh; display:flex; flex-direction:column; gap:14px; }
         .pairs-modal-header { display:flex; align-items:center; justify-content:space-between; }
@@ -175,8 +175,7 @@
         .pairs-edit-btn { padding:5px 12px; background:transparent; border:1px solid var(--border); border-radius:var(--radius-btn); color:#666666; font-size:var(--font-base); cursor:pointer; display:flex; align-items:center; gap:4px; }
         .pairs-edit-btn:hover { background:var(--border); color:var(--text-primary); }
 
-        .fxp-bars-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card);
-        box-shadow: none; padding:18px; }
+        .fxp-bars-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); padding:18px; }
         .fxp-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
         .fxp-bar-cur { font-size:var(--font-md); font-weight:bold; width:36px; flex-shrink:0; }
         .fxp-bar-track { flex:1; height:28px; background:var(--bg-base); border-radius:var(--radius-btn); position:relative; overflow:hidden; }
@@ -186,8 +185,7 @@
         .fxp-bar-val { font-size:var(--font-base); font-weight:bold; width:54px; text-align:right; flex-shrink:0; }
         .fxp-bar-flag { font-size:var(--font-lg); width:20px; flex-shrink:0; }
 
-        .fxp-heatmap-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card);
-        box-shadow: none; padding:18px; }
+        .fxp-heatmap-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); padding:18px; }
         .fxp-heatmap-table { border-collapse:collapse; width:100%; min-width:560px; }
         .fxp-heatmap-table th { font-size:var(--font-base); font-weight:bold; padding:8px 6px; text-align:center; color:var(--text-label); border:1px solid var(--border); background:var(--bg-base); }
         .fxp-heatmap-table td { font-size:var(--font-base); font-weight:bold; padding:8px 6px; text-align:center; border:1px solid var(--border); cursor:default; transition:filter .15s; }
@@ -200,12 +198,7 @@
            CURRENCY INDEX PAGE
            ============================================= */
         .ci-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-        .ci-chart-card {
-            background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card);
-        box-shadow: none;
-            display:flex; flex-direction:column; overflow:hidden;
-            transition:border-color .2s; cursor:pointer;
-        }
+        .ci-chart-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); display:flex; flex-direction:column; overflow:hidden; transition:border-color .2s; cursor:pointer; }
         .ci-chart-card:hover { border-color:#2a3060; }
         .ci-card-header { display:flex; align-items:flex-start; justify-content:space-between; padding:12px 12px 4px 12px; flex-shrink:0; }
         .ci-card-cur { display:flex; align-items:center; gap:6px; }
@@ -217,7 +210,7 @@
         .ci-chart-wrap canvas { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
 
         /* Full-size individual chart modal */
-        .ci-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; }
+        .ci-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center; }
         .ci-modal-overlay.open { display:flex; }
         .ci-modal { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); padding:12px 16px 16px 16px; width:90vw; max-width:1100px; height:70vh; display:flex; flex-direction:column; gap:10px; }
         /* Mobile : 2 lignes — [titre centré] / [boutons TF gauche | X droite] */
@@ -243,8 +236,7 @@
         .ci-modal-chart canvas { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
 
         /* Combined big chart */
-        .ci-combined-wrap { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card);
-        box-shadow: none; padding:16px; display:flex; flex-direction:column; gap:10px; }
+        .ci-combined-wrap { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); padding:16px; display:flex; flex-direction:column; gap:10px; }
         .ci-combined-chart { position:relative; height:65vh; background:var(--bg-base); border-radius:var(--radius-btn); overflow:hidden; }
         #ciCombinedChart { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
         .ci-combined-legend { display:flex; flex-wrap:wrap; gap:8px; }
@@ -257,8 +249,7 @@
            OVERVIEW / BIAS
            ============================================= */
         .ov-layout { display:flex; flex-direction:column; gap:18px; }
-        .ov-sessions { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card);
-        box-shadow: none; display:flex; align-items:stretch; height:64px; overflow:hidden; }
+        .ov-sessions { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); display:flex; align-items:stretch; height:64px; overflow:hidden; }
         .ov-session-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:0 16px; position:relative; }
         .ov-session-item + .ov-session-item::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); height:55%; width:1px; background:#666666; opacity:0.3; }
         .ov-session-item.active { background:transparent; }
@@ -270,12 +261,7 @@
         .ov-session-sub { font-size:var(--font-sm); color:#666666; }
         .ov-session-sub.active-sub { color:#fff; opacity:1; }
         .ov-top-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-        .ov-cur-card {
-            background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card);
-        box-shadow: none;
-            padding:14px 16px; position:relative; overflow:hidden;
-            transition:border-color .2s, background .2s; cursor:default;
-        }
+        .ov-cur-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); padding:14px 16px; position:relative; overflow:hidden; transition:border-color .2s, background .2s; cursor:default; }
         .ov-cur-card:hover { border-color:var(--accent); background:var(--bg-header); }
         .ov-accent { position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
         .ov-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
@@ -297,8 +283,7 @@
         .ov-signal-bar-fill { height:100%; border-radius:2px; position:absolute; }
 
         /* Pair bias section */
-        .ov-pairs-section { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card);
-        box-shadow: none; padding:16px; }
+        .ov-pairs-section { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); padding:16px; }
         .ov-pairs-title { font-size:var(--font-base); font-weight:bold; color:var(--text-muted); letter-spacing:0.3px; margin-bottom:14px; }
         .ov-pairs-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
         .ov-pair-row {
@@ -312,8 +297,6 @@
         .ov-pair-bias-fill { height:100%; border-radius:3px; position:absolute; }
         .ov-pair-score { font-size:var(--font-base); font-weight:bold; }
         .ov-pair-label { font-size:var(--font-sm); font-weight:bold; text-transform:uppercase; letter-spacing:0.3px; }
-
-        /* Legend note */
 
         @media (max-width: 1000px) {
             .pc-only { display:none !important; }
@@ -401,34 +384,89 @@
             #mob-ciGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
         }
         /* =============================================
-           WEIGHTS PANEL
+           AI ANALYST
            ============================================= */
-        .weights-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
-        .weights-modal-overlay.open { display:flex; }
-        .weights-modal { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-card); padding:24px; width:420px; max-width:95vw; display:flex; flex-direction:column; gap:16px; }
-        .weights-modal-header { display:flex; align-items:center; justify-content:space-between; }
-        .weights-modal-header h3 { font-size:var(--font-md); font-weight:bold; color:var(--text-primary); }
-        .weights-modal-close { background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer; line-height:1; }
-        .weights-modal-close:hover { color:var(--text-primary); }
-        .weights-total-bar { background:#111111; border:1px solid var(--border); border-radius:var(--radius-btn); padding:8px 14px; display:flex; align-items:center; justify-content:space-between; font-size:var(--font-base); }
-        .weights-total-val { font-weight:bold; font-size:var(--font-lg); }
-        .weights-row { display:flex; flex-direction:column; gap:6px; }
-        .weights-row-header { display:flex; align-items:center; justify-content:space-between; }
-        .weights-row-label { font-size:var(--font-base); font-weight:bold; color:var(--text-muted); }
-        .weights-row-pct { font-size:var(--font-md); font-weight:bold; color:var(--text-primary); min-width:38px; text-align:right; }
-        .weights-slider { -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--border); outline:none; cursor:pointer; }
-        .weights-slider::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:#4a8fff; cursor:pointer; }
-        .weights-slider::-moz-range-thumb { width:16px; height:16px; border-radius:50%; background:#4a8fff; cursor:pointer; border:none; }
-        .weights-actions { display:flex; gap:8px; justify-content:flex-end; border-top:1px solid var(--border); padding-top:14px; }
-        .weights-reset-btn { padding:8px 16px; background:transparent; border:1px solid var(--border); border-radius:var(--radius-btn); color:var(--text-muted); font-size:var(--font-base); font-weight:bold; cursor:pointer; font-family:inherit; }
-        .weights-reset-btn:hover { background:var(--border); color:var(--text-primary); }
-        .weights-apply-btn { padding:8px 20px; background:var(--accent); color:#fff; border:1px solid var(--accent-hover); border-radius:var(--radius-btn); font-size:var(--font-md); font-weight:bold; cursor:pointer; font-family:inherit; }
-        .weights-apply-btn:hover { background:var(--accent-hover); }
+        .ai-layout { display:flex; flex-direction:column; gap:12px; }
+
+        /* Key banner */
+        .ai-key-banner { display:flex; align-items:center; gap:10px; background:#0d1117; border:1px solid #1e3a5f; border-radius:var(--radius-card); padding:10px 14px; }
+        .ai-key-input { flex:1; background:#0a0a0a; border:1px solid #1e2230; border-radius:var(--radius-btn); padding:6px 10px; color:#fff; font-family:inherit; font-size:var(--font-sm); outline:none; max-width:360px; }
+        .ai-key-input:focus { border-color:#4a8fff; }
+        .ai-key-save-btn { padding:6px 16px; background:#1a3060; border:1px solid #2a4a8a; border-radius:var(--radius-btn); color:#fff; font-size:var(--font-sm); font-weight:bold; cursor:pointer; font-family:inherit; white-space:nowrap; }
+        .ai-key-save-btn:hover { background:#2a4a8a; }
+        .ai-key-clear-btn { padding:4px 12px; background:transparent; border:1px solid #3a2020; border-radius:var(--radius-btn); color:#664444; font-size:var(--font-sm); cursor:pointer; font-family:inherit; }
+        .ai-key-clear-btn:hover { background:#3a2020; color:#cc8888; }
+
+        /* Controls */
+        .ai-settings-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; background:transparent; border:1px solid var(--border); border-radius:var(--radius-btn); color:#666; font-size:var(--font-sm); font-weight:bold; cursor:pointer; font-family:inherit; }
+        .ai-settings-btn:hover { color:#aaa; }
+        .ai-lang-select { background:#0a0a0a; border:1px solid #1e2230; border-radius:var(--radius-btn); color:#888; font-size:var(--font-sm); font-family:inherit; padding:4px 8px; outline:none; cursor:pointer; }
+        .ai-generate-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 18px; background:linear-gradient(135deg,#1a3060,#2a4a8a); border:1px solid #3a5aaa; border-radius:var(--radius-btn); color:#fff; font-size:var(--font-sm); font-weight:bold; cursor:pointer; font-family:inherit; transition:all .15s; }
+        .ai-generate-btn:hover { background:linear-gradient(135deg,#2a4a8a,#3a5aaa); }
+        .ai-generate-btn:disabled { opacity:0.5; cursor:not-allowed; }
+        .ai-generate-btn.loading { animation: pulse-dot 1.2s infinite; }
+
+        /* Settings panel */
+        .ai-settings-panel { background:#0d0d0d; border:1px solid #1e2230; border-radius:var(--radius-card); padding:16px; display:flex; flex-direction:column; gap:12px; }
+        .ai-settings-header { display:flex; align-items:center; justify-content:space-between; font-size:var(--font-sm); font-weight:bold; color:#888; text-transform:uppercase; letter-spacing:0.5px; }
+        .ai-settings-close { background:transparent; border:none; color:#666; font-size:16px; cursor:pointer; line-height:1; }
+        .ai-settings-close:hover { color:#fff; }
+        .ai-sources-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+        .ai-source-chip { display:flex; align-items:center; gap:7px; padding:7px 10px; background:#121212; border:1px solid #1e2230; border-radius:var(--radius-btn); cursor:pointer; transition:all .15s; user-select:none; }
+        .ai-source-chip:hover { border-color:#2a3060; }
+        .ai-source-chip.active { border-color:#4a8fff; background:#0d1830; }
+        .ai-source-chip input[type=checkbox] { display:none; }
+        .ai-source-dot { width:7px; height:7px; border-radius:50%; background:#333; flex-shrink:0; transition:background .15s; }
+        .ai-source-chip.active .ai-source-dot { background:#4a8fff; }
+        .ai-source-name { font-size:var(--font-sm); font-weight:bold; color:#666; }
+        .ai-source-chip.active .ai-source-name { color:#fff; }
+        .ai-source-type { font-size:var(--font-xs); color:#444; }
+        .ai-custom-source { display:flex; gap:8px; }
+        .ai-custom-input { flex:1; background:#0a0a0a; border:1px solid #1e2230; border-radius:var(--radius-btn); padding:6px 10px; color:#fff; font-family:inherit; font-size:var(--font-sm); outline:none; }
+        .ai-custom-input:focus { border-color:#4a8fff; }
+        .ai-custom-add-btn { padding:6px 16px; background:transparent; border:1px solid #2a3060; border-radius:var(--radius-btn); color:#4a8fff; font-size:var(--font-sm); font-weight:bold; cursor:pointer; font-family:inherit; white-space:nowrap; }
+        .ai-custom-add-btn:hover { background:#0d1830; }
+        .ai-settings-footer { display:flex; align-items:center; justify-content:space-between; padding-top:8px; border-top:1px solid #111; }
+
+        /* Brief card */
+        .ai-brief-card { background:#0d0d0d; border:1px solid #1e2230; border-radius:var(--radius-card); min-height:400px; display:flex; flex-direction:column; }
+        .ai-brief-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; }
+        .ai-brief-content { flex:1; padding:24px 28px; line-height:1.8; color:#ccc; font-size:var(--font-base); overflow-y:auto; }
+
+        /* Brief markdown rendering */
+        .ai-brief-content h1 { font-size:15px; font-weight:900; color:#fff; margin:0 0 20px 0; padding:14px 16px; background:linear-gradient(135deg,#0d1830,#0a1020); border:1px solid #1e3a5f; border-left:3px solid #4a8fff; border-radius:6px; letter-spacing:0.5px; }
+        .ai-brief-content h2 { font-size:11px; font-weight:bold; color:#4a8fff; margin:24px 0 10px 0; text-transform:uppercase; letter-spacing:1.2px; display:flex; align-items:center; gap:8px; }
+        .ai-brief-content h2::before { content:''; display:block; width:3px; height:12px; background:#4a8fff; border-radius:2px; flex-shrink:0; }
+        .ai-brief-content h2::after { content:''; flex:1; height:1px; background:linear-gradient(to right,#1e2230,transparent); }
+        .ai-brief-content h3 { font-size:11px; font-weight:bold; color:#888; margin:14px 0 5px 0; padding-left:10px; border-left:2px solid #2a3060; }
+        .ai-brief-content p { margin:0 0 8px 0; color:#aaa; font-size:11px; line-height:1.75; }
+        .ai-brief-content ul { margin:0 0 10px 0; color:#aaa; list-style:none; padding:0; }
+        .ai-brief-content li { margin-bottom:5px; padding:4px 8px 4px 20px; position:relative; font-size:11px; color:#aaa; line-height:1.6; }
+        .ai-brief-content li::before { content:'›'; position:absolute; left:6px; color:#4a8fff; font-weight:bold; }
+        .ai-brief-content strong { color:#fff; font-weight:bold; }
+        .ai-brief-content em { color:#888; font-style:italic; }
+        .ai-brief-content hr { border:none; border-top:1px solid #1a1a2a; margin:20px 0; }
+        .ai-brief-content .ai-tag-bull { display:inline-block; padding:1px 7px; background:rgba(20,188,96,0.15); border:1px solid rgba(20,188,96,0.3); border-radius:3px; color:#14BC60; font-size:var(--font-xs); font-weight:bold; }
+        .ai-brief-content .ai-tag-bear { display:inline-block; padding:1px 7px; background:rgba(242,102,102,0.15); border:1px solid rgba(242,102,102,0.3); border-radius:3px; color:#F26666; font-size:var(--font-xs); font-weight:bold; }
+        .ai-brief-content .ai-tag-neutral { display:inline-block; padding:1px 7px; background:rgba(74,143,255,0.1); border:1px solid rgba(74,143,255,0.2); border-radius:3px; color:#4a8fff; font-size:var(--font-xs); font-weight:bold; }
+        .ai-brief-content .ai-section-block { background:#0d0d0d; border:1px solid #1a1a2a; border-radius:6px; padding:12px 16px; margin-bottom:12px; }
+        .ai-brief-meta { padding:10px 28px; border-top:1px solid #111; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+        .ai-brief-timestamp { font-size:var(--font-xs); color:#444; }
+        .ai-brief-sources { font-size:var(--font-xs); color:#444; }
+        .ai-streaming-cursor { display:inline-block; width:2px; height:12px; background:#4a8fff; margin-left:2px; animation:pulse-dot 0.8s infinite; vertical-align:middle; }
+
+        /* History */
+        .ai-history-bar { background:#0a0a0a; border:1px solid #1e2230; border-radius:var(--radius-card); padding:10px 14px; display:flex; align-items:center; gap:10px; }
+        .ai-history-list { flex:1; display:flex; gap:6px; flex-wrap:wrap; }
+        .ai-history-chip { padding:3px 10px; background:#121212; border:1px solid #1e2230; border-radius:var(--radius-btn); color:#666; font-size:var(--font-xs); cursor:pointer; transition:all .15s; }
+        .ai-history-chip:hover { border-color:#4a8fff; color:#aaa; }
+        .ai-history-clear { padding:3px 10px; background:transparent; border:1px solid #2a1010; border-radius:var(--radius-btn); color:#553333; font-size:var(--font-xs); cursor:pointer; font-family:inherit; }
+        .ai-history-clear:hover { background:#2a1010; color:#cc8888; }
 
         /* =============================================
            FOCUS PAIR PANEL
            ============================================= */
-        .fp-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:900; }
+        .fp-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); z-index:900; }
         .fp-overlay.open { display:block; }
         .fp-panel {
             position:fixed; top:0; right:0; bottom:0; width:380px; max-width:95vw;
@@ -469,9 +507,9 @@
         .fp-formula { font-size:var(--font-sm); color:#666666; text-align:center; line-height:1.6; }
         .ov-pair-row { cursor:pointer; }
 
-        /* ---- Fade-in on all pages ---- */
-        .tab-page.active,
-        .mob-page.active {
+        /* ---- Fade-in on page content (not the container, to avoid breaking position:fixed modals) ---- */
+        .tab-page.active > *,
+        .mob-page.active > * {
             animation: fadeInUp 0.3s ease both;
         }
         .cot-subtab-content {
@@ -635,7 +673,7 @@
 
             <!-- TABLE (60%) -->
             <div style="border-radius:8px; background:var(--bg-card); border:1px solid var(--border); overflow:hidden; display:flex; flex-direction:column; min-height:0;">
-                <div style="flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:#2a2a3a var(--bg-card); min-height:0;">
+                <div style="flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:var(--bg-header) var(--bg-card); min-height:0;">
                     <table class="sentiment-table" style="width:100%; table-layout:fixed;">
                         <thead style="position:sticky;top:0;z-index:2;">
                             <tr>
@@ -803,6 +841,71 @@
     <!-- MACRO PAGE -->
     <div class="tab-page" id="page-macropage">
         <div class="macro-page-section">
+            <!-- AI ANALYST (moved here from its own tab) -->
+            <div class="ai-layout" style="margin-bottom:20px;">
+
+                <div class="ai-key-banner" id="aiKeyBanner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;color:#4a8fff"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span style="flex:1">Clé API Anthropic requise</span>
+                    <input class="ai-key-input" id="aiKeyInput" type="password" placeholder="sk-ant-api03-..." spellcheck="false"/>
+                    <button class="ai-key-save-btn" onclick="aiSaveKey()">Enregistrer</button>
+                </div>
+
+                <div class="page-header" style="position:relative;">
+                    <div class="ph-left" style="gap:8px;">
+                        <button class="ai-settings-btn" onclick="aiToggleSettings()" title="Sources & Settings">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                            Sources
+                        </button>
+                        <span class="ph-status" id="aiStatus"></span>
+                    </div>
+                    <div class="ph-center">AI Macro Analyst</div>
+                    <div class="ph-right" style="gap:6px;">
+                        <select class="ai-lang-select" id="aiLangSelect">
+                            <option value="french">Français</option>
+                            <option value="english">English</option>
+                        </select>
+                        <button class="ai-generate-btn" id="aiGenerateBtn" onclick="aiGenerate()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            Daily Brief
+                        </button>
+                    </div>
+                </div>
+
+                <div class="ai-settings-panel" id="aiSettingsPanel" style="display:none;">
+                    <div class="ai-settings-header">
+                        <span>Sources de données</span>
+                        <button class="ai-settings-close" onclick="aiToggleSettings()">✕</button>
+                    </div>
+                    <div class="ai-sources-grid" id="aiSourcesGrid"></div>
+                    <div class="ai-custom-source">
+                        <input class="ai-custom-input" id="aiCustomUrl" type="text" placeholder="Ajouter une URL custom (ex: https://www.forexlive.com)"/>
+                        <button class="ai-custom-add-btn" onclick="aiAddCustomSource()">Ajouter</button>
+                    </div>
+                    <div class="ai-settings-footer">
+                        <span style="color:#666;font-size:10px;">Les sources cochées seront lues avant génération du brief</span>
+                        <button class="ai-key-clear-btn" onclick="aiClearKey()">Effacer la clé API</button>
+                    </div>
+                </div>
+
+                <div class="ai-brief-card" id="aiBriefCard">
+                    <div class="ai-brief-empty" id="aiBriefEmpty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;color:#333;margin-bottom:12px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                        <div style="color:#444;font-size:13px;font-weight:bold;">Aucun brief généré</div>
+                        <div style="color:#333;font-size:11px;margin-top:4px;">Cliquez sur "Daily Brief" pour analyser les marchés</div>
+                    </div>
+                    <div class="ai-brief-content" id="aiBriefContent" style="display:none;"></div>
+                </div>
+
+                <div class="ai-history-bar" id="aiHistoryBar" style="display:none;">
+                    <span style="color:#666;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">Historique</span>
+                    <div class="ai-history-list" id="aiHistoryList"></div>
+                    <button class="ai-history-clear" onclick="aiClearHistory()">Effacer</button>
+                </div>
+
+            </div>
+
+            <!-- Central Bank Rates -->
             <div class="page-header">
                 <div class="ph-left">
                     <span class="source-badge">Static + verified</span>
@@ -815,22 +918,81 @@
             <div class="ir-layout">
                 <div class="ir-cards-grid" id="irCardsGrid"></div>
             </div>
-            <!-- Economic Calendar embedded at bottom of macro -->
-            <div class="macro-page-section" style="margin-top:20px;">
-                <div class="page-header">
-                    <div class="ph-left"></div>
-                    <div class="ph-center">Economic Calendar</div>
-                    <div class="ph-right"></div>
+        </div>
+    </div>
+</div>
+</div>
+        </div>
+    </div>
+
+    <!-- AI ANALYST -->
+    <div class="tab-page" id="page-aianalyst">
+        <div class="ai-layout">
+
+            <!-- API Key banner (shown only if no key stored) -->
+            <div class="ai-key-banner" id="aiKeyBanner">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;color:#4a8fff"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span style="flex:1">Clé API Anthropic requise</span>
+                <input class="ai-key-input" id="aiKeyInput" type="password" placeholder="sk-ant-api03-..." spellcheck="false"/>
+                <button class="ai-key-save-btn" onclick="aiSaveKey()">Enregistrer</button>
+            </div>
+
+            <!-- Top row : controls -->
+            <div class="page-header" style="position:relative;">
+                <div class="ph-left" style="gap:8px;">
+                    <button class="ai-settings-btn" onclick="aiToggleSettings()" title="Sources & Settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        Sources
+                    </button>
+                    <span class="ph-status" id="aiStatus"></span>
                 </div>
-                <div class="calendar-section">
-                    <div class="tradingview-widget-container" style="flex:1;min-height:0;">
-                        <div class="tradingview-widget-container__widget" style="height:100%;"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-                        {"colorTheme":"dark","isTransparent":true,"locale":"en","countryFilter":"us,ca,eu,fr,de,es,ch,it,gb,au,nz,jp","importanceFilter":"-1,0,1","width":"100%","height":"100%"}
-                        </script>
-                    </div>
+                <div class="ph-center">AI Macro Analyst</div>
+                <div class="ph-right" style="gap:6px;">
+                    <select class="ai-lang-select" id="aiLangSelect">
+                        <option value="french">Français</option>
+                        <option value="english">English</option>
+                    </select>
+                    <button class="ai-generate-btn" id="aiGenerateBtn" onclick="aiGenerate()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        Daily Brief
+                    </button>
                 </div>
             </div>
+
+            <!-- Settings panel -->
+            <div class="ai-settings-panel" id="aiSettingsPanel" style="display:none;">
+                <div class="ai-settings-header">
+                    <span>Sources de données</span>
+                    <button class="ai-settings-close" onclick="aiToggleSettings()">✕</button>
+                </div>
+                <div class="ai-sources-grid" id="aiSourcesGrid"></div>
+                <div class="ai-custom-source">
+                    <input class="ai-custom-input" id="aiCustomUrl" type="text" placeholder="Ajouter une URL custom (ex: https://www.forexlive.com)"/>
+                    <button class="ai-custom-add-btn" onclick="aiAddCustomSource()">Ajouter</button>
+                </div>
+                <div class="ai-settings-footer">
+                    <span style="color:#666;font-size:10px;">Les sources cochées seront lues avant génération du brief</span>
+                    <button class="ai-key-clear-btn" onclick="aiClearKey()">Effacer la clé API</button>
+                </div>
+            </div>
+
+            <!-- Brief output -->
+            <div class="ai-brief-card" id="aiBriefCard">
+                <div class="ai-brief-empty" id="aiBriefEmpty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;color:#333;margin-bottom:12px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                    <div style="color:#444;font-size:13px;font-weight:bold;">Aucun brief généré</div>
+                    <div style="color:#333;font-size:11px;margin-top:4px;">Cliquez sur "Daily Brief" pour analyser les marchés</div>
+                </div>
+                <div class="ai-brief-content" id="aiBriefContent" style="display:none;"></div>
+            </div>
+
+            <!-- History -->
+            <div class="ai-history-bar" id="aiHistoryBar" style="display:none;">
+                <span style="color:#666;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">Historique</span>
+                <div class="ai-history-list" id="aiHistoryList"></div>
+                <button class="ai-history-clear" onclick="aiClearHistory()">Effacer</button>
+            </div>
+
         </div>
     </div>
 </div>
@@ -1018,6 +1180,63 @@
 
         <!-- MACRO PAGE -->
         <div class="mob-page" id="mob-page-macro">
+            <!-- AI ANALYST (mobile, at top of macro) -->
+            <div id="mob-aiKeyBanner" style="display:none;align-items:center;gap:8px;background:#0d1117;border:1px solid #1e3a5f;border-radius:8px;padding:10px 12px;margin:8px 0;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#4a8fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input id="mob-aiKeyInput" type="password" placeholder="Clé API Anthropic..." style="flex:1;background:#0a0a0a;border:1px solid #1e2230;border-radius:5px;padding:5px 8px;color:#fff;font-family:inherit;font-size:11px;outline:none;min-width:0;"/>
+                <button onclick="mobAiSaveKey()" style="padding:5px 12px;background:#1a3060;border:1px solid #2a4a8a;border-radius:5px;color:#fff;font-size:11px;font-weight:bold;cursor:pointer;font-family:inherit;white-space:nowrap;">OK</button>
+            </div>
+
+            <div class="mob-section-header">
+                <span class="msh-title">AI Analyst</span>
+                <div class="msh-right">
+                    <span class="msh-status" id="mob-aiStatus"></span>
+                    <button class="cs-tf-btn" onclick="mobAiToggleSettings()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;" title="Sources">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="mob-aiSettingsPanel" style="display:none;background:#0d0d0d;border:1px solid #1e2230;border-radius:8px;padding:12px;margin:0 0 8px 0;gap:10px;flex-direction:column;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:10px;font-weight:bold;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Sources actives</span>
+                    <button onclick="mobAiToggleSettings()" style="background:transparent;border:none;color:#666;font-size:16px;cursor:pointer;line-height:1;">✕</button>
+                </div>
+                <div id="mob-aiSourcesGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"></div>
+                <div style="display:flex;gap:6px;">
+                    <input id="mob-aiCustomUrl" type="url" placeholder="URL custom..." style="flex:1;background:#0a0a0a;border:1px solid #1e2230;border-radius:5px;padding:5px 8px;color:#fff;font-family:inherit;font-size:11px;outline:none;"/>
+                    <button onclick="mobAiAddCustom()" style="padding:5px 10px;background:transparent;border:1px solid #2a3060;border-radius:5px;color:#4a8fff;font-size:11px;font-weight:bold;cursor:pointer;font-family:inherit;">+</button>
+                </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <button id="mob-aiGenerateBtn" onclick="mobAiGenerate()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:linear-gradient(135deg,#1a3060,#2a4a8a);border:1px solid #3a5aaa;border-radius:8px;color:#fff;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    Daily Brief
+                </button>
+                <select id="mob-aiLangSelect" style="background:#0a0a0a;border:1px solid #1e2230;border-radius:8px;color:#888;font-size:11px;font-family:inherit;padding:10px 8px;outline:none;cursor:pointer;">
+                    <option value="french">FR</option>
+                    <option value="english">EN</option>
+                </select>
+            </div>
+
+            <div id="mob-aiBriefCard" style="background:#0d0d0d;border:1px solid #1e2230;border-radius:8px;min-height:200px;display:flex;flex-direction:column;margin-bottom:12px;">
+                <div id="mob-aiBriefEmpty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 16px;text-align:center;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;margin-bottom:8px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                    <div style="color:#444;font-size:11px;font-weight:bold;">Aucun brief généré</div>
+                </div>
+                <div id="mob-aiBriefContent" style="display:none;padding:14px;line-height:1.7;color:#ccc;font-size:12px;overflow-y:auto;max-height:400px;"></div>
+            </div>
+
+            <div id="mob-aiHistoryBar" style="display:none;background:#0a0a0a;border:1px solid #1e2230;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                    <span style="color:#666;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">Historique</span>
+                    <button onclick="aiClearHistory();mobAiRenderHistory();" style="padding:2px 8px;background:transparent;border:1px solid #2a1010;border-radius:4px;color:#553333;font-size:10px;cursor:pointer;font-family:inherit;">Effacer</button>
+                </div>
+                <div id="mob-aiHistoryList" style="display:flex;gap:5px;flex-wrap:wrap;"></div>
+            </div>
+
+            <!-- Central Bank Rates -->
             <div class="mob-section-header">
                 <span class="msh-title">Central Bank Rates</span>
                 <div class="msh-right">
@@ -1026,18 +1245,6 @@
                 </div>
             </div>
             <div class="mob-ir-cards-grid" id="mob-irCardsGrid"></div>
-            <!-- Economic Calendar at bottom -->
-            <div class="mob-section-header" style="margin-top:12px;">
-                <span class="msh-title">Economic Calendar</span>
-            </div>
-            <div style="height:600px;border-radius:8px;overflow:hidden;margin-bottom:12px;">
-                <div class="tradingview-widget-container" style="height:100%;">
-                    <div class="tradingview-widget-container__widget" style="height:100%;"></div>
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-                    {"colorTheme":"dark","isTransparent":true,"locale":"en","countryFilter":"us,ca,eu,fr,de,es,ch,it,gb,au,nz,jp","importanceFilter":"-1,0,1","width":"100%","height":"100%"}
-                    </script>
-                </div>
-            </div>
         </div>
 
     </div><!-- end mob-content -->
@@ -4689,16 +4896,44 @@ async function ovRefresh() {
    WEIGHTS PANEL
    ========================================================= */
 function openWeightsModal() {
-    /* Sync sliders to current weights */
-    document.getElementById('wSliderRsi').value  = Math.round(OV_WEIGHTS.rsi * 100);
-    document.getElementById('wSliderCi').value   = Math.round(OV_WEIGHTS.ci * 100);
-    document.getElementById('wSliderCot').value  = Math.round(OV_WEIGHTS.cot * 100);
-    document.getElementById('wSliderSent').value = Math.round(OV_WEIGHTS.sentiment * 100);
+    var existing = document.getElementById('weightsModalOverlay');
+    if (existing) existing.remove();
+    var el = document.createElement('div');
+    el.id = 'weightsModalOverlay';
+    el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    el.onclick = function(e){ if(e.target===el) closeWeightsModal(); };
+    el.innerHTML = '<div style="background:#121212;border:1px solid #1e2230;border-radius:8px;padding:24px;width:420px;max-width:95vw;display:flex;flex-direction:column;gap:16px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+        '<h3 style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:bold;color:#fff;">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><line x1="12" y1="20" x2="12" y2="4"/><line x1="5" y1="13" x2="19" y2="13"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="16" r="2"/></svg>' +
+        'Adjust Signal Weights</h3>' +
+        '<button onclick="closeWeightsModal()" style="background:transparent;border:none;color:#aaa;font-size:20px;cursor:pointer;line-height:1;">&#x2715;</button>' +
+        '</div>' +
+        '<div style="background:#111;border:1px solid transparent;border-radius:5px;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;font-size:12px;">' +
+        '<span style="color:#888">Total weight</span><span id="weightsTotalVal" style="font-weight:bold;font-size:14px;color:#14BC60;">100%</span></div>' +
+        _wRow('RSI (Currency Strength)', 'wSliderRsi', 'wPctRsi', Math.round(OV_WEIGHTS.rsi*100), 'rsi') +
+        _wRow('CI (Currency Index)',      'wSliderCi',  'wPctCi',  Math.round(OV_WEIGHTS.ci*100),  'ci')  +
+        _wRow('COT (Commitments of Traders)', 'wSliderCot', 'wPctCot', Math.round(OV_WEIGHTS.cot*100), 'cot') +
+        _wRow('Sentiment (Contrarian)',   'wSliderSent','wPctSent', Math.round(OV_WEIGHTS.sentiment*100), 'sentiment') +
+        '<div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #1e2230;padding-top:14px;">' +
+        '<button onclick="resetWeights()" style="padding:8px 16px;background:transparent;border:1px solid transparent;border-radius:5px;color:#aaa;font-size:12px;font-weight:bold;cursor:pointer;font-family:inherit;">Reset to Default</button>' +
+        '<button onclick="applyWeights()" style="padding:8px 20px;background:#2a3060;color:#fff;border:1px solid #3a4080;border-radius:5px;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit;">Apply &amp; Recalculate</button>' +
+        '</div></div>';
+    document.body.appendChild(el);
     updateWeightDisplay();
-    document.getElementById('weightsModalOverlay').classList.add('open');
+}
+function _wRow(label, sliderId, pctId, val, key) {
+    return '<div style="display:flex;flex-direction:column;gap:6px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+        '<span style="font-size:12px;font-weight:bold;color:#aaa;">'+ label +'</span>' +
+        '<span id="'+ pctId +'" style="font-size:13px;font-weight:bold;color:#fff;min-width:38px;text-align:right;">'+ val +'%</span></div>' +
+        '<input type="range" id="'+ sliderId +'" min="0" max="100" value="'+ val +'" '+
+        'oninput="onWeightSlider(\''+key+'\',this.value)" '+
+        'style="-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:#333;outline:none;cursor:pointer;"></div>';
 }
 function closeWeightsModal() {
-    document.getElementById('weightsModalOverlay').classList.remove('open');
+    var el = document.getElementById('weightsModalOverlay');
+    if (el) el.remove();
 }
 function updateWeightDisplay() {
     var keys = ['rsi','ci','cot','sentiment'];
@@ -4851,6 +5086,500 @@ function closeFocusPair() {
     document.getElementById('fpOverlay').classList.remove('open');
     document.getElementById('fpPanel').classList.remove('open');
 }
+
+/* =========================================================
+   MOBILE AI ANALYST
+   ========================================================= */
+
+var _mobAiInited = false;
+
+function mobAiInit() {
+    var key = aiGetKey();
+    var banner = document.getElementById('mob-aiKeyBanner');
+    if (banner) banner.style.display = key ? 'none' : 'flex';
+    mobAiRenderSources();
+    mobAiRenderHistory();
+}
+
+function mobAiSaveKey() {
+    var k = (document.getElementById('mob-aiKeyInput') || {}).value || '';
+    k = k.trim();
+    if (!k) return;
+    try { localStorage.setItem('ai_analyst_key', k); } catch(e) {}
+    document.getElementById('mob-aiKeyBanner').style.display = 'none';
+    document.getElementById('mob-aiStatus').textContent = '✓';
+    setTimeout(function(){ document.getElementById('mob-aiStatus').textContent = ''; }, 2000);
+}
+
+function mobAiToggleSettings() {
+    var p = document.getElementById('mob-aiSettingsPanel');
+    if (!p) return;
+    var isOpen = p.style.display === 'flex';
+    p.style.display = isOpen ? 'none' : 'flex';
+    if (!isOpen) p.style.flexDirection = 'column';
+    mobAiRenderSources();
+}
+
+function mobAiRenderSources() {
+    var grid = document.getElementById('mob-aiSourcesGrid');
+    if (!grid) return;
+    var all = AI_SOURCES.concat(_aiCustomSources);
+    grid.innerHTML = all.map(function(s) {
+        return '<div onclick="aiToggleSource(\'' + s.id + '\');mobAiRenderSources();" ' +
+            'style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:#121212;border:1px solid ' +
+            (s.active ? '#4a8fff' : '#1e2230') + ';border-radius:5px;cursor:pointer;">' +
+            '<div style="width:6px;height:6px;border-radius:50%;background:' + (s.active ? '#4a8fff' : '#333') + ';flex-shrink:0;"></div>' +
+            '<div><div style="font-size:11px;font-weight:bold;color:' + (s.active ? '#fff' : '#666') + ';">' + s.name + '</div>' +
+            '<div style="font-size:9px;color:#444;">' + s.type + '</div></div></div>';
+    }).join('');
+}
+
+function mobAiAddCustom() {
+    var inp = document.getElementById('mob-aiCustomUrl');
+    var url = (inp || {}).value || '';
+    url = url.trim();
+    if (!url || !url.startsWith('http')) return;
+    var name = url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
+    _aiCustomSources.push({ id:'custom_' + Date.now(), name:name, url:url, type:'Custom', active:true });
+    if (inp) inp.value = '';
+    mobAiRenderSources();
+}
+
+function mobAiRenderHistory() {
+    var bar  = document.getElementById('mob-aiHistoryBar');
+    var list = document.getElementById('mob-aiHistoryList');
+    if (!list || !bar) return;
+    if (!_aiHistory.length) { bar.style.display = 'none'; return; }
+    bar.style.display = 'block';
+    list.innerHTML = _aiHistory.map(function(h, i) {
+        var d = new Date(h.date);
+        var label = d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}) + ' ' +
+                    d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        return '<div onclick="mobAiLoadHistory(' + i + ')" ' +
+            'style="padding:3px 8px;background:#121212;border:1px solid #1e2230;border-radius:4px;color:#666;font-size:10px;cursor:pointer;">' +
+            label + '</div>';
+    }).join('');
+}
+
+function mobAiLoadHistory(idx) {
+    var h = _aiHistory[idx];
+    if (!h) return;
+    document.getElementById('mob-aiBriefEmpty').style.display = 'none';
+    var el = document.getElementById('mob-aiBriefContent');
+    el.style.display = 'block';
+    el.innerHTML = aiRenderMarkdown(h.text);
+}
+
+async function mobAiGenerate() {
+    var key = aiGetKey();
+    if (!key) { document.getElementById('mob-aiKeyBanner').style.display = 'flex'; return; }
+
+    var btn = document.getElementById('mob-aiGenerateBtn');
+    btn.disabled = true;
+    btn.textContent = 'Analyse en cours...';
+    document.getElementById('mob-aiStatus').textContent = '⏳';
+
+    var emptyEl   = document.getElementById('mob-aiBriefEmpty');
+    var contentEl = document.getElementById('mob-aiBriefContent');
+    emptyEl.style.display = 'none';
+    contentEl.style.display = 'block';
+    contentEl.innerHTML = '<span class="ai-streaming-cursor"></span>';
+
+    var lang    = (document.getElementById('mob-aiLangSelect') || {}).value || 'french';
+    var sources = aiGetActiveSources();
+    var today   = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+
+    var systemPrompt = lang === 'french'
+        ? 'Tu es un analyste FX macro senior. Génère un brief macro quotidien clair et actionnable pour un trader forex. Réponds en français. Structure avec Markdown : # titre, ## sections, **gras**. Sections : Résumé, Données macro, Politique monétaire, Risk Sentiment, Paires à surveiller, Points clés demain.'
+        : 'You are a senior FX macro analyst. Generate a clear daily macro brief for a forex trader. Respond in English. Use Markdown: # title, ## sections, **bold**. Sections: Summary, Macro Data, Monetary Policy, Risk Sentiment, Pairs to Watch, Key Points Tomorrow.';
+
+    var userPrompt = (lang === 'french' ? 'Brief macro FX pour le ' : 'FX macro brief for ') + today + '.\n\nSources :\n' +
+        sources.map(function(s){ return '- ' + s.name + ' : ' + s.url; }).join('\n') +
+        '\n\nRecherche les informations récentes et produis un brief complet.';
+
+    try {
+        var response = await fetch('https://anthropic-proxy.didinehamdii.workers.dev/', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01' },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-6',
+                max_tokens: 3000,
+                system: systemPrompt,
+                tools: [{ type:'web_search_20250305', name:'web_search' }],
+                messages: [{ role:'user', content:userPrompt }]
+            })
+        });
+
+        if (!response.ok) {
+            var err = await response.json().catch(function(){ return {}; });
+            throw new Error((err.error && err.error.message) || 'Erreur API ' + response.status);
+        }
+
+        var data = await response.json();
+        var text = (data.content || []).filter(function(b){ return b.type==='text'; }).map(function(b){ return b.text; }).join('\n');
+        if (!text) throw new Error('Aucun contenu');
+
+        contentEl.innerHTML = aiRenderMarkdown(text);
+
+        _aiHistory.unshift({ date:new Date().toISOString(), text:text, sources:sources.map(function(s){ return s.name; }) });
+        if (_aiHistory.length > 10) _aiHistory.length = 10;
+        try { localStorage.setItem('ai_analyst_history', JSON.stringify(_aiHistory)); } catch(e) {}
+
+        // Sync PC history too
+        aiRenderHistory();
+        mobAiRenderHistory();
+        document.getElementById('mob-aiStatus').textContent = '✓';
+        setTimeout(function(){ document.getElementById('mob-aiStatus').textContent = ''; }, 3000);
+
+    } catch(e) {
+        contentEl.innerHTML = '<div style="color:#F26666;padding:16px;text-align:center;font-size:12px;">' + e.message + '</div>';
+        document.getElementById('mob-aiStatus').textContent = '✗';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Générer le Daily Brief';
+}
+
+// Hook into mobShowPage for lazy init
+var _origMobShowPage = mobShowPage;
+mobShowPage = function(name, idx, btn) {
+    _origMobShowPage(name, idx, btn);
+    if (name === 'macro' && !_mobAiInited) { _mobAiInited = true; mobAiInit(); }
+};
+
+
+var AI_SOURCES = [
+    { id:'investinglive', name:'InvestingLive',  url:'https://investinglive.com/live-feed/',        type:'News FX',    active:true  },
+    { id:'ing',           name:'ING Think FX',   url:'https://think.ing.com/market/fx/',            type:'Analyses',   active:true  },
+    { id:'fxstreet',      name:'FXStreet',        url:'https://www.fxstreet.com/news',              type:'Analyses',   active:true  },
+    { id:'dailyfx',       name:'DailyFX',         url:'https://www.dailyfx.com/forex/fundamental',  type:'Fondamental',active:true  },
+    { id:'investing',     name:'Investing.com',   url:'https://www.investing.com/news/forex-news',  type:'News',       active:false },
+    { id:'reuters',       name:'Reuters FX',      url:'https://www.reuters.com/markets/currencies', type:'Reuters',    active:true  },
+    { id:'fed',           name:'Federal Reserve', url:'https://www.federalreserve.gov/newsevents.htm',type:'Banque centrale',active:true },
+    { id:'ecb',           name:'ECB',             url:'https://www.ecb.europa.eu/press/pr/date/html/index.en.html',type:'Banque centrale',active:true },
+    { id:'mql5cal',       name:'MQL5 Calendar',   url:'https://www.mql5.com/en/economic-calendar', type:'Calendrier', active:true  },
+];
+
+var _aiCustomSources = [];
+var _aiHistory = [];
+var _aiCurrentBrief = null;
+
+function aiInit() {
+    aiRenderSources();
+    aiLoadHistory();
+    var key = aiGetKey();
+    document.getElementById('aiKeyBanner').style.display = key ? 'none' : 'flex';
+    if (key && document.getElementById('aiKeyInput')) {
+        document.getElementById('aiKeyInput').value = '';
+    }
+}
+
+function aiGetKey() {
+    try { return localStorage.getItem('ai_analyst_key') || ''; } catch(e) { return ''; }
+}
+
+function aiSaveKey() {
+    var k = document.getElementById('aiKeyInput').value.trim();
+    if (!k) return;
+    try { localStorage.setItem('ai_analyst_key', k); } catch(e) {}
+    document.getElementById('aiKeyBanner').style.display = 'none';
+    document.getElementById('aiStatus').textContent = 'Clé enregistrée ✓';
+    setTimeout(function(){ document.getElementById('aiStatus').textContent = ''; }, 2000);
+}
+
+function aiClearKey() {
+    try { localStorage.removeItem('ai_analyst_key'); } catch(e) {}
+    document.getElementById('aiKeyBanner').style.display = 'flex';
+    document.getElementById('aiStatus').textContent = 'Clé supprimée';
+    setTimeout(function(){ document.getElementById('aiStatus').textContent = ''; }, 2000);
+}
+
+function aiToggleSettings() {
+    var p = document.getElementById('aiSettingsPanel');
+    p.style.display = p.style.display === 'none' ? 'flex' : 'none';
+    if (p.style.display === 'flex') p.style.flexDirection = 'column';
+}
+
+function aiRenderSources() {
+    var grid = document.getElementById('aiSourcesGrid');
+    if (!grid) return;
+    var all = AI_SOURCES.concat(_aiCustomSources);
+    grid.innerHTML = all.map(function(s) {
+        return '<div class="ai-source-chip' + (s.active?' active':'') + '" onclick="aiToggleSource(\'' + s.id + '\')" title="' + s.url + '">' +
+            '<div class="ai-source-dot"></div>' +
+            '<div><div class="ai-source-name">' + s.name + '</div><div class="ai-source-type">' + s.type + '</div></div>' +
+            '</div>';
+    }).join('');
+}
+
+function aiToggleSource(id) {
+    var src = AI_SOURCES.find(function(s){ return s.id===id; }) ||
+              _aiCustomSources.find(function(s){ return s.id===id; });
+    if (src) src.active = !src.active;
+    aiRenderSources();
+}
+
+function aiAddCustomSource() {
+    var inp = document.getElementById('aiCustomUrl');
+    var url = inp.value.trim();
+    if (!url || !url.startsWith('http')) { inp.style.borderColor='#F26666'; return; }
+    inp.style.borderColor='';
+    var name = url.replace(/^https?:\/\/(www\.)?/,'').split('/')[0];
+    var id = 'custom_' + Date.now();
+    _aiCustomSources.push({ id:id, name:name, url:url, type:'Custom', active:true });
+    inp.value = '';
+    aiRenderSources();
+}
+
+function aiGetActiveSources() {
+    return AI_SOURCES.concat(_aiCustomSources).filter(function(s){ return s.active; });
+}
+
+async function aiGenerate() {
+    var key = aiGetKey();
+    if (!key) { document.getElementById('aiKeyBanner').style.display='flex'; return; }
+
+    var btn = document.getElementById('aiGenerateBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    document.getElementById('aiStatus').textContent = 'Analyse en cours...';
+
+    var briefCard = document.getElementById('aiBriefCard');
+    var emptyEl   = document.getElementById('aiBriefEmpty');
+    var contentEl = document.getElementById('aiBriefContent');
+    emptyEl.style.display = 'none';
+    contentEl.style.display = 'block';
+    contentEl.innerHTML = '<span class="ai-streaming-cursor"></span>';
+
+    // Remove old meta if any
+    var oldMeta = briefCard.querySelector('.ai-brief-meta');
+    if (oldMeta) oldMeta.remove();
+
+    var lang = document.getElementById('aiLangSelect').value;
+    var sources = aiGetActiveSources();
+    var today = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+
+    var systemPrompt = (lang === 'french' ?
+        'Tu es un analyste FX macro senior. Tu lis les sources fournies et tu génères un brief macro quotidien clair et actionnable pour un trader forex. ' +
+        'Réponds TOUJOURS en français. Structure ta réponse avec des sections Markdown : # titre, ## sections, **gras** pour les points importants. ' +
+        'Utilise des emojis sparingly pour les signaux (🟢 bullish, 🔴 bearish, 🟡 neutre). ' +
+        'Sections attendues : **Résumé du jour**, **Données macro & impact devises**, **Politique monétaire**, **Risk Sentiment**, **Paires à surveiller**, **Points clés à surveiller demain**.'
+        :
+        'You are a senior FX macro analyst. You read the provided sources and generate a clear, actionable daily macro brief for a forex trader. ' +
+        'Always respond in English. Structure your response with Markdown sections: # title, ## sections, **bold** for key points. ' +
+        'Use emojis sparingly for signals (🟢 bullish, 🔴 bearish, 🟡 neutral). ' +
+        'Expected sections: **Day Summary**, **Macro Data & Currency Impact**, **Monetary Policy**, **Risk Sentiment**, **Pairs to Watch**, **Key Points to Monitor Tomorrow**.'
+    );
+
+    var userPrompt = (lang === 'french' ?
+        'Génère le daily brief macro FX pour le ' + today + '.\n\n' +
+        'Sources actives à consulter via web search :\n' + sources.map(function(s){ return '- ' + s.name + ' : ' + s.url; }).join('\n') + '\n\n' +
+        'Recherche les informations les plus récentes sur ces sites et produis un brief complet et structuré.'
+        :
+        'Generate the daily FX macro brief for ' + today + '.\n\n' +
+        'Active sources to search:\n' + sources.map(function(s){ return '- ' + s.name + ': ' + s.url; }).join('\n') + '\n\n' +
+        'Search for the most recent information on these sites and produce a complete, structured brief.'
+    );
+
+    try {
+        var response = await fetch('https://anthropic-proxy.didinehamdii.workers.dev/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': key,
+                'anthropic-version': '2023-06-01',
+                'anthropic-beta': 'interleaved-thinking-2025-05-14'
+            },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-6',
+                max_tokens: 4000,
+                system: systemPrompt,
+                tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+                messages: [{ role: 'user', content: userPrompt }]
+            })
+        });
+
+        if (!response.ok) {
+            var err = await response.json().catch(function(){ return {}; });
+            throw new Error((err.error && err.error.message) || 'Erreur API ' + response.status);
+        }
+
+        var data = await response.json();
+
+        // Extract text blocks
+        var text = (data.content || [])
+            .filter(function(b){ return b.type === 'text'; })
+            .map(function(b){ return b.text; })
+            .join('\n');
+
+        if (!text) throw new Error('Aucun contenu généré');
+
+        // Render markdown
+        contentEl.innerHTML = aiRenderMarkdown(text);
+
+        // Add meta footer
+        var meta = document.createElement('div');
+        meta.className = 'ai-brief-meta';
+        meta.innerHTML = '<span class="ai-brief-timestamp">Généré le ' + new Date().toLocaleString('fr-FR') + '</span>' +
+            '<span class="ai-brief-sources">Sources : ' + sources.map(function(s){ return s.name; }).join(', ') + '</span>';
+        briefCard.appendChild(meta);
+
+        // Save to history
+        _aiCurrentBrief = { date: new Date().toISOString(), text: text, sources: sources.map(function(s){ return s.name; }) };
+        _aiHistory.unshift(_aiCurrentBrief);
+        if (_aiHistory.length > 10) _aiHistory.length = 10;
+        try { localStorage.setItem('ai_analyst_history', JSON.stringify(_aiHistory)); } catch(e) {}
+        aiRenderHistory();
+
+        document.getElementById('aiStatus').textContent = '✓ Brief généré';
+        setTimeout(function(){ document.getElementById('aiStatus').textContent = ''; }, 3000);
+
+    } catch(e) {
+        contentEl.innerHTML = '<div style="color:#F26666;padding:20px;text-align:center;">' +
+            '<div style="font-size:13px;font-weight:bold;margin-bottom:6px;">Erreur</div>' +
+            '<div style="font-size:11px;color:#aa6666;">' + e.message + '</div></div>';
+        document.getElementById('aiStatus').textContent = 'Erreur';
+    }
+
+    btn.disabled = false;
+    btn.classList.remove('loading');
+}
+
+function aiRenderMarkdown(text) {
+    // Escape HTML
+    var t = text
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;');
+
+    var lines = t.split('\n');
+    var html = '';
+    var inList = false;
+    var inSection = false;
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+
+        // H1 — title banner
+        var m1 = line.match(/^# (.+)$/);
+        if (m1) {
+            if (inList) { html += '</ul>'; inList = false; }
+            if (inSection) { html += '</div>'; inSection = false; }
+            html += '<h1>' + inlineFormat(m1[1]) + '</h1>';
+            continue;
+        }
+
+        // H2 — section header + open card
+        var m2 = line.match(/^## (.+)$/);
+        if (m2) {
+            if (inList) { html += '</ul>'; inList = false; }
+            if (inSection) { html += '</div>'; inSection = false; }
+            html += '<h2>' + inlineFormat(m2[1]) + '</h2><div class="ai-section-block">';
+            inSection = true;
+            continue;
+        }
+
+        // H3 — sub-header inside section
+        var m3 = line.match(/^### (.+)$/);
+        if (m3) {
+            if (inList) { html += '</ul>'; inList = false; }
+            html += '<h3>' + inlineFormat(m3[1]) + '</h3>';
+            continue;
+        }
+
+        // HR
+        if (line.match(/^---+$/)) {
+            if (inList) { html += '</ul>'; inList = false; }
+            html += '<hr>';
+            continue;
+        }
+
+        // List item
+        var ml = line.match(/^[-•*] (.+)$/);
+        if (ml) {
+            if (!inList) { html += '<ul>'; inList = true; }
+            html += '<li>' + inlineFormat(ml[1]) + '</li>';
+            continue;
+        }
+
+        // Empty line
+        if (line.trim() === '') {
+            if (inList) { html += '</ul>'; inList = false; }
+            continue;
+        }
+
+        // Paragraph
+        if (inList) { html += '</ul>'; inList = false; }
+        html += '<p>' + inlineFormat(line) + '</p>';
+    }
+
+    if (inList) html += '</ul>';
+    if (inSection) html += '</div>';
+
+    return html;
+}
+
+function inlineFormat(text) {
+    return text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/🟢/g, '<span class="ai-tag-bull">🟢 BULL</span>')
+        .replace(/🔴/g, '<span class="ai-tag-bear">🔴 BEAR</span>')
+        .replace(/🟡/g, '<span class="ai-tag-neutral">🟡 NEUTRE</span>');
+}
+
+function aiLoadHistory() {
+    try {
+        var h = localStorage.getItem('ai_analyst_history');
+        if (h) _aiHistory = JSON.parse(h);
+    } catch(e) { _aiHistory = []; }
+    aiRenderHistory();
+}
+
+function aiRenderHistory() {
+    var bar = document.getElementById('aiHistoryBar');
+    var list = document.getElementById('aiHistoryList');
+    if (!list) return;
+    if (!_aiHistory.length) { bar.style.display='none'; return; }
+    bar.style.display='flex';
+    list.innerHTML = _aiHistory.map(function(h, i) {
+        var d = new Date(h.date);
+        var label = d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}) + ' ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        return '<div class="ai-history-chip" onclick="aiLoadHistoryItem(' + i + ')" title="' + (h.sources||[]).join(', ') + '">' + label + '</div>';
+    }).join('');
+}
+
+function aiLoadHistoryItem(idx) {
+    var h = _aiHistory[idx];
+    if (!h) return;
+    var contentEl = document.getElementById('aiBriefContent');
+    var emptyEl = document.getElementById('aiBriefEmpty');
+    var briefCard = document.getElementById('aiBriefCard');
+    emptyEl.style.display = 'none';
+    contentEl.style.display = 'block';
+    contentEl.innerHTML = aiRenderMarkdown(h.text);
+    var oldMeta = briefCard.querySelector('.ai-brief-meta');
+    if (oldMeta) oldMeta.remove();
+    var meta = document.createElement('div');
+    meta.className = 'ai-brief-meta';
+    meta.innerHTML = '<span class="ai-brief-timestamp">Archivé le ' + new Date(h.date).toLocaleString('fr-FR') + '</span>' +
+        '<span class="ai-brief-sources">Sources : ' + (h.sources||[]).join(', ') + '</span>';
+    briefCard.appendChild(meta);
+}
+
+function aiClearHistory() {
+    _aiHistory = [];
+    try { localStorage.removeItem('ai_analyst_history'); } catch(e) {}
+    aiRenderHistory();
+}
+
+// Init on tab switch
+var _aiInited = false;
+var _origShowTab = showTab;
+showTab = function(name) {
+    _origShowTab(name);
+    if (name === 'macropage' && !_aiInited) { _aiInited = true; aiInit(); }
+};
 </script>
 
 <!-- PAIRS MODAL — outside pc-only so it works on mobile too -->
@@ -4869,43 +5598,6 @@ function closeFocusPair() {
         <div class="pairs-modal-footer">
             <button class="pairs-action-btn" onclick="closePairsModal()">Cancel</button>
             <button class="pairs-save-btn" onclick="savePairsSelection()">Save &amp; Apply</button>
-        </div>
-    </div>
-</div>
-
-<!-- WEIGHTS MODAL -->
-<div class="weights-modal-overlay" id="weightsModalOverlay" onclick="if(event.target===this)closeWeightsModal()">
-    <div class="weights-modal">
-        <div class="weights-modal-header">
-            <h3 style="display:flex;align-items:center;gap:8px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><line x1="12" y1="20" x2="12" y2="4"/><line x1="5" y1="13" x2="19" y2="13"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="16" r="2"/></svg>
-                Adjust Signal Weights
-            </h3>
-            <button class="weights-modal-close" onclick="closeWeightsModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-        </div>
-        <div class="weights-total-bar">
-            <span style="color:#888888">Total weight</span>
-            <span class="weights-total-val" id="weightsTotalVal">100%</span>
-        </div>
-        <div class="weights-row">
-            <div class="weights-row-header"><span class="weights-row-label">RSI (Currency Strength)</span><span class="weights-row-pct" id="wPctRsi">25%</span></div>
-            <input type="range" class="weights-slider" id="wSliderRsi" min="0" max="100" value="25" oninput="onWeightSlider('rsi',this.value)">
-        </div>
-        <div class="weights-row">
-            <div class="weights-row-header"><span class="weights-row-label">CI (Currency Index)</span><span class="weights-row-pct" id="wPctCi">20%</span></div>
-            <input type="range" class="weights-slider" id="wSliderCi" min="0" max="100" value="20" oninput="onWeightSlider('ci',this.value)">
-        </div>
-        <div class="weights-row">
-            <div class="weights-row-header"><span class="weights-row-label">COT (Commitments of Traders)</span><span class="weights-row-pct" id="wPctCot">25%</span></div>
-            <input type="range" class="weights-slider" id="wSliderCot" min="0" max="100" value="25" oninput="onWeightSlider('cot',this.value)">
-        </div>
-        <div class="weights-row">
-            <div class="weights-row-header"><span class="weights-row-label">Sentiment (Contrarian)</span><span class="weights-row-pct" id="wPctSent">30%</span></div>
-            <input type="range" class="weights-slider" id="wSliderSent" min="0" max="100" value="30" oninput="onWeightSlider('sentiment',this.value)">
-        </div>
-        <div class="weights-actions">
-            <button class="weights-reset-btn" onclick="resetWeights()">Reset to Default</button>
-            <button class="weights-apply-btn" onclick="applyWeights()">Apply &amp; Recalculate</button>
         </div>
     </div>
 </div>
