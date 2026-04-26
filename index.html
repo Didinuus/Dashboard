@@ -5741,7 +5741,12 @@ function aiLoadHistory() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
         _aiHistory = Array.isArray(data) ? data : [];
-        if (_aiHistory.length) ovParseAiSignals(_aiHistory[0].text);
+        if (_aiHistory.length) {
+            ovParseAiSignals(_aiHistory[0].text);
+            // Re-render overview cards with AI signals if already loaded
+            var grid = document.getElementById('ovCurGrid');
+            if (grid && grid.children.length > 0) ovRefresh();
+        }
         aiRenderHistory();
         mobAiRenderHistory();
         aiRenderHistoryCards();
