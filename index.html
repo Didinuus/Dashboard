@@ -5828,11 +5828,12 @@ function aiRenderHistoryCards() {
             var date = d.toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long'}) + ' · ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
             var rawText = h.text.indexOf('#') > -1 ? h.text.slice(h.text.indexOf('#')) : h.text;
             var preview = rawText.replace(/[#*`]/g,'').replace(/\n+/g,' ').trim().slice(0, 120) + '…';
+            var srcStr = (h.sources||[]).slice(0,4).join(', ');
             return '<div class="ai-history-entry-card" style="position:relative;" onclick="aiLoadHistoryItem(' + i + ')">' +
                 '<button onclick="aiDeleteHistoryItem(' + i + ',event)" title="Supprimer" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);width:22px;height:22px;background:transparent;border:1px solid #2a2a3a;border-radius:50%;color:#555;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;" onmouseover="this.style.background=\'#2a1010\';this.style.color=\'#F26666\'" onmouseout="this.style.background=\'transparent\';this.style.color=\'#555\'">' + svgX + '</button>' +
                 '<div class="ai-history-entry-date">' + date + '</div>' +
                 '<div class="ai-history-entry-preview">' + preview + '</div>' +
-                '<div class="ai-history-entry-sources">' + sources + '</div>' +
+                '<div class="ai-history-entry-sources">' + srcStr + '</div>' +
                 '</div>';
         }).join('');
 }
