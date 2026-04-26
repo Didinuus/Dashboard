@@ -430,7 +430,7 @@
         .ai-settings-footer { display:flex; align-items:center; justify-content:space-between; padding-top:8px; border-top:1px solid #111; }
 
         /* Brief card */
-        .ai-brief-card { background:var(--bg-base); border:1px solid #1e2230; border-radius:var(--radius-card); min-height:400px; display:flex; flex-direction:column; position:relative; }
+        .ai-brief-card { background:var(--bg-base); border:1px solid #1e2230; border-radius:var(--radius-card); display:flex; flex-direction:column; position:relative; }
         .ai-history-entry-card { background:#111; border:1px solid #1e2230; border-radius:6px; padding:12px 16px; cursor:pointer; transition:border-color .15s, background .15s; display:flex; flex-direction:column; gap:6px; }
         .ai-history-entry-card:hover { border-color:#4a8fff; background:#0d1830; }
         .ai-history-entry-date { font-size:11px; font-weight:bold; color:#4a8fff; }
@@ -438,7 +438,10 @@
         .ai-history-entry-sources { font-size:10px; color:#333; }
         .ai-brief-header-x { width:24px; height:24px; background:transparent; border:1px solid #2a2a3a; border-radius:50%; color:#666; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; line-height:1; transition:all .15s; flex-shrink:0; }
         .ai-brief-header-x:hover { background:#1a1a2a; color:#fff; border-color:#666; }
-        .ai-brief-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; }
+        /* Empty state: shrinks to content, no forced stretch */
+        .ai-brief-empty { display:flex; flex-direction:column; }
+        /* History list: max 5 entries then scroll */
+        #aiBriefHistoryCards { max-height:calc(5 * 68px + 28px); overflow-y:auto; scrollbar-width:thin; scrollbar-color:#1e2230 transparent; }
         .ai-brief-content { flex:1; padding:24px 28px; line-height:1.8; color:#ccc; font-size:var(--font-base); overflow-y:auto; }
 
         /* Brief markdown rendering */
@@ -927,8 +930,8 @@
 
                 <div class="ai-brief-card" id="aiBriefCard">
                     <div class="ai-brief-empty" id="aiBriefEmpty">
-                        <div id="aiBriefHistoryCards" style="display:none;width:100%;padding:16px;display:flex;flex-direction:column;gap:8px;"></div>
-                        <div id="aiBriefNoHistory" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:60px 20px;">
+                        <div id="aiBriefHistoryCards" style="display:none;flex-direction:column;gap:8px;padding:16px;width:100%;box-sizing:border-box;"></div>
+                        <div id="aiBriefNoHistory" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;color:#333;margin-bottom:12px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                             <div style="color:#444;font-size:13px;font-weight:bold;">Aucun brief généré</div>
                             <div style="color:#333;font-size:11px;margin-top:4px;">Cliquez sur "Daily Brief" pour analyser les marchés</div>
@@ -5735,6 +5738,7 @@ function aiRenderHistoryCards() {
     }
     if (noHistory) noHistory.style.display = 'none';
     container.style.display = 'flex';
+    container.style.flexDirection = 'column';
     var svgX = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     container.innerHTML = '<div style="font-size:10px;font-weight:bold;color:#444;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Briefs récents</div>' +
         _aiHistory.map(function(h, i) {
