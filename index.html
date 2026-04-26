@@ -5332,12 +5332,12 @@ async function mobAiGenerate() {
     var today   = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
 
     var systemPrompt = lang === 'french'
-        ? 'Tu es un analyste FX macro senior. Génère un brief macro quotidien clair et actionnable pour un trader forex. Réponds en français. Structure avec Markdown : # titre, ## sections, **gras**. Sections : Résumé, Données macro, Politique monétaire, Risk Sentiment, Paires à surveiller, Points clés demain.'
-        : 'You are a senior FX macro analyst. Generate a clear daily macro brief for a forex trader. Respond in English. Use Markdown: # title, ## sections, **bold**. Sections: Summary, Macro Data, Monetary Policy, Risk Sentiment, Pairs to Watch, Key Points Tomorrow.';
+        ? 'Tu es un analyste FX macro senior. Tu lis les sources fournies et tu génères un brief macro quotidien clair et actionnable pour un trader forex. Réponds en français. Structure avec Markdown : # titre, ## sections, **gras** pour les points importants. Utilise des emojis pour les signaux (🟢 bullish, 🔴 bearish, 🟡 neutre). Sections : Résumé du jour, Données macro & impact devises, Politique monétaire, Risk Sentiment, Paires à surveiller, Points clés demain. Explique les causalités (données → impact devise). Limite-toi à 5-7 recherches web ciblées.'
+        : 'You are a senior FX macro analyst. Generate a clear, actionable daily macro brief for a forex trader. Respond in English. Use Markdown: # title, ## sections, **bold** for key points. Signals: 🟢 🔴 🟡. Sections: Day Summary, Macro Data & Currency Impact, Monetary Policy, Risk Sentiment, Pairs to Watch, Key Points Tomorrow. Explain causality (data → currency impact). Limit yourself to 5-7 targeted web searches.';
 
     var userPrompt = (lang === 'french' ? 'Brief macro FX pour le ' : 'FX macro brief for ') + today + '.\n\nSources :\n' +
         sources.map(function(s){ return '- ' + s.name + ' : ' + s.url; }).join('\n') +
-        '\n\nRecherche les informations récentes et produis un brief complet.';
+        '\n\nRecherche les informations les plus récentes (5-7 recherches ciblées) et produis un brief structuré et actionnable.';
 
     try {
         var response = await fetch('https://anthropic-proxy.didinehamdii.workers.dev/', {
@@ -5510,27 +5510,14 @@ async function aiGenerate() {
     var sources = aiGetActiveSources();
     var today = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
 
-    var systemPrompt = (lang === 'french' ?
-        'Tu es un analyste FX macro senior. Tu lis les sources fournies et tu génères un brief macro quotidien clair et actionnable pour un trader forex. ' +
-        'Réponds TOUJOURS en français. Structure ta réponse avec des sections Markdown : # titre, ## sections, **gras** pour les points importants. ' +
-        'Utilise des emojis sparingly pour les signaux (🟢 bullish, 🔴 bearish, 🟡 neutre). ' +
-        'Sections attendues : **Résumé du jour**, **Données macro & impact devises**, **Politique monétaire**, **Risk Sentiment**, **Paires à surveiller**, **Points clés à surveiller demain**.'
-        :
-        'You are a senior FX macro analyst. You read the provided sources and generate a clear, actionable daily macro brief for a forex trader. ' +
-        'Always respond in English. Structure your response with Markdown sections: # title, ## sections, **bold** for key points. ' +
-        'Use emojis sparingly for signals (🟢 bullish, 🔴 bearish, 🟡 neutral). ' +
-        'Expected sections: **Day Summary**, **Macro Data & Currency Impact**, **Monetary Policy**, **Risk Sentiment**, **Pairs to Watch**, **Key Points to Monitor Tomorrow**.'
-    );
+    var systemPrompt = lang === 'french'
+        ? 'Tu es un analyste FX macro senior. Tu lis les sources fournies et tu génères un brief macro quotidien clair et actionnable pour un trader forex. Réponds en français. Structure avec Markdown : # titre, ## sections, **gras** pour les points importants. Utilise des emojis pour les signaux (🟢 bullish, 🔴 bearish, 🟡 neutre). Sections : Résumé du jour, Données macro & impact devises, Politique monétaire, Risk Sentiment, Paires à surveiller, Points clés demain. Explique les causalités (données → impact devise). Limite-toi à 5-7 recherches web ciblées.'
+        : 'You are a senior FX macro analyst. Generate a clear, actionable daily macro brief for a forex trader. Respond in English. Use Markdown: # title, ## sections, **bold** for key points. Signals: 🟢 🔴 🟡. Sections: Day Summary, Macro Data & Currency Impact, Monetary Policy, Risk Sentiment, Pairs to Watch, Key Points Tomorrow. Explain causality (data → currency impact). Limit yourself to 5-7 targeted web searches.';
 
-    var userPrompt = (lang === 'french' ?
-        'Génère le daily brief macro FX pour le ' + today + '.\n\n' +
-        'Sources actives à consulter via web search :\n' + sources.map(function(s){ return '- ' + s.name + ' : ' + s.url; }).join('\n') + '\n\n' +
-        'Recherche les informations les plus récentes sur ces sites et produis un brief complet et structuré.'
-        :
-        'Generate the daily FX macro brief for ' + today + '.\n\n' +
-        'Active sources to search:\n' + sources.map(function(s){ return '- ' + s.name + ': ' + s.url; }).join('\n') + '\n\n' +
-        'Search for the most recent information on these sites and produce a complete, structured brief.'
-    );
+    var srcList = sources.map(function(s){ return '- ' + s.name + ' : ' + s.url; }).join('\n');
+    var userPrompt = lang === 'french'
+        ? 'Brief macro FX pour le ' + today + '.\n\nSources :\n' + srcList + '\n\nRecherche les informations les plus récentes (5-7 recherches ciblées) et produis un brief structuré et actionnable.'
+        : 'FX macro brief for ' + today + '.\n\nSources:\n' + srcList + '\n\nSearch for the most recent info (5-7 targeted searches) and produce a structured, actionable brief.';
 
     try {
         var response = await fetch('https://anthropic-proxy.didinehamdii.workers.dev/', {
@@ -5543,7 +5530,7 @@ async function aiGenerate() {
             },
             body: JSON.stringify({
                 model: 'claude-sonnet-4-6',
-                max_tokens: 4000,
+                max_tokens: 3000,
                 system: systemPrompt,
                 tools: [{ type: 'web_search_20250305', name: 'web_search' }],
                 messages: [{ role: 'user', content: userPrompt }]
