@@ -5363,9 +5363,10 @@ async function mobAiGenerate() {
 
         contentEl.innerHTML = aiRenderMarkdown(text);
 
-        _aiHistory.unshift({ date:new Date().toISOString(), text:text, sources:sources.map(function(s){ return s.name; }) });
+        var brief = { date:new Date().toISOString(), text:text, sources:sources.map(function(s){ return s.name; }) };
+        _aiHistory.unshift(brief);
         if (_aiHistory.length > 10) _aiHistory.length = 10;
-        try { localStorage.setItem('ai_analyst_history', JSON.stringify(_aiHistory)); } catch(e) {}
+        aiCloudSave(brief);
 
         // Show theme button + default light mode
         var briefCard = document.getElementById('mob-aiBriefCard');
@@ -5568,7 +5569,7 @@ async function aiGenerate() {
         _aiCurrentBrief = { date: new Date().toISOString(), text: text, sources: sources.map(function(s){ return s.name; }) };
         _aiHistory.unshift(_aiCurrentBrief);
         if (_aiHistory.length > 10) _aiHistory.length = 10;
-        try { localStorage.setItem('ai_analyst_history', JSON.stringify(_aiHistory)); } catch(e) {}
+        aiCloudSave(_aiCurrentBrief);
         aiRenderHistory();
 
         document.getElementById('aiStatus').textContent = '✓ Brief généré';
@@ -5674,14 +5675,48 @@ function inlineFormat(text) {
         .replace(/🟡/g, '<span class="ai-tag-neutral">🟡 NEUTRE</span>');
 }
 
+var PROXY_URL = 'https://anthropic-proxy.didinehamdii.workers.dev/';
+
+function aiCloudSave(brief) {
+    fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-action': 'save-brief' },
+        body: JSON.stringify(brief)
+    }).catch(function(e) { console.warn('Cloud save failed:', e); });
+}
+
+function aiCloudDelete(idx) {
+    fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-action': 'delete-brief' },
+        body: JSON.stringify({ index: idx })
+    }).catch(function(e) { console.warn('Cloud delete failed:', e); });
+}
+
 function aiLoadHistory() {
-    try {
-        var h = localStorage.getItem('ai_analyst_history');
-        if (h) _aiHistory = JSON.parse(h);
-    } catch(e) { _aiHistory = []; }
-    aiRenderHistory();
-    mobAiRenderHistory();
-    aiRenderHistoryCards();
+    fetch(PROXY_URL, {
+        method: 'GET',
+        headers: { 'x-action': 'load-briefs' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        _aiHistory = Array.isArray(data) ? data : [];
+        aiRenderHistory();
+        mobAiRenderHistory();
+        aiRenderHistoryCards();
+        mobAiRenderHistoryCards();
+    })
+    .catch(function() {
+        // Fallback to localStorage if cloud unavailable
+        try {
+            var h = localStorage.getItem('ai_analyst_history');
+            if (h) _aiHistory = JSON.parse(h);
+        } catch(e) { _aiHistory = []; }
+        aiRenderHistory();
+        mobAiRenderHistory();
+        aiRenderHistoryCards();
+        mobAiRenderHistoryCards();
+    });
 }
 
 function aiRenderHistory() {
@@ -5767,8 +5802,8 @@ function aiShowBriefActions() {
 
 function aiDeleteHistoryItem(idx, e) {
     e.stopPropagation();
+    aiCloudDelete(idx);
     _aiHistory.splice(idx, 1);
-    try { localStorage.setItem('ai_analyst_history', JSON.stringify(_aiHistory)); } catch(ex) {}
     aiRenderHistoryCards();
     mobAiRenderHistoryCards();
     aiRenderHistory();
@@ -5855,6 +5890,11 @@ function aiLoadHistoryItem(idx) {
 
 function aiClearHistory() {
     _aiHistory = [];
+    fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-action': 'clear-briefs' },
+        body: '{}'
+    }).catch(function(){});
     try { localStorage.removeItem('ai_analyst_history'); } catch(e) {}
     aiRenderHistory();
     mobAiRenderHistory();
