@@ -1,6 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+const WORKER_URL = 'https://anthropic-proxy.didinehamdii.workers.dev/';
+
+async function syncState() {
+    try {
+        const res = await fetch(WORKER_URL, { headers: {'x-action': 'load-state'} });
+        const state = await res.json();
+        dbSave('full_state', JSON.stringify(state));
+    } catch(e) { console.error("Sync Load Error:", e); }
+}
+
+function dbSave(key, value) {
+    const state = JSON.parse(dbLoad('full_state') || '{}');
+    state[key] = value;
+    dbSave('full_state', JSON.stringify(state));
+    fetch(WORKER_URL, {
+        method: 'POST',
+        headers: {'x-action': 'save-state', 'Content-Type': 'application/json'},
+        body: JSON.stringify(state)
+    }).catch(e => console.error("Sync Save Error:", e));
+}
+
+function dbLoad(key) {
+    return JSON.parse(dbLoad('full_state') || '{}')[key];
+}
+
+// Initialisation synchro au démarrage
+syncState();
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FX Dashboard</title>
@@ -2864,10 +2894,10 @@ function mobShowSub(name, btn) {
    PAIRS MODAL
    ========================================================= */
 function getActivePairs() {
-    try { var saved = localStorage.getItem('fx_pairs'); if (saved) { var p=JSON.parse(saved); if(Array.isArray(p)&&p.length)return p; } } catch(e){}
+    try { var saved = dbLoad('fx_pairs'); if (saved) { var p=JSON.parse(saved); if(Array.isArray(p)&&p.length)return p; } } catch(e){}
     return ALL_PAIRS.slice();
 }
-function saveActivePairs(pairs) { try { localStorage.setItem('fx_pairs', JSON.stringify(pairs)); } catch(e){} }
+function saveActivePairs(pairs) { try { dbSave('fx_pairs', JSON.stringify(pairs)); } catch(e){} }
 var _modalTempSelected = new Set();
 function openPairsModal() { _modalTempSelected = new Set(getActivePairs()); buildPairsGrid(); document.getElementById('pairsModalOverlay').classList.add('open'); }
 function closePairsModal() { document.getElementById('pairsModalOverlay').classList.remove('open'); }
@@ -2910,7 +2940,7 @@ async function actualiserDonnees() {
         _sentimentMap = {};
         sd.symbols.forEach(function(s){ _sentimentMap[s.name] = s; });
         _sentimentMapCache = _sentimentMap;
-        try { localStorage.setItem('sentimentCache', JSON.stringify(_sentimentMap)); } catch(e) {}
+        try { dbSave('sentimentCache', JSON.stringify(_sentimentMap)); } catch(e) {}
         if (!IS_MOBILE) { afficherTableau(_sentimentMap); afficherGraphique(_sentimentMap); }
         mobAfficherTableau(_sentimentMap);
         mobRenderSentBars();
@@ -2922,7 +2952,7 @@ async function actualiserDonnees() {
         /* Try memory cache first, then localStorage */
         var fallback = (_sentimentMapCache && Object.keys(_sentimentMapCache).length) ? _sentimentMapCache : null;
         if (!fallback) {
-            try { var stored = localStorage.getItem('sentimentCache'); if (stored) fallback = JSON.parse(stored); } catch(e2) {}
+            try { var stored = dbLoad('sentimentCache'); if (stored) fallback = JSON.parse(stored); } catch(e2) {}
         }
         if (fallback && Object.keys(fallback).length) {
             _sentimentMap = fallback;
@@ -4421,7 +4451,7 @@ var OV_WEIGHTS = { rsi: 0.25, ci: 0.20, cot: 0.25, sentiment: 0.30 };
 
 /* Sparkline history: { cur: [{ t, score }] } — last 20 snapshots */
 var _ovSparkHistory = (function() {
-    try { return JSON.parse(localStorage.getItem('ov_spark_history') || '{}'); } catch(e) { return {}; }
+    try { return JSON.parse(dbLoad('ov_spark_history') || '{}'); } catch(e) { return {}; }
 })();
 
 
@@ -4436,7 +4466,7 @@ function ovSaveSparkSnapshot(scores) {
             if (arr.length > 20) arr.shift();
         }
     });
-    try { localStorage.setItem('ov_spark_history', JSON.stringify(_ovSparkHistory)); } catch(e) {}
+    try { dbSave('ov_spark_history', JSON.stringify(_ovSparkHistory)); } catch(e) {}
 }
 
 function ovDrawSparkline(canvas, cur, currentScore, color) {
@@ -5167,7 +5197,7 @@ function mobAiSaveKey() {
     var k = (document.getElementById('mob-aiKeyInput') || {}).value || '';
     k = k.trim();
     if (!k) return;
-    try { localStorage.setItem('ai_analyst_key', k); } catch(e) {}
+    try { dbSave('ai_analyst_key', k); } catch(e) {}
     document.getElementById('mob-aiKeyBanner').style.display = 'none';
     document.getElementById('mob-aiStatus').textContent = '✓';
     setTimeout(function(){ document.getElementById('mob-aiStatus').textContent = ''; }, 2000);
@@ -5344,13 +5374,13 @@ function aiInit() {
 }
 
 function aiGetKey() {
-    try { return localStorage.getItem('ai_analyst_key') || ''; } catch(e) { return ''; }
+    try { return dbLoad('ai_analyst_key') || ''; } catch(e) { return ''; }
 }
 
 function aiSaveKey() {
     var k = document.getElementById('aiKeyInput').value.trim();
     if (!k) return;
-    try { localStorage.setItem('ai_analyst_key', k); } catch(e) {}
+    try { dbSave('ai_analyst_key', k); } catch(e) {}
     document.getElementById('aiKeyBanner').style.display = 'none';
     document.getElementById('aiStatus').textContent = 'Clé enregistrée ✓';
     setTimeout(function(){ document.getElementById('aiStatus').textContent = ''; }, 2000);
@@ -5625,7 +5655,7 @@ function aiLoadHistory() {
     })
     .catch(function() {
         try {
-            var h = localStorage.getItem('ai_analyst_history');
+            var h = dbLoad('ai_analyst_history');
             if (h) _aiHistory = JSON.parse(h);
         } catch(e) { _aiHistory = []; }
         aiRenderHistory();
