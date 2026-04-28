@@ -5787,7 +5787,7 @@ function aiDeleteHistoryItem(idx, e) {
     e.stopPropagation();
     var brief = _aiHistory[idx];
     var label = (brief && brief.title) ? brief.title : (brief && brief.date ? new Date(brief.date).toLocaleDateString('fr-FR') : 'ce brief');
-    if (!confirm('Supprimer « ' + label + ' » ?\nCette action est irréversible.')) return;
+    if (!confirm("Supprimer \u00ab " + label + " \u00bb ?\nCette action est irréversible.")) return;
     aiCloudDelete(idx);
     _aiHistory.splice(idx, 1);
     aiRenderHistoryCards();
