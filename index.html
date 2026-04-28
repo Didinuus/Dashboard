@@ -11,9 +11,6 @@ function _lsGet(key) {
 function _lsSet(key, value) {
     try { localStorage.setItem(key, value); } catch(e) {}
 }
-function _lsRemove(key) {
-    try { localStorage.removeItem(key); } catch(e) {}
-}
 
 // ── dbSave : localStorage immédiat + sync KV Cloudflare en arrière-plan ──
 function dbSave(key, value) {
@@ -5325,7 +5322,7 @@ async function mobAiGenerate() {
         '\n\nRecherche les informations les plus récentes (5-7 recherches ciblées) et produis un brief structuré et actionnable. IMPORTANT : commence ta réponse DIRECTEMENT par le titre # sans aucune phrase d\'introduction.';
 
     try {
-        var response = await fetch(PROXY_URL, {
+        var response = await fetch(WORKER_URL, {
             method: 'POST',
             headers: { 'Content-Type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01' },
             body: JSON.stringify({
@@ -5348,9 +5345,11 @@ async function mobAiGenerate() {
 
         contentEl.innerHTML = aiRenderMarkdown(text);
 
-        var brief = { date:new Date().toISOString(), text:text, sources:sources.map(function(s){ return s.name; }) };
+        var _mobTitleMatch = text.match(/^#+\s*(.+)/m);
+        var _mobBriefTitle = _mobTitleMatch ? _mobTitleMatch[1].trim() : '';
+        var brief = { date:new Date().toISOString(), text:text, title:_mobBriefTitle, sources:sources.map(function(s){ return s.name; }) };
         _aiHistory.unshift(brief);
-        if (_aiHistory.length > 10) _aiHistory.length = 10;
+        if (_aiHistory.length > 20) _aiHistory.length = 20;
         aiCloudSave(brief);
 
         // Show theme button + default light mode
@@ -5506,7 +5505,7 @@ async function aiGenerate() {
         : 'FX macro brief for ' + today + '.\n\nSources:\n' + srcList + '\n\nSearch for the most recent info (5-7 targeted searches) and produce a structured, actionable brief. IMPORTANT: start your response DIRECTLY with the # title, no introduction.';
 
     try {
-        var response = await fetch(PROXY_URL, {
+        var response = await fetch(WORKER_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -5550,9 +5549,13 @@ async function aiGenerate() {
         aiShowBriefActions(nowStr);
 
         // Save to history
-        _aiCurrentBrief = { date: new Date().toISOString(), text: text, sources: sources.map(function(s){ return s.name; }) };
+        // Extraire le titre depuis le markdown (première ligne # ...)
+        var _briefTitle = '';
+        var _titleMatch = text.match(/^#+\s*(.+)/m);
+        if (_titleMatch) _briefTitle = _titleMatch[1].trim();
+        _aiCurrentBrief = { date: new Date().toISOString(), text: text, title: _briefTitle, sources: sources.map(function(s){ return s.name; }) };
         _aiHistory.unshift(_aiCurrentBrief);
-        if (_aiHistory.length > 10) _aiHistory.length = 10;
+        if (_aiHistory.length > 20) _aiHistory.length = 20;
         aiCloudSave(_aiCurrentBrief);
         aiRenderHistory();
 
@@ -5659,26 +5662,24 @@ function inlineFormat(text) {
         .replace(/🟡/g, '<span class="ai-tag-neutral">🟡 NEUTRE</span>');
 }
 
-var PROXY_URL = 'https://anthropic-proxy.didinehamdii.workers.dev/';
-
 function aiCloudSave(brief) {
-    fetch(PROXY_URL, {
+    fetch(WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-action': 'save-brief' },
         body: JSON.stringify(brief)
-    }).catch(function(e) { console.warn('Cloud save failed:', e); });
+    }).catch(function(e) { console.error('Cloud save failed:', e); });
 }
 
 function aiCloudDelete(idx) {
-    fetch(PROXY_URL, {
+    fetch(WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-action': 'delete-brief' },
         body: JSON.stringify({ index: idx })
-    }).catch(function(e) { console.warn('Cloud delete failed:', e); });
+    }).catch(function(e) { console.error('Cloud delete failed:', e); });
 }
 
 function aiLoadHistory() {
-    fetch(PROXY_URL, {
+    fetch(WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-action': 'load-briefs' },
         body: '{}'
@@ -5787,8 +5788,9 @@ function aiShowBriefActions() {
 function aiDeleteHistoryItem(idx, e) {
     e.stopPropagation();
     var brief = _aiHistory[idx];
-    var label = brief && brief.title ? brief.title : 'ce brief';
-    if (!confirm('Supprimer \u00ab ' + label + ' \u00bb ?\nCette action est irr\u00e9versible.')) return;
+    var label = (brief && brief.title) ? brief.title : (brief && brief.date ? new Date(brief.date).toLocaleDateString('fr-FR') : 'ce brief');
+    if (!confirm('Supprimer « ' + label + ' » ?
+Cette action est irréversible.')) return;
     aiCloudDelete(idx);
     _aiHistory.splice(idx, 1);
     aiRenderHistoryCards();
@@ -5880,7 +5882,7 @@ function aiLoadHistoryItem(idx) {
 
 function aiClearHistory() {
     _aiHistory = [];
-    fetch(PROXY_URL, {
+    fetch(WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-action': 'clear-briefs' },
         body: '{}'
