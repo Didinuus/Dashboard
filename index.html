@@ -5786,6 +5786,9 @@ function aiShowBriefActions() {
 
 function aiDeleteHistoryItem(idx, e) {
     e.stopPropagation();
+    var brief = _aiHistory[idx];
+    var label = brief && brief.title ? brief.title : 'ce brief';
+    if (!confirm('Supprimer \u00ab ' + label + ' \u00bb ?\nCette action est irr\u00e9versible.')) return;
     aiCloudDelete(idx);
     _aiHistory.splice(idx, 1);
     aiRenderHistoryCards();
