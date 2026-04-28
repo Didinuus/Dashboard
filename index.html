@@ -1311,6 +1311,29 @@ var MAJOR_PAIRS = ['EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD
 var _sentimentMap = {}, _sentimentMapCache = {};
 var OANDA_KEY = 'a6109748dde9f520b7491de5f93c4fde-50b266ca427e911f6bec97df47f92a4b';
 var OANDA_URL = 'https://api-fxpractice.oanda.com/v3';
+
+/* ── oandaFetch : fetch OANDA avec retry automatique ───────────────────────
+   Retry jusqu'à MAX_RETRIES fois en cas d'erreur réseau ou réponse non-ok.
+   Backoff exponentiel : 400ms, 800ms, 1600ms entre les tentatives.
+   Retourne la Response si ok, null si toutes les tentatives échouent.
+   ────────────────────────────────────────────────────────────────────────── */
+var OANDA_MAX_RETRIES = 2;
+async function oandaFetch(url) {
+    var opts = { headers: { 'Authorization': 'Bearer ' + OANDA_KEY } };
+    for (var attempt = 0; attempt <= OANDA_MAX_RETRIES; attempt++) {
+        try {
+            var r = await fetch(url, opts);
+            if (r.ok) return r;
+            /* Erreur HTTP (4xx/5xx) — pas la peine de retry sur 401/403 (clé invalide) */
+            if (r.status === 401 || r.status === 403) return null;
+            /* Autres erreurs HTTP : on retry */
+        } catch(e) { /* Erreur réseau : on retry */ }
+        if (attempt < OANDA_MAX_RETRIES) {
+            await new Promise(function(res){ setTimeout(res, 400 * Math.pow(2, attempt)); });
+        }
+    }
+    return null;
+}
 var CS_CURRENCIES = ['EUR','USD','GBP','AUD','CHF','JPY','CAD','NZD'];
 var CS_COLORS = {EUR:'#1C79B3',USD:'#AD4055',GBP:'#2E832B',AUD:'#6C2835',CHF:'#885713',JPY:'#777777',CAD:'#13527B',NZD:'#1A4817'};
 var CS_PAIRS = {EUR:{base:['EUR_USD','EUR_GBP','EUR_AUD','EUR_JPY','EUR_CAD','EUR_CHF'],quote:[]},USD:{base:['USD_JPY','USD_CAD','USD_CHF'],quote:['EUR_USD','GBP_USD','AUD_USD','NZD_USD']},GBP:{base:['GBP_USD','GBP_AUD','GBP_JPY','GBP_CAD','GBP_CHF'],quote:['EUR_GBP']},AUD:{base:['AUD_USD','AUD_JPY','AUD_CAD','AUD_CHF','AUD_NZD'],quote:['EUR_AUD','GBP_AUD']},CHF:{base:['CHF_JPY'],quote:['EUR_CHF','GBP_CHF','AUD_CHF','USD_CHF','CAD_CHF']},JPY:{base:[],quote:['EUR_JPY','GBP_JPY','AUD_JPY','USD_JPY','CAD_JPY','CHF_JPY','NZD_JPY']},CAD:{base:['CAD_JPY','CAD_CHF'],quote:['EUR_CAD','GBP_CAD','AUD_CAD','USD_CAD']},NZD:{base:['NZD_USD','NZD_CAD','NZD_CHF','NZD_JPY'],quote:['AUD_NZD','EUR_NZD','GBP_NZD']}};
@@ -1495,7 +1518,7 @@ async function fkrFetch(dateOrLatest) {
               '?base=EUR&symbols=USD,GBP,JPY,CHF,CAD,AUD,NZD';
     try {
         var r = await fetch(url);
-        if (!r.ok) return null;
+        if (!r.ok) return null;  /* native fetch — r is always a Response, never null */
         var d = await r.json();
         return d.rates || null;
     } catch(e) { return null; }
@@ -1560,8 +1583,8 @@ async function ciLoad() {
     await Promise.all(allPairs.map(async function(pair) {
         var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + cfg.count + '&price=M';
         try {
-            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
-            if (!r.ok) return;
+            var r = await oandaFetch(url);
+            if (!r) return;
             var d = await r.json();
             if (!d.candles || d.candles.length <= 1) return;
             _ciRawData[pair] = {
@@ -1612,8 +1635,8 @@ async function ciLoadMoreHistory() {
     await Promise.all(allPairs.map(async function(pair) {
         var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.gran + '&count=' + batchCount + '&price=M&to=' + encodeURIComponent(toTime);
         try {
-            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
-            if (!r.ok) return;
+            var r = await oandaFetch(url);
+            if (!r) return;
             var d = await r.json();
             if (!d.candles || !d.candles.length) return;
             var newCloses = d.candles.map(function(c){ return parseFloat(c.mid.c); });
@@ -2501,8 +2524,8 @@ async function ciModalLoad() {
     await Promise.all(basket.map(async function(item) {
         var url = OANDA_URL + '/instruments/' + item.pair + '/candles?granularity=' + cfg.gran + '&count=' + cfg.count + '&price=M';
         try {
-            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
-            if (!r.ok) return;
+            var r = await oandaFetch(url);
+            if (!r) return;
             var d = await r.json();
             if (!d.candles || d.candles.length <= 1) return;
             _ciModalRawData[item.pair] = {
@@ -2828,8 +2851,8 @@ async function ciModalLoadMore() {
         if (!_ciModalRawData[item.pair]) return;
         var url = OANDA_URL + '/instruments/' + item.pair + '/candles?granularity=' + cfg.gran + '&count=' + batchCount + '&price=M&to=' + encodeURIComponent(toTime);
         try {
-            var r = await fetch(url, {headers:{'Authorization':'Bearer '+OANDA_KEY}});
-            if (!r.ok) return;
+            var r = await oandaFetch(url);
+            if (!r) return;
             var d = await r.json();
             if (!d.candles || !d.candles.length) return;
             var newCloses = d.candles.map(function(c){ return parseFloat(c.mid.c); });
@@ -2880,6 +2903,7 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape'&&document.
 /* =========================================================
    MOBILE NAV
    ========================================================= */
+var _mobAiInited = false; // Bug 5 fix: declare flag here for use directly in mobShowPage
 function mobShowPage(name, idx, btn) {
     document.querySelectorAll('.mob-page').forEach(function(p){ p.classList.remove('active'); });
     document.querySelectorAll('.mob-nav-btn').forEach(function(b){
@@ -2891,7 +2915,7 @@ function mobShowPage(name, idx, btn) {
     var s=btn.querySelector('svg'); if(s)s.style.stroke='#fff';
     document.getElementById('mobContent').scrollTop = 0;
     if (name === 'strength') { mobCsLoad(); setTimeout(mobFxpLoad, 800); }
-    if (name === 'macro') mobRenderRates();
+    if (name === 'macro') { mobRenderRates(); if(!_mobAiInited){ _mobAiInited=true; mobAiInit(); } } // Bug 5 fix: lazy init inline
     if (name === 'sentiment') actualiserDonnees();
     if (name === 'overview') ovRefresh();
 }
@@ -3456,8 +3480,8 @@ async function fetchCandles(instrument, count, tf) {
     var tfStr = tf || csTF;
     var url = OANDA_URL + '/instruments/' + instrument + '/candles?granularity=' + tfStr + '&count=' + count + '&price=M';
     try {
-        var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + OANDA_KEY } });
-        if (!r.ok) return null;
+        var r = await oandaFetch(url);
+        if (!r) return null;
         var d = await r.json();
         if (!d.candles || !d.candles.length) return null;
         return {
@@ -3742,8 +3766,8 @@ async function mobCsLoad() {
     await Promise.all(pairs.map(async function(p) {
         var url = OANDA_URL + '/instruments/' + p + '/candles?granularity=' + mobCsTF + '&count=' + (CS_COUNT[mobCsTF] + 20) + '&price=M';
         try {
-            var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + OANDA_KEY } });
-            if (!r.ok) return;
+            var r = await oandaFetch(url);
+            if (!r) return;
             var d = await r.json();
             if (d.candles && d.candles.length) {
                 results[p] = {
@@ -4113,8 +4137,8 @@ async function fxpFetchPair(pair, tf) {
     var cfg = FXP_TF_CONFIG[useTF];
     var url = OANDA_URL + '/instruments/' + pair + '/candles?granularity=' + cfg.granularity + '&count=' + cfg.count + '&price=M';
     try {
-        var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + OANDA_KEY } });
-        if (!r.ok) return null;
+        var r = await oandaFetch(url);
+        if (!r) return null;
         var d = await r.json();
         if (!d.candles || d.candles.length < 2) return null;
         var first = parseFloat(d.candles[0].mid.o), last = parseFloat(d.candles[d.candles.length-1].mid.c);
@@ -4431,6 +4455,7 @@ window.addEventListener('load', function() {
     setInterval(function(){ if(!IS_MOBILE) renderRates(); else mobRenderRates(); }, 60*60*1000);
 });
 
+var _aiInited = false; // Bug 5 fix: lazy init flag for PC AI Analyst
 function showTab(name){
     document.querySelectorAll('.tab-page').forEach(function(p){ p.classList.remove('active'); });
     document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
@@ -4438,7 +4463,7 @@ function showTab(name){
     document.querySelectorAll('.tab-btn').forEach(function(b){ if(b.getAttribute('onclick')==="showTab('"+name+"')")b.classList.add('active'); });
     if(name==='strength'){ csLoad(); setTimeout(fxpLoad,1000); }
     if(name==='currencyindex'){ ciLoad(); }
-    if(name==='macropage') renderRates();
+    if(name==='macropage'){ renderRates(); if(!_aiInited){ _aiInited=true; aiInit(); } } // Bug 5 fix: lazy init inline, no monkey-patch
     if(name==='sentiment') actualiserDonnees();
     if(name==='cotreport') chargerCOT();
     if(name==='overview') ovRefresh();
@@ -5216,15 +5241,14 @@ function closeFocusPair() {
    MOBILE AI ANALYST
    ========================================================= */
 
-var _mobAiInited = false;
+// _mobAiInited declared at mobShowPage definition (Bug 5 fix)
 
 function mobAiInit() {
     var key = aiGetKey();
     var banner = document.getElementById('mob-aiKeyBanner');
     if (banner) banner.style.display = key ? 'none' : 'flex';
     mobAiRenderSources();
-    aiLoadHistory(); // loads _aiHistory, renders PC + mobile history
-    mobAiRenderHistoryCards();
+    aiLoadHistory('mob'); // Bug 3 fix: only render mobile history cards (no double render)
 }
 
 function mobAiSaveKey() {
@@ -5351,6 +5375,7 @@ async function mobAiGenerate() {
         // Show theme button + default light mode
         var briefCard = document.getElementById('mob-aiBriefCard');
         var icon = document.getElementById('mob-aiBriefThemeIcon');
+        var themeBtn = document.getElementById('mob-aiBriefThemeBtn'); // Bug 1 fix: declare themeBtn
         briefCard.classList.add('light-mode');
         briefCard.style.background = '#f5f5f0';
         briefCard.style.borderColor = '#ddd';
@@ -5370,12 +5395,8 @@ async function mobAiGenerate() {
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Générer le Daily Brief';
 }
 
-// Hook into mobShowPage for lazy init
-var _origMobShowPage = mobShowPage;
-mobShowPage = function(name, idx, btn) {
-    _origMobShowPage(name, idx, btn);
-    if (name === 'macro' && !_mobAiInited) { _mobAiInited = true; mobAiInit(); }
-};
+// Bug 5 fix: mobShowPage lazy init is now integrated directly in mobShowPage (no monkey-patch)
+var _mobAiInited_unused = false; // kept as no-op placeholder for safety, flag is in mobShowPage above
 
 
 var AI_SOURCES = [
@@ -5395,7 +5416,7 @@ var _aiHistory = [];
 
 function aiInit() {
     aiRenderSources();
-    aiLoadHistory();
+    aiLoadHistory('pc'); // Bug 3 fix: only render PC history cards when called from PC init
     var key = aiGetKey();
     document.getElementById('aiKeyBanner').style.display = key ? 'none' : 'flex';
     if (key && document.getElementById('aiKeyInput')) {
@@ -5670,7 +5691,13 @@ function aiCloudDelete(idx) {
     }).catch(function(e) { console.error('Cloud delete failed:', e); });
 }
 
-function aiLoadHistory() {
+// Bug 3 fix: renderTarget = 'pc' | 'mob' | 'both' (default) — avoids double render when called from a single init
+function aiLoadHistory(renderTarget) {
+    var target = renderTarget || 'both';
+    function doRender() {
+        if (target === 'pc' || target === 'both') aiRenderHistoryCards();
+        if (target === 'mob' || target === 'both') mobAiRenderHistoryCards();
+    }
     fetch(WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-action': 'load-briefs' },
@@ -5679,16 +5706,14 @@ function aiLoadHistory() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
         _aiHistory = Array.isArray(data) ? data : [];
-        aiRenderHistoryCards();
-        mobAiRenderHistoryCards();
+        doRender();
     })
     .catch(function() {
         try {
             var h = dbLoad('ai_analyst_history');
             if (h) _aiHistory = JSON.parse(h);
         } catch(e) { _aiHistory = []; }
-        aiRenderHistoryCards();
-        mobAiRenderHistoryCards();
+        doRender();
     });
 }
 
@@ -5760,7 +5785,7 @@ function aiBriefToggleTheme() {
     }
 }
 
-function aiShowBriefActions() {
+function aiShowBriefActions(dateStr) { // Bug 2 fix: accept dateStr param (passed by callers but unused)
     var themeBtn = document.getElementById('aiBriefThemeBtn');
     if (themeBtn) themeBtn.style.display = 'inline-flex';
     // Default to light mode
@@ -5874,13 +5899,8 @@ function aiClearHistory() {
     mobAiRenderHistoryCards();
 }
 
-// Init on tab switch
-var _aiInited = false;
-var _origShowTab = showTab;
-showTab = function(name) {
-    _origShowTab(name);
-    if (name === 'macropage' && !_aiInited) { _aiInited = true; aiInit(); }
-};
+// Bug 5 fix: showTab lazy init is now integrated directly in showTab (no monkey-patch)
+var _aiInited_unused = false; // kept as no-op placeholder, flag _aiInited is declared in showTab section above
 </script>
 
 <!-- PAIRS MODAL — outside pc-only so it works on mobile too -->
