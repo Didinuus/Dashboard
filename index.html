@@ -5094,9 +5094,7 @@ function applyWeights() {
     OV_WEIGHTS.cot       = parseInt(document.getElementById('wSliderCot').value)  / 100;
     OV_WEIGHTS.sentiment = parseInt(document.getElementById('wSliderSent').value) / 100;
     closeWeightsModal();
-    /* Update legend notes */
-    if (note) note.textContent = 'Score = RSI ×'+(OV_WEIGHTS.rsi*100|0)+'% + CI ×'+(OV_WEIGHTS.ci*100|0)+'% + COT ×'+(OV_WEIGHTS.cot*100|0)+'% + Sentiment ×'+(OV_WEIGHTS.sentiment*100|0)+'%  |  Range −100 to +100  |  Sessions in UTC local time';
-    if (mobNote) mobNote.textContent = 'RSI×'+(OV_WEIGHTS.rsi*100|0)+' + CI×'+(OV_WEIGHTS.ci*100|0)+' + COT×'+(OV_WEIGHTS.cot*100|0)+' + Sentiment×'+(OV_WEIGHTS.sentiment*100|0)+' | Range −100 to +100';
+    /* Weights updated — no legend notes needed */
     /* Re-run bias with new weights */
     var bias = computeBias();
     renderOverview(bias);
@@ -5734,7 +5732,7 @@ function mobAiBriefClose() {
     var themeBtn = document.getElementById('mob-aiBriefThemeBtn');
     var icon     = document.getElementById('mob-aiBriefThemeIcon');
     if (themeBtn) themeBtn.style.display = 'none';
-    if (closeBtn) closeBtn.style.display = 'none';
+    /* closeBtn removed */
     if (icon) icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
     mobAiRenderHistoryCards();
 }
@@ -5789,8 +5787,7 @@ function aiDeleteHistoryItem(idx, e) {
     e.stopPropagation();
     var brief = _aiHistory[idx];
     var label = (brief && brief.title) ? brief.title : (brief && brief.date ? new Date(brief.date).toLocaleDateString('fr-FR') : 'ce brief');
-    if (!confirm('Supprimer « ' + label + ' » ?
-Cette action est irréversible.')) return;
+    if (!confirm('Supprimer « ' + label + ' » ?\nCette action est irréversible.')) return;
     aiCloudDelete(idx);
     _aiHistory.splice(idx, 1);
     aiRenderHistoryCards();
