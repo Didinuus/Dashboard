@@ -4,30 +4,68 @@
 <script>
 const WORKER_URL = 'https://anthropic-proxy.didinehamdii.workers.dev/';
 
-async function syncState() {
-    try {
-        const res = await fetch(WORKER_URL, { headers: {'x-action': 'load-state'} });
-        const state = await res.json();
-        dbSave('full_state', JSON.stringify(state));
-    } catch(e) { console.error("Sync Load Error:", e); }
+// ── Couche localStorage réelle (base du système) ─────────────────
+function _lsGet(key) {
+    try { return localStorage.getItem(key); } catch(e) { return null; }
+}
+function _lsSet(key, value) {
+    try { localStorage.setItem(key, value); } catch(e) {}
+}
+function _lsRemove(key) {
+    try { localStorage.removeItem(key); } catch(e) {}
 }
 
+// ── dbSave : localStorage immédiat + sync KV Cloudflare en arrière-plan ──
 function dbSave(key, value) {
-    const state = JSON.parse(dbLoad('full_state') || '{}');
+    let state = {};
+    try { state = JSON.parse(_lsGet('full_state') || '{}'); } catch(e) {}
     state[key] = value;
-    dbSave('full_state', JSON.stringify(state));
+    _lsSet('full_state', JSON.stringify(state));
+    // Sync vers Cloudflare KV (non-bloquant)
     fetch(WORKER_URL, {
         method: 'POST',
         headers: {'x-action': 'save-state', 'Content-Type': 'application/json'},
         body: JSON.stringify(state)
-    }).catch(e => console.error("Sync Save Error:", e));
+    }).catch(function(e) { console.error("Sync Save Error:", e); });
 }
 
+// ── dbLoad : lecture depuis localStorage ──────────────────────────
 function dbLoad(key) {
-    return JSON.parse(dbLoad('full_state') || '{}')[key];
+    try {
+        var state = JSON.parse(_lsGet('full_state') || '{}');
+        return (state[key] !== undefined) ? state[key] : null;
+    } catch(e) { return null; }
 }
 
-// Initialisation synchro au démarrage
+// ── dbDelete : suppression d'une clé ─────────────────────────────
+function dbDelete(key) {
+    let state = {};
+    try { state = JSON.parse(_lsGet('full_state') || '{}'); } catch(e) {}
+    delete state[key];
+    _lsSet('full_state', JSON.stringify(state));
+    fetch(WORKER_URL, {
+        method: 'POST',
+        headers: {'x-action': 'save-state', 'Content-Type': 'application/json'},
+        body: JSON.stringify(state)
+    }).catch(function(e) { console.error("Sync Delete Error:", e); });
+}
+
+// ── syncState : au démarrage, KV Cloudflare → localStorage ───────
+// KV est la source de vérité cross-navigateur/cross-appareil
+async function syncState() {
+    try {
+        const res = await fetch(WORKER_URL, { headers: {'x-action': 'load-state'} });
+        if (!res.ok) return;
+        const state = await res.json();
+        if (state && typeof state === 'object' && Object.keys(state).length > 0) {
+            // Merge : KV gagne sur localStorage pour chaque clé présente
+            let local = {};
+            try { local = JSON.parse(_lsGet('full_state') || '{}'); } catch(e) {}
+            const merged = Object.assign({}, local, state);
+            _lsSet('full_state', JSON.stringify(merged));
+        }
+    } catch(e) { console.error("Sync Load Error:", e); }
+}
 syncState();
 </script>
 
@@ -5387,7 +5425,7 @@ function aiSaveKey() {
 }
 
 function aiClearKey() {
-    try { localStorage.removeItem('ai_analyst_key'); } catch(e) {}
+    dbDelete('ai_analyst_key');
     document.getElementById('aiKeyBanner').style.display = 'flex';
     document.getElementById('aiStatus').textContent = 'Clé supprimée';
     setTimeout(function(){ document.getElementById('aiStatus').textContent = ''; }, 2000);
@@ -5844,7 +5882,7 @@ function aiClearHistory() {
         headers: { 'Content-Type': 'application/json', 'x-action': 'clear-briefs' },
         body: '{}'
     }).catch(function(){});
-    try { localStorage.removeItem('ai_analyst_history'); } catch(e) {}
+    try { dbDelete('ai_analyst_history'); } catch(e) {}
     aiRenderHistory();
     mobAiRenderHistory();
     aiRenderHistoryCards();
